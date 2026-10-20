@@ -1,0 +1,12 @@
+UTC: 2026-10-20T04:59:26Z
+go version go1.23.2 linux/amd64
+linux
+amd64
+1
+Parent commit: 9f6714d70332aa376dbdd5643667fc67d317b290
+Source tree SHA256: e97456ebb71d95e7088ee6234ae6cf5af1bd73e787e5bd661b0dd112ec9e2cd2
+ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-inspect	1.014s
+ok  	github.com/softdevstudio/bitspeed/inspect	2.553s
+ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.078s
+bitspeed-inspect 0.0.0-dev
+PASS: formatting, vet, race tests, build, version smoke
