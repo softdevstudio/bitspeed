@@ -1,0 +1,9 @@
+PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, timeouts and native cancellation checks
+PASS tag/latest hash and provenance: bitspeed-inspect-darwin-amd64.tar.gz
+PASS tag/latest hash and provenance: bitspeed-inspect-darwin-arm64.tar.gz
+PASS tag/latest hash and provenance: bitspeed-inspect-linux-amd64.tar.gz
+PASS tag/latest hash and provenance: bitspeed-inspect-linux-arm64.tar.gz
+PASS tag/latest hash and provenance: bitspeed-inspect-verification.json
+PASS tag/latest hash and provenance: bitspeed-inspect-windows-amd64.zip
+PASS public Inspect 0.1.1 release source 6df6f71227b3728905ec7a5cf15e7f2d82ae6f49
+{"ci_run_id": 39377986547, "cross_build_only_targets": ["linux/arm64", "darwin/amd64"], "native_smoke_targets": ["linux/amd64", "darwin/arm64", "windows/amd64"], "product": "bitspeed-inspect", "release_run_id": 39378129857, "source_sha": "6df6f71227b3728905ec7a5cf15e7f2d82ae6f49", "version": "0.1.1"}

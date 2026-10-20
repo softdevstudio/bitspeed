@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.1",
+  "started_at": "2026-10-20T06:07:08.021747921Z",
+  "request": {
+    "samples_requested": 3,
+    "max_redirects": 10,
+    "timeout_ns": 5000000000,
+    "connect_timeout_ns": 5000000000,
+    "header_timeout_ns": 10000000000,
+    "body_timeout_ns": 15000000000,
+    "interval_ns": 0,
+    "method": "GET",
+    "url": "http://127.0.0.1:36645/headers",
+    "connection_policy": "fresh",
+    "decompression": false
+  },
+  "samples": [
+    {
+      "index": 0,
+      "outcome": "complete",
+      "elapsed_ns": 202084626,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-1",
+          "url": "http://127.0.0.1:36645/headers",
+          "outcome": "complete",
+          "elapsed_ns": 202050906,
+          "status_code": 200,
+          "protocol": "HTTP/1.1",
+          "remote_address": "127.0.0.1:36645",
+          "connection_reused": false,
+          "body_bytes": 16,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "connect_start",
+              "offset_ns": 124618,
+              "attempt": "connect-1",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 485261,
+              "attempt": "connect-1",
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 553084,
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 671813,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 201820899
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 202046629
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 202050906
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "outcome": "complete",
+      "elapsed_ns": 201224002,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-1",
+          "url": "http://127.0.0.1:36645/headers",
+          "outcome": "complete",
+          "elapsed_ns": 201086735,
+          "status_code": 200,
+          "protocol": "HTTP/1.1",
+          "remote_address": "127.0.0.1:36645",
+          "connection_reused": false,
+          "body_bytes": 16,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "connect_start",
+              "offset_ns": 75544,
+              "attempt": "connect-1",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 192561,
+              "attempt": "connect-1",
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 262386,
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 321025,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 200995868
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 201083951
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 201086735
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "outcome": "complete",
+      "elapsed_ns": 201251430,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-1",
+          "url": "http://127.0.0.1:36645/headers",
+          "outcome": "complete",
+          "elapsed_ns": 201237369,
+          "status_code": 200,
+          "protocol": "HTTP/1.1",
+          "remote_address": "127.0.0.1:36645",
+          "connection_reused": false,
+          "body_bytes": 16,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "connect_start",
+              "offset_ns": 49895,
+              "attempt": "connect-1",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 360904,
+              "attempt": "connect-1",
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 404610,
+              "outcome": "success",
+              "address": "127.0.0.1:36645"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 436248,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 201134719
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 201232752
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 201237369
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

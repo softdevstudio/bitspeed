@@ -1,0 +1,16 @@
+{
+  "product": "bitspeed-inspect",
+  "version": "0.1.1",
+  "source_sha": "6df6f71227b3728905ec7a5cf15e7f2d82ae6f49",
+  "ci_run_id": 39377986547,
+  "release_run_id": 39378129857,
+  "native_smoke_targets": [
+    "linux/amd64",
+    "darwin/arm64",
+    "windows/amd64"
+  ],
+  "cross_build_only_targets": [
+    "linux/arm64",
+    "darwin/amd64"
+  ]
+}
