@@ -2,11 +2,11 @@
 
 BitSpeed houses two independent Go tools. Inspect will explain HTTP transfer timing and compare saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-This is an unreleased development build. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
+This is the Inspect release candidate. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
 
 ## Build and run
 
-Use Go 1.23 or later. No external Go modules are required.
+Use the Go version pinned in go.mod (1.27.3). No external Go modules are required.
 
 ```sh
 go build -o /tmp/bitspeed-inspect ./cmd/bitspeed-inspect
@@ -59,3 +59,7 @@ The recording contract is in docs/recording-v1.md and the report contract is in 
 ## License
 
 Code is licensed under Apache 2.0. See LICENSE, NOTICE and THIRD_PARTY_LICENSES.md.
+
+## Release packaging
+
+CI-gated release automation builds five archives with stable filenames, checks native Linux, macOS and Windows executables, and publishes only after the gates pass. See docs/releases.md for platform coverage, provenance, licensing and retry behavior. Transfer remains unreleased. No hosted service or account is required.

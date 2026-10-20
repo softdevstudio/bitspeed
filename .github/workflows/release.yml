@@ -1,0 +1,128 @@
+name: Release Inspect
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: bitspeed-release
+  cancel-in-progress: false
+env:
+  CI_RUN_ID: ${{ github.event.workflow_run.id }}
+  CHECKED_SHA: ${{ github.event.workflow_run.head_sha }}
+jobs:
+  plan:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_repository.full_name == github.repository && github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.plan.outputs.sha }}
+      version: ${{ steps.plan.outputs.version }}
+      build: ${{ steps.plan.outputs.build }}
+      publish: ${{ steps.plan.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CHECKED_SHA }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - id: plan
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/release_inspect.py plan --sha "$CHECKED_SHA"
+  package:
+    needs: plan
+    if: needs.plan.outputs.build == 'true'
+    name: package-${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {goos: linux, goarch: amd64}
+          - {goos: linux, goarch: arm64}
+          - {goos: darwin, goarch: amd64}
+          - {goos: darwin, goarch: arm64}
+          - {goos: windows, goarch: amd64}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - env:
+          TARGET_OS: ${{ matrix.goos }}
+          TARGET_ARCH: ${{ matrix.goarch }}
+        run: python scripts/release_inspect.py package --goos "$TARGET_OS" --goarch "$TARGET_ARCH" --output dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: inspect-package-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/*
+  native:
+    needs: [plan, package]
+    name: native-${{ matrix.goos }}-${{ matrix.goarch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-latest, goos: linux, goarch: amd64, extension: tar.gz, binary: bitspeed-inspect}
+          - {runner: macos-latest, goos: darwin, goarch: arm64, extension: tar.gz, binary: bitspeed-inspect}
+          - {runner: windows-latest, goos: windows, goarch: amd64, extension: zip, binary: bitspeed-inspect.exe}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/download-artifact@v4
+        with:
+          name: inspect-package-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist
+      - name: Verify archive and source
+        env:
+          ARCHIVE: bitspeed-inspect-${{ matrix.goos }}-${{ matrix.goarch }}.${{ matrix.extension }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          SHA: ${{ needs.plan.outputs.sha }}
+        shell: bash
+        run: python scripts/release_inspect.py verify "dist/$ARCHIVE" --version "$VERSION" --sha "$SHA" --extract native --require-clean
+      - name: Native CLI smoke
+        env:
+          NATIVE_BINARY: ${{ matrix.binary }}
+        shell: bash
+        run: python scripts/smoke-inspect.py "$PWD/native/$NATIVE_BINARY"
+  publish:
+    needs: [plan, package, native]
+    if: needs.plan.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: inspect-package-*
+          path: release-out
+          merge-multiple: true
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          SHA: ${{ needs.plan.outputs.sha }}
+        run: python scripts/release_inspect.py publish --sha "$SHA" --output release-out

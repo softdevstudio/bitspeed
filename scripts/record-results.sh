@@ -28,6 +28,7 @@ if [ -n "$unformatted" ]; then
   printf 'Unformatted files:\n%s\n' "$unformatted"
   exit 1
 fi
+python3 -m unittest discover -s scripts -p "test_*.py" -v
 go vet ./...
 go test -race -v -count=1 -timeout=60s ./...
 build_dir="$(mktemp -d)"

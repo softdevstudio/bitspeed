@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check the built CLI and fixture together, including partial-failure output."""
 import json
+import os
 import queue
 import signal
 import subprocess
@@ -49,20 +50,23 @@ try:
     assert invalid.returncode == 1 and not invalid.stdout
     bad = subprocess.run([binary, 'record', 'https://user:private@example.org/'], capture_output=True, text=True, timeout=10)
     assert bad.returncode == 1 and not bad.stdout and 'private' not in bad.stderr
-    cancelled = subprocess.Popen([binary, 'record', '--samples=3', base + '/timeout'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    try:
-        time.sleep(0.2)
-        cancelled.send_signal(signal.SIGTERM)
-        stdout, stderr = cancelled.communicate(timeout=10)
-        assert cancelled.returncode == 1, stderr
-        recording = json.loads(stdout)
-        assert recording['samples'][0]['outcome'] == 'cancelled'
-        assert recording['samples'][0]['hops'][0]['error_code'] == 'cancelled'
-    finally:
-        if cancelled.poll() is None:
-            cancelled.kill()
-            cancelled.communicate()
-    print('PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, SIGTERM cancellation')
+    timed = subprocess.run([binary, 'record', '--samples=1', '--timeout=100ms', base + '/timeout'], capture_output=True, text=True, timeout=10)
+    assert timed.returncode == 1 and json.loads(timed.stdout)['samples'][0]['hops'][0]['error_code'] == 'timeout'
+    if os.name != 'nt':
+        cancelled = subprocess.Popen([binary, 'record', '--samples=3', base + '/timeout'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            time.sleep(0.2)
+            cancelled.send_signal(signal.SIGTERM)
+            stdout, stderr = cancelled.communicate(timeout=10)
+            assert cancelled.returncode == 1, stderr
+            recording = json.loads(stdout)
+            assert recording['samples'][0]['outcome'] == 'cancelled'
+            assert recording['samples'][0]['hops'][0]['error_code'] == 'cancelled'
+        finally:
+            if cancelled.poll() is None:
+                cancelled.kill()
+                cancelled.communicate()
+    print('PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, timeouts and native cancellation checks')
 finally:
     fixture.terminate()
     try:

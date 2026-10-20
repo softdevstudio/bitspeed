@@ -1,0 +1,4 @@
+/dist/
+/release-out/
+/native/
+__pycache__/

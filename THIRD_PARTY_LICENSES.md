@@ -1,5 +1,5 @@
 # Third Party Licenses
 
-The current source uses only the Go standard library and has no external Go module dependencies. Go runtime and standard library code linked into future binaries is covered by the Go distribution's BSD-style license and associated notices. Release packaging must include the license and applicable notices from the exact Go toolchain used to build those binaries.
+The source has no external Go module dependencies. Distributed executables link the Go runtime and standard library, including applicable bundled components. Each archive contains the exact building toolchain's LICENSE, PATENTS, VERSION and available license/notice files under third_party/go, preserving their original paths.
 
-GitHub Actions used by CI are build infrastructure, not vendored source or runtime dependencies.
+BUILD_INFO.json records the Go version and source revision used for that archive. Go itself is covered by its BSD-style license, with additional notices for bundled components. GitHub Actions are build infrastructure and are not included in the runtime binary.
