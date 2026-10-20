@@ -2,7 +2,7 @@
 
 BitSpeed houses two independent Go tools. Inspect will explain HTTP transfer timing and compare saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-This is an unreleased development build. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare remains unimplemented. Transfer has no implementation yet.
+This is an unreleased development build. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
 
 ## Build and run
 
@@ -37,13 +37,22 @@ The report separates measured fields, calculated intervals and labelled interpre
 
 Use - as the filename to read stdin. Explaining a valid failed recording exits successfully. See docs/explanations.md for the report schema, interval definitions and rule limits.
 
+## Compare recordings
+
+```sh
+/tmp/bitspeed-inspect compare before.json after.json
+/tmp/bitspeed-inspect compare --format=json before.json after.json
+```
+
+The comparison retains descriptive statistics when requests or responses differ, and withholds unsupported change verdicts. It reports failures and missing values, handles a zero baseline without dividing by zero, and treats overlapping ranges as inconclusive. Three available values per group and full phase coverage are the minimum for a change verdict. These rules do not establish statistical confidence or causation. Response mismatches can block response verdicts while leaving connection-phase comparisons available. See docs/comparisons.md for exact rules and evidence references.
+
 ## Checks
 
 ```sh
 bash scripts/record-results.sh
 ```
 
-The script runs formatting checks, go vet, race-enabled tests and a build/version smoke check and an executable recorder check including SIGTERM cancellation. It records the environment, source-tree fingerprint and outcomes under test/results. CI runs on Linux and macOS and uploads its own results. The streamed-body test records its allocation check alongside the correctness results. Passing these checks is not an Inspect release: comparisons and release preparation remain ahead.
+The script runs formatting checks, go vet, race-enabled tests and a build/version smoke check and an executable recorder check including SIGTERM cancellation. It records the environment, source-tree fingerprint and outcomes under test/results. CI runs on Linux and macOS and uploads its own results. The streamed-body test records its allocation check alongside the correctness results. Passing these checks is not an Inspect release: release preparation remains ahead.
 
 The recording contract is in docs/recording-v1.md and the report contract is in docs/explanations.md. AGENTS.md holds the agreed development sequence and session handoff.
 

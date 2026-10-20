@@ -205,7 +205,7 @@ func explainHop(h Hop, path string) HopReport {
 		measurement("url", h.URL, path+"/url"), measurement("outcome", h.Outcome, path+"/outcome"), measurement("elapsed_ns", h.ElapsedNS, path+"/elapsed_ns"),
 		measurement("status_code", observed(h.StatusCode), path+"/status_code"), measurement("protocol", observed(h.Protocol), path+"/protocol"),
 		measurement("remote_address", observed(h.RemoteAddress), path+"/remote_address"), measurement("connection_reused", observed(h.ConnectionReused), path+"/connection_reused"),
-		measurement("body_bytes", h.BodyBytes, path+"/body_bytes"), measurement("body_complete", h.BodyComplete, path+"/body_complete"),
+		measurement("content_encoding", observed(h.ContentEncoding), path+"/content_encoding"), measurement("body_bytes", h.BodyBytes, path+"/body_bytes"), measurement("body_complete", h.BodyComplete, path+"/body_complete"),
 	}, Interpretations: []Interpretation{}}
 	if h.ErrorCode != "" {
 		hr.Measurements = append(hr.Measurements, measurement("error_code", h.ErrorCode, path+"/error_code"))

@@ -49,6 +49,7 @@ type Sample struct {
 }
 
 type Hop struct {
+	ContentEncoding       *string `json:"content_encoding"`
 	WinningConnectAttempt *string `json:"winning_connect_attempt"`
 	URL                   string  `json:"url"`
 	Outcome               string  `json:"outcome"`
@@ -154,6 +155,9 @@ func (r Recording) Validate() error {
 			}
 			if !validOutcome(h.Outcome) || h.ElapsedNS < 0 || h.ElapsedNS > s.ElapsedNS || h.BodyBytes < 0 {
 				return fmt.Errorf("invalid sample %d hop %d", i, j)
+			}
+			if h.ContentEncoding != nil && !validEncoding(*h.ContentEncoding) {
+				return errors.New("unknown content encoding classification")
 			}
 			if h.StatusCode != nil && (*h.StatusCode < 100 || *h.StatusCode > 599) {
 				return errors.New("invalid HTTP status")
@@ -319,4 +323,12 @@ func validateEvidence(h Hop) error {
 
 	}
 	return nil
+}
+
+func validEncoding(value string) bool {
+	switch value {
+	case "identity", "gzip", "br", "deflate", "zstd", "compress", "other":
+		return true
+	}
+	return false
 }

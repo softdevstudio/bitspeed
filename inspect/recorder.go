@@ -10,6 +10,7 @@ import (
 	"net/http/httptrace"
 	"net/url"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -325,6 +326,13 @@ func recordHop(parent context.Context, target *url.URL, o Options, atLimit bool)
 		status, protocol := response.StatusCode, response.Proto
 		h.StatusCode = &status
 		h.Protocol = &protocol
+		encoding := strings.ToLower(strings.TrimSpace(strings.Join(response.Header.Values("Content-Encoding"), ",")))
+		if encoding == "" {
+			encoding = "identity"
+		} else if !validEncoding(encoding) {
+			encoding = "other"
+		}
+		h.ContentEncoding = &encoding
 		if status == http.StatusSwitchingProtocols {
 			response.Body.Close()
 			h.ErrorCode = "unsupported_upgrade"

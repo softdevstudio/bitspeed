@@ -6,6 +6,8 @@ import signal
 import subprocess
 import sys
 import threading
+import tempfile
+from pathlib import Path
 import time
 
 binary = sys.argv[1]
@@ -15,9 +17,12 @@ threading.Thread(target=lambda: lines.put(fixture.stdout.readline()), daemon=Tru
 try:
     base = lines.get(timeout=10).strip()
     assert base.startswith('http://127.0.0.1:'), 'missing fixture URL'
+    saved_recording = None
     for path, outcome in [('/empty', 'complete'), ('/redirect', 'complete'), ('/disconnect', 'failed')]:
         run = subprocess.run([binary, 'record', '--samples=1', base + path], capture_output=True, text=True, timeout=10)
         assert run.returncode == (0 if outcome == 'complete' else 1), run.stderr
+        if saved_recording is None:
+            saved_recording = run.stdout
         recording = json.loads(run.stdout)
         assert recording['samples'][0]['outcome'] == outcome
         explanation = subprocess.run([binary, 'explain', '--format=json', '-'], input=run.stdout, capture_output=True, text=True, timeout=10)
@@ -32,6 +37,14 @@ try:
         if path == '/disconnect':
             hop = recording['samples'][0]['hops'][0]
             assert hop['body_bytes'] == 5 and not hop['body_complete']
+    with tempfile.TemporaryDirectory() as directory:
+        baseline = Path(directory) / 'before.json'
+        baseline.write_text(saved_recording)
+        comparison = subprocess.run([binary, 'compare', '--format=json', str(baseline), '-'], input=saved_recording, capture_output=True, text=True, timeout=10)
+        assert comparison.returncode == 0, comparison.stderr
+        compared = json.loads(comparison.stdout)
+        assert compared['baseline']['recorded'] == 1 and compared['candidate']['recorded'] == 1
+        assert compared['hops'][0]['calculations']
     invalid = subprocess.run([binary, 'explain', '-'], input='{}', capture_output=True, text=True, timeout=10)
     assert invalid.returncode == 1 and not invalid.stdout
     bad = subprocess.run([binary, 'record', 'https://user:private@example.org/'], capture_output=True, text=True, timeout=10)
@@ -49,7 +62,7 @@ try:
         if cancelled.poll() is None:
             cancelled.kill()
             cancelled.communicate()
-    print('PASS: executable recording, explanations, redirects, truncated body, redaction, SIGTERM cancellation')
+    print('PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, SIGTERM cancellation')
 finally:
     fixture.terminate()
     try:

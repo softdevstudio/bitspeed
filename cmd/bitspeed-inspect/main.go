@@ -38,14 +38,14 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		_, err := fmt.Fprintln(stdout, "bitspeed-inspect "+inspect.Version)
 		return err
 	case "--help", "help":
-		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture, record, explain\nPlanned: compare")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture, record, explain, compare")
 		return err
 	case "record":
 		return record(ctx, args[1:], stdout, stderr)
 	case "explain":
 		return explain(args[1:], os.Stdin, stdout, stderr)
 	case "compare":
-		return fmt.Errorf("%s is not implemented in this development build", args[0])
+		return compare(args[1:], os.Stdin, stdout, stderr)
 	case "fixture":
 		return serveFixture(ctx, args[1:], stdout, stderr)
 	default:
@@ -173,4 +173,48 @@ func explain(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 		return inspect.WriteReportJSON(stdout, report)
 	}
 	return inspect.WriteReportText(stdout, report)
+}
+
+func readRecording(path string, stdin io.Reader) (inspect.Recording, error) {
+	reader := stdin
+	if path != "-" {
+		file, err := os.Open(path)
+		if err != nil {
+			return inspect.Recording{}, errors.New("cannot open recording file")
+		}
+		defer file.Close()
+		reader = file
+	}
+	return inspect.Decode(reader)
+}
+
+func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
+	flags := flag.NewFlagSet("compare", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	format := flags.String("format", "text", "comparison format: text or json")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+		return err
+	}
+	if flags.NArg() != 2 || (*format != "text" && *format != "json") || (flags.Arg(0) == "-" && flags.Arg(1) == "-") {
+		return errors.New("usage: bitspeed-inspect compare [--format=text|json] BASELINE CANDIDATE (at most one - for stdin)")
+	}
+	baseline, err := readRecording(flags.Arg(0), stdin)
+	if err != nil {
+		return fmt.Errorf("invalid baseline recording: %w", err)
+	}
+	candidate, err := readRecording(flags.Arg(1), stdin)
+	if err != nil {
+		return fmt.Errorf("invalid candidate recording: %w", err)
+	}
+	report, err := inspect.Compare(baseline, candidate)
+	if err != nil {
+		return err
+	}
+	if *format == "json" {
+		return inspect.WriteComparisonJSON(stdout, report)
+	}
+	return inspect.WriteComparisonText(stdout, report)
 }

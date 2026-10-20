@@ -327,3 +327,34 @@ func TestUpgradeRejectedWithoutReadingStream(t *testing.T) {
 		t.Fatal("upgraded connection not closed")
 	}
 }
+
+func TestRecordedEncodingClassification(t *testing.T) {
+	for _, encoding := range []string{"", "gzip", "GZip", "br", "gzip, br", "private-secret"} {
+		t.Run(encoding, func(t *testing.T) {
+			s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				if encoding != "" {
+					w.Header().Set("Content-Encoding", encoding)
+				}
+				w.Write([]byte("raw"))
+			}))
+			defer s.Close()
+			r := checkedRecord(t, context.Background(), s.URL, testOptions())
+			h := r.Samples[0].Hops[0]
+			want := strings.ToLower(encoding)
+			if want == "" {
+				want = "identity"
+			}
+			if want == "gzip, br" || want == "private-secret" {
+				want = "other"
+			}
+			if h.ContentEncoding == nil || *h.ContentEncoding != want || h.BodyBytes != 3 {
+				t.Fatalf("bad raw encoding evidence %+v", h)
+			}
+			var out bytes.Buffer
+			Encode(&out, r)
+			if strings.Contains(out.String(), "private-secret") {
+				t.Fatal("raw encoding value leaked")
+			}
+		})
+	}
+}

@@ -69,7 +69,7 @@ func TestRecordCommand(t *testing.T) {
 			t.Fatal("invalid input wrote partial JSON")
 		}
 	}
-	for _, command := range []string{"record", "fixture", "explain"} {
+	for _, command := range []string{"record", "fixture", "explain", "compare"} {
 		var out, errOut bytes.Buffer
 		if err := run(context.Background(), []string{command, "--help"}, &out, &errOut); err != nil {
 			t.Fatal("help failed", err)
@@ -117,6 +117,42 @@ func TestExplainCommand(t *testing.T) {
 		}
 		if out.Len() != 0 {
 			t.Fatal("invalid input produced partial report")
+		}
+	}
+}
+
+func TestCompareCommand(t *testing.T) {
+	s := httptest.NewServer(fixture.New(fixture.Config{}))
+	defer s.Close()
+	options := inspect.DefaultOptions()
+	options.Samples = 1
+	r, err := inspect.Record(context.Background(), s.URL+"/empty", options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input bytes.Buffer
+	inspect.Encode(&input, r)
+	path := filepath.Join(t.TempDir(), "baseline.json")
+	os.WriteFile(path, input.Bytes(), 0600)
+	for _, format := range []string{"text", "json"} {
+		var out, errOut bytes.Buffer
+		if err := compare([]string{"--format=" + format, path, "-"}, bytes.NewReader(input.Bytes()), &out, &errOut); err != nil {
+			t.Fatal(err)
+		}
+		if format == "json" && !json.Valid(out.Bytes()) {
+			t.Fatal("invalid comparison JSON")
+		}
+		if format == "text" && !strings.Contains(out.String(), "Interpretation") {
+			t.Fatal("missing verdict labels")
+		}
+	}
+	for _, args := range [][]string{nil, {"-", "-"}, {"--format=bad", path, path}, {"missing", path}, {path, "missing"}, {path, "-"}} {
+		var out, errOut bytes.Buffer
+		if err := compare(args, strings.NewReader("{}"), &out, &errOut); err == nil {
+			t.Fatal("invalid comparison accepted")
+		}
+		if out.Len() != 0 {
+			t.Fatal("invalid comparison produced output")
 		}
 	}
 }
