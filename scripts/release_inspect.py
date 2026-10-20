@@ -168,13 +168,27 @@ def verify_ci(sha):
         raise ValueError('checked source is no longer main HEAD')
 
 
+def find_release(tag):
+    # The tag endpoint omits drafts. List authenticated releases so retries
+    # discover the draft created by this workflow before it is published.
+    page = 1
+    while True:
+        releases = api(f'releases?per_page=100&page={page}')
+        for item in releases:
+            if item['tag_name'] == tag:
+                return item
+        if len(releases) < 100:
+            return None
+        page += 1
+
+
 def plan(sha):
     valid_sha(sha)
     if command('git', 'rev-parse', 'HEAD') != sha:
         raise ValueError('checkout is not checked source')
     verify_ci(sha)
     v = version()
-    release = api('releases/tags/' + urllib.parse.quote('inspect/v' + v, safe=''), optional=True)
+    release = find_release('inspect/v' + v)
     published = release is not None and not release['draft']
     result = dict(sha=sha, version=v, build=str(not published).lower(), publish=str(not published and not v.endswith('-dev')).lower())
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
@@ -233,7 +247,7 @@ def publish(sha, output):
     if not re.fullmatch(r'\d+\.\d+\.\d+', v):
         raise ValueError('only stable Inspect versions can publish')
     tag = 'inspect/v' + v
-    existing = api('releases/tags/' + urllib.parse.quote(tag, safe=''), optional=True)
+    existing = find_release(tag)
     if existing and not existing['draft']:
         raise ValueError('published releases are immutable')
     run = os.environ['GITHUB_RUN_ID']
@@ -257,7 +271,7 @@ def publish(sha, output):
     if any(path.name not in allowed for path in assets):
         raise ValueError('unexpected release asset')
     (output / 'SHA256SUMS').write_text(''.join(hash_file(path) + '  ' + path.name + '\n' for path in assets))
-    ref = api('git/ref/tags/' + urllib.parse.quote(tag, safe=''), optional=True)
+    ref = api('git/ref/tags/' + urllib.parse.quote(tag, safe='/'), optional=True)
     if ref is not None and ref['object']['sha'] != sha:
         raise ValueError('existing tag source mismatch')
     if ref is None:
@@ -265,9 +279,9 @@ def publish(sha, output):
     if existing is None:
         subprocess.run(['gh', 'release', 'create', tag, '--repo', REPO, '--verify-tag', '--draft', '--title', 'BitSpeed Inspect ' + v, '--notes', 'HTTP transfer recording, evidence-based explanations and guarded comparisons. See the included README and verification metadata.'], check=True)
     subprocess.run(['gh', 'release', 'upload', tag, '--repo', REPO, '--clobber', *map(str, assets), str(output / 'SHA256SUMS')], check=True)
-    uploaded = api('releases/tags/' + urllib.parse.quote(tag, safe=''))
+    uploaded = find_release(tag)
     expected_names = {path.name for path in assets} | {'SHA256SUMS'}
-    if {asset['name'] for asset in uploaded['assets']} != expected_names:
+    if uploaded is None or not uploaded['draft'] or {asset['name'] for asset in uploaded['assets']} != expected_names:
         raise ValueError('draft asset set mismatch')
     with tempfile.TemporaryDirectory() as temp:
         subprocess.run(['gh', 'release', 'download', tag, '--repo', REPO, '--dir', temp], check=True)

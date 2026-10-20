@@ -2,11 +2,11 @@
 
 BitSpeed houses two independent Go tools. Inspect explains HTTP transfer timing and compares saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-Inspect 0.1.0 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
+Inspect 0.1.1 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
 
 ## Download
 
-Download a platform archive and SHA256SUMS from [Inspect releases](https://github.com/softdevstudio/bitspeed/releases/tag/inspect/v0.1.0). Verify the archive against the manifest before extracting. Archives contain the executable, documentation, licenses and BUILD_INFO.json. Linux arm64 and macOS amd64 are cross-built only; Linux amd64, macOS arm64 and Windows amd64 receive native CLI checks. See docs/releases.md for details.
+Download a platform archive and SHA256SUMS from [Inspect releases](https://github.com/softdevstudio/bitspeed/releases/tag/inspect/v0.1.1). Verify the archive against the manifest before extracting. Archives contain the executable, documentation, licenses and BUILD_INFO.json. Linux arm64 and macOS amd64 are cross-built only; Linux amd64, macOS arm64 and Windows amd64 receive native CLI checks. See docs/releases.md for details.
 
 For example, on Linux amd64:
 

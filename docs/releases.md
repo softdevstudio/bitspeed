@@ -1,6 +1,6 @@
 # Inspect Releases
 
-Inspect is versioned independently of the future Transfer tool. Its constant is inspect/version.go, its tags are inspect/vX.Y.Z, and stable archive names start with bitspeed-inspect. The first release is prepared as 0.1.0 after independent review and the gates below. Transfer has no release or binary yet.
+Inspect is versioned independently of the future Transfer tool. Its constant is inspect/version.go, its tags are inspect/vX.Y.Z, and stable archive names start with bitspeed-inspect. The first release is prepared as 0.1.1 after independent review and the gates below. Transfer has no release or binary yet.
 
 ## Automated gates
 

@@ -61,8 +61,17 @@ class ReleaseGuards(unittest.TestCase):
             with patch.object(release, 'api', side_effect=[run, {'object': {'sha': 'b' * 40}}]):
                 self.assertRaises(ValueError, release.verify_ci, sha)
 
+    def test_draft_discovery_and_pagination(self):
+        draft = {'tag_name': 'inspect/v0.1.0', 'draft': True}
+        first = [{'tag_name': 'other/v' + str(i)} for i in range(100)]
+        with patch.object(release, 'api', side_effect=[first, [draft]]) as api:
+            self.assertEqual(release.find_release('inspect/v0.1.0'), draft)
+            self.assertEqual(api.call_args_list[1].args[0], 'releases?per_page=100&page=2')
+        with patch.object(release, 'api', return_value=[]):
+            self.assertIsNone(release.find_release('inspect/v9.0.0'))
+
     def test_publisher_rejects_missing_native_gate_before_upload(self):
-        with patch.dict('os.environ', {'GITHUB_RUN_ID': '456'}), patch.object(release, 'verify_ci'), patch.object(release, 'command', return_value='a' * 40), patch.object(release, 'version', return_value='0.1.0'), patch.object(release, 'api', side_effect=[None, {'jobs': []}]), patch.object(release.subprocess, 'run') as run:
+        with patch.dict('os.environ', {'GITHUB_RUN_ID': '456'}), patch.object(release, 'verify_ci'), patch.object(release, 'command', return_value='a' * 40), patch.object(release, 'version', return_value='0.1.0'), patch.object(release, 'api', side_effect=[[], {'jobs': []}]), patch.object(release.subprocess, 'run') as run:
             self.assertRaisesRegex(ValueError, 'gates', release.publish, 'a' * 40, '.')
             run.assert_not_called()
 
@@ -89,7 +98,7 @@ class ReleaseGuards(unittest.TestCase):
                         return {'jobs': jobs}
                     if path.startswith('git/'):
                         return {'object': {'sha': sha}}
-                    return {'draft': True, 'assets': [{'name': p.name} for p in output.iterdir()]}
+                    return [{'tag_name': 'inspect/v0.1.0', 'draft': True, 'assets': [{'name': p.name} for p in output.iterdir()]}]
                 with patch.dict('os.environ', {'GITHUB_RUN_ID': '456', 'CI_RUN_ID': '123'}), patch.object(release, 'verify_ci'), patch.object(release, 'command', return_value=sha), patch.object(release, 'version', return_value='0.1.0'), patch.object(release, 'api', side_effect=api), patch.object(release, 'verify_archive'), patch.object(release, 'carry_transfer'), patch.object(release.subprocess, 'run', side_effect=run):
                     if corrupt:
                         self.assertRaisesRegex(ValueError, 'integrity', release.publish, sha, output)
