@@ -1,5 +1,5 @@
 // Package transfer defines the independent single-file transfer contract.
-// Network operations and persistent storage are not implemented yet.
+// Sender snapshots are local; network operations are not implemented yet.
 package transfer
 
 import (

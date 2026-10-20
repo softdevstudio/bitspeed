@@ -49,3 +49,13 @@ func TestInvalidCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestPreparationOptionsRejectBeforeIO(t *testing.T) {
+	for _, tail := range [][]string{nil, {"--source=SECRET"}, {"--spool=SECRET"}, {"--spool=SECRET", "--source=SECRET", "--reuse=SECRET"}, {"--spool=SECRET", "--source=SECRET", "--token=SECRET"}, {"--spool=SECRET", "--source=SECRET", "--chunk-size=0"}, {"--spool=SECRET", "--spool=SECRET", "--source=SECRET"}} {
+		var out bytes.Buffer
+		err := run(append([]string{"send", "--prepare-only"}, tail...), &out)
+		if err == nil || out.Len() != 0 || strings.Contains(err.Error(), "SECRET") {
+			t.Fatal("invalid flags leaked or succeeded", err)
+		}
+	}
+}

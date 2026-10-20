@@ -2,6 +2,8 @@
 """The unreleased Transfer skeleton must never report a successful transfer."""
 from pathlib import Path
 import subprocess
+import json
+import os
 import sys
 import tempfile
 
@@ -19,4 +21,13 @@ with tempfile.TemporaryDirectory() as directory:
         assert 'not implemented' in result.stderr and 'SECRET' not in result.stderr
         assert canary.read_bytes() == b'unchanged'
         assert list(Path(directory).iterdir()) == [canary]
-print('PASS: Transfer skeleton version/help and fail-closed operations; no source or directory changes')
+    if os.name != 'nt':
+        spool = Path(directory) / 'spool'
+        prepared = subprocess.run([binary, 'send', '--prepare-only', '--source=' + str(canary), '--spool=' + str(spool)], capture_output=True, text=True, check=True, timeout=10)
+        result = json.loads(prepared.stdout)
+        assert result['prepared'] and not result['transferred']
+        identity = result['manifest']['transfer_id']
+        canary.unlink()
+        reused = subprocess.run([binary, 'send', '--prepare-only', '--spool=' + str(spool), '--reuse=' + identity], capture_output=True, text=True, check=True, timeout=10)
+        assert json.loads(reused.stdout) == result
+print('PASS: local snapshot prepare/reuse and Transfer skeleton version/help; unimplemented operations fail closed')
