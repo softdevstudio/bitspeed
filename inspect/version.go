@@ -1,4 +1,4 @@
 package inspect
 
-// Version is intentionally unreleased until record, explain and compare pass their gates.
-const Version = "0.0.0-dev"
+// Version identifies the independently released Inspect command.
+const Version = "0.1.0"
