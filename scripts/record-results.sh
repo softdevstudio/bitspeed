@@ -13,11 +13,14 @@ go env GOOS GOARCH CGO_ENABLED
 printf 'Parent commit: %s\n' "$(git rev-parse HEAD 2>/dev/null || printf unknown)"
 python3 - <<'PY'
 import hashlib
+import os
+import subprocess
 from pathlib import Path
 root = Path('.')
 digest = hashlib.sha256()
-for p in sorted(root.rglob('*')):
-    if not p.is_file() or '.git' in p.parts or p.parts[:2] == ('test', 'results'):
+paths = subprocess.check_output(['git', 'ls-files', '-z', '--cached', '--others', '--exclude-standard']).split(b'\0')
+for p in sorted({Path(os.fsdecode(name)) for name in paths if name}):
+    if not p.is_file() or p.parts[:2] == ('test', 'results'):
         continue
     digest.update(p.as_posix().encode() + b'\0' + p.read_bytes() + b'\0')
 print('Source tree SHA256:', digest.hexdigest())
@@ -39,6 +42,8 @@ python3 scripts/smoke-inspect.py "$build_dir/bitspeed-inspect"
 go build -o "$build_dir/bitspeed-transfer" ./cmd/bitspeed-transfer
 "$build_dir/bitspeed-transfer" --version
 python3 scripts/smoke-transfer.py "$build_dir/bitspeed-transfer"
+python3 scripts/smoke-transfer-interruption.py "$build_dir/bitspeed-transfer"
+python3 scripts/smoke-transfer-tls.py "$build_dir/bitspeed-transfer"
 printf 'PASS: formatting, vet, race tests, both command builds and CLI smoke\n'
 
 if [ "${BITSPEED_CHECK_SITE:-0}" = "1" ]; then

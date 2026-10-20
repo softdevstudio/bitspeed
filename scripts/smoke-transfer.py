@@ -12,7 +12,8 @@ import hashlib
 
 binary = str(Path(sys.argv[1]).resolve())
 version = subprocess.run([binary, '--version'], capture_output=True, text=True, check=True, timeout=10)
-assert version.stdout == 'bitspeed-transfer 0.0.0-dev\n'
+expected_version = sys.argv[2] if len(sys.argv) > 2 else __import__('re').search(r'const Version = "([^"]+)"', (Path(__file__).resolve().parents[1] / 'transfer/version.go').read_text()).group(1)
+assert version.stdout == 'bitspeed-transfer ' + expected_version + '\n'
 with tempfile.TemporaryDirectory() as directory:
     canary = Path(directory) / 'source'
     canary.write_bytes(b'unchanged')
@@ -24,6 +25,13 @@ with tempfile.TemporaryDirectory() as directory:
         assert result.stderr and 'SECRET' not in result.stderr
         assert canary.read_bytes() == b'unchanged'
         assert list(Path(directory).iterdir()) == [canary]
+    if os.name == 'nt':
+        token = Path(directory) / 'token'
+        token.write_text('0123456789abcdef' * 4 + '\n')
+        unsupported = subprocess.run([binary, 'serve', '--root=' + str(Path(directory) / 'receiver'), '--token-file=' + str(token)], capture_output=True, text=True, timeout=10)
+        assert unsupported.returncode == 1 and not unsupported.stdout and 'unsupported' in unsupported.stderr.lower()
+        assert not (Path(directory) / 'receiver').exists()
+        print('PASS: Windows version/help and unsupported-operation checks; delivery is not supported')
     if os.name != 'nt':
         spool = Path(directory) / 'spool'
         prepared = subprocess.run([binary, 'send', '--prepare-only', '--source=' + str(canary), '--spool=' + str(spool)], capture_output=True, text=True, check=True, timeout=10)
@@ -96,4 +104,5 @@ with tempfile.TemporaryDirectory() as directory:
             assert '0123456789abcdef' not in diagnostics
 
 
-print('PASS: Transfer preparation, staging, verified publication, receipt cache, process restart, repeat delivery and damaged-output rejection')
+if os.name != 'nt':
+    print('PASS: Transfer preparation, staging, verified publication, receipt cache, process restart, repeat delivery and damaged-output rejection')

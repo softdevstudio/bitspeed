@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"github.com/softdevstudio/bitspeed/transfer"
 	"io"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ func TestVersionAndHelp(t *testing.T) {
 		}
 	}
 	var out bytes.Buffer
-	if err := run([]string{"--version"}, &out); err != nil || out.String() != "bitspeed-transfer 0.0.0-dev\n" {
+	if err := run([]string{"--version"}, &out); err != nil || out.String() != "bitspeed-transfer "+transfer.Version+"\n" {
 		t.Fatal(out.String(), err)
 	}
 }

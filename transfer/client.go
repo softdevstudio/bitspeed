@@ -19,6 +19,9 @@ import (
 var ErrRequest = errors.New("receiver request failed")
 
 func LoadToken(path string) (string, error) {
+	if !spoolSupported() {
+		return "", ErrUnsupported
+	}
 	info, e := os.Lstat(path)
 	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > 65 {
 		return "", ErrConfig
