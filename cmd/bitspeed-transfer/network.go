@@ -111,7 +111,9 @@ func serveReceiver(ctx context.Context, args []string, stdout io.Writer) error {
 		}
 		c.MaxReservedBytes = n
 	}
-	receiver, e := transfer.NewReceiver(c)
+	startup, cancelStartup := context.WithTimeout(ctx, 5*time.Minute)
+	defer cancelStartup()
+	receiver, e := transfer.NewReceiverContext(startup, c)
 	if e != nil {
 		return e
 	}

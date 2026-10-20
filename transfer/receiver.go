@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 const MaxReceiverSessions = 16
@@ -45,6 +46,16 @@ type Receiver struct {
 
 func NewReceiver(c ReceiverConfig) (*Receiver, error) { return newReceiver(c, realReceiverOps()) }
 func newReceiver(c ReceiverConfig, ops receiverOps) (*Receiver, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+	defer cancel()
+	return newReceiverContext(ctx, c, ops)
+}
+
+// NewReceiverContext bounds startup recovery as well as validating stored progress.
+func NewReceiverContext(ctx context.Context, c ReceiverConfig) (*Receiver, error) {
+	return newReceiverContext(ctx, c, realReceiverOps())
+}
+func newReceiverContext(ctx context.Context, c ReceiverConfig, ops receiverOps) (*Receiver, error) {
 	if !spoolSupported() {
 		return nil, ErrUnsupported
 	}
@@ -79,12 +90,12 @@ func newReceiver(c ReceiverConfig, ops receiverOps) (*Receiver, error) {
 			unlock()
 		}
 	}()
-	entries, e := boundedEntries(c.Root, 3)
+	entries, e := boundedEntries(c.Root, 3+MaxReceiverSessions)
 	if e != nil {
 		return nil, e
 	}
 	for _, entry := range entries {
-		if entry.Name() != ".lock" && entry.Name() != "sessions" && entry.Name() != "files" {
+		if entry.Name() != ".lock" && entry.Name() != "sessions" && entry.Name() != "files" && !probeName(entry.Name()) {
 			return nil, ErrRecovery
 		}
 	}
@@ -97,6 +108,12 @@ func newReceiver(c ReceiverConfig, ops receiverOps) (*Receiver, error) {
 			return nil, e
 		}
 	}
+	if e = r.cleanProbes(ctx); e != nil {
+		return nil, e
+	}
+	if e = r.cleanAdmissions(ctx); e != nil {
+		return nil, e
+	}
 	if files, fe := boundedEntries(filepath.Join(c.Root, "files"), 0); fe != nil || len(files) != 0 {
 		return nil, ErrRecovery
 	}
@@ -107,6 +124,25 @@ func newReceiver(c ReceiverConfig, ops receiverOps) (*Receiver, error) {
 		return nil, e
 	}
 	if _, _, e = r.inventory(); e != nil {
+		return nil, e
+	}
+	sessions, e := boundedEntries(filepath.Join(r.root, "sessions"), MaxReceiverSessions)
+	if e != nil {
+		return nil, ErrRecovery
+	}
+	for _, entry := range sessions {
+		if e = ctx.Err(); e != nil {
+			return nil, e
+		}
+		m, le := r.load(entry.Name())
+		if le != nil {
+			return nil, le
+		}
+		if _, e = r.status(ctx, m); e != nil {
+			return nil, e
+		}
+	}
+	if e = ctx.Err(); e != nil {
 		return nil, e
 	}
 	ok = true
@@ -339,14 +375,23 @@ func chunkSizeAt(m Manifest, index int) int64 {
 }
 func (r *Receiver) verifyFile(ctx context.Context, path string, length int64, digest string) error {
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() != length {
+	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > length {
 		return ErrRecovery
+	}
+	if info.Size() != length {
+		return errChunkCorrupt
 	}
 	f, e := os.Open(path)
 	if e != nil {
 		return ErrStorage
 	}
 	defer f.Close()
+	corrupt := func() error {
+		if e := r.ops.close(f); e != nil {
+			return ErrStorage
+		}
+		return errChunkCorrupt
+	}
 	hash := sha256.New()
 	buf := make([]byte, 32<<10)
 	var n int64
@@ -363,15 +408,17 @@ func (r *Receiver) verifyFile(ctx context.Context, path string, length int64, di
 			return ErrStorage
 		}
 		if count == 0 {
-			return ErrRecovery
+			return corrupt()
 		}
 	}
 	var extra [1]byte
-	if count, re := f.Read(extra[:]); count != 0 || re != io.EOF {
-		return ErrRecovery
+	if count, re := f.Read(extra[:]); re != nil && re != io.EOF {
+		return ErrStorage
+	} else if count != 0 || re != io.EOF {
+		return corrupt()
 	}
 	if hex.EncodeToString(hash.Sum(nil)) != digest {
-		return ErrRecovery
+		return corrupt()
 	}
 	if e = r.ops.sync(f); e != nil {
 		return ErrStorage
@@ -386,14 +433,14 @@ func (r *Receiver) status(ctx context.Context, m Manifest) (StoredStatus, error)
 	s := StoredStatus{ProtocolVersion: 1, TransferID: m.TransferID, ManifestSHA256: identity, State: Uploading, MissingChunks: []int{}}
 	dir := filepath.Join(r.root, "sessions", m.TransferID)
 	chunks := filepath.Join(dir, "chunks")
-	entries, e := boundedEntries(chunks, MaxChunks+1)
+	entries, e := boundedEntries(chunks, 2*MaxChunks+1)
 	if e != nil {
 		return s, ErrRecovery
 	}
 	for _, entry := range entries {
 		if entry.Name() == "incoming.tmp" {
 			info, e := os.Lstat(filepath.Join(chunks, entry.Name()))
-			if e != nil || !info.Mode().IsRegular() {
+			if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > MaxChunkSize {
 				return s, ErrRecovery
 			}
 			if e = os.Remove(filepath.Join(chunks, entry.Name())); e != nil {
@@ -401,9 +448,15 @@ func (r *Receiver) status(ctx context.Context, m Manifest) (StoredStatus, error)
 			}
 			continue
 		}
-		i, e := strconv.Atoi(entry.Name())
-		if e != nil || i < 0 || i >= len(m.ChunkSHA256) || strconv.Itoa(i) != entry.Name() {
+		name := strings.TrimSuffix(entry.Name(), ".bad")
+		i, e := strconv.Atoi(name)
+		if e != nil || i < 0 || i >= len(m.ChunkSHA256) || strconv.Itoa(i) != name {
 			return s, ErrRecovery
+		}
+		if strings.HasSuffix(entry.Name(), ".bad") {
+			if e = privateChunk(filepath.Join(chunks, entry.Name()), chunkSizeAt(m, i)); e != nil {
+				return s, e
+			}
 		}
 	}
 	for i, digest := range m.ChunkSHA256 {
@@ -414,7 +467,13 @@ func (r *Receiver) status(ctx context.Context, m Manifest) (StoredStatus, error)
 		} else if e != nil {
 			return s, ErrStorage
 		}
-		if e = r.verifyFile(ctx, path, chunkSizeAt(m, i), digest); e != nil {
+		if e = r.verifyFile(ctx, path, chunkSizeAt(m, i), digest); errors.Is(e, errChunkCorrupt) {
+			if e = r.quarantine(path, chunkSizeAt(m, i)); e != nil {
+				return s, e
+			}
+			s.MissingChunks = append(s.MissingChunks, i)
+			continue
+		} else if e != nil {
 			return s, e
 		}
 		s.VerifiedChunks++
@@ -467,18 +526,22 @@ func (r *Receiver) store(ctx context.Context, m Manifest, index int, body io.Rea
 	target := filepath.Join(chunks, strconv.Itoa(index))
 	duplicate := false
 	if _, e := os.Lstat(target); e == nil {
-		if e = r.verifyFile(ctx, target, want, m.ChunkSHA256[index]); e != nil {
+		if e = r.verifyFile(ctx, target, want, m.ChunkSHA256[index]); errors.Is(e, errChunkCorrupt) {
+			if e = r.quarantine(target, want); e != nil {
+				return ack, e
+			}
+		} else if e != nil {
 			return ack, e
+		} else {
+			duplicate = true
 		}
-		duplicate = true
 	} else if !os.IsNotExist(e) {
 		return ack, ErrStorage
 	}
 	temp := filepath.Join(chunks, "incoming.tmp")
 	if _, e := os.Lstat(temp); e == nil {
-		info, e := os.Lstat(temp)
-		if e != nil || !info.Mode().IsRegular() {
-			return ack, ErrRecovery
+		if e := privateChunk(temp, MaxChunkSize); e != nil {
+			return ack, e
 		}
 		if e = os.Remove(temp); e != nil {
 			return ack, ErrStorage

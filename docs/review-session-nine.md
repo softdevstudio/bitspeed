@@ -1,0 +1,11 @@
+# Upload recovery review
+
+A separate review task, without the implementation conversation, inspected receiver recovery, chunk verification, startup cancellation, fault tests and the persistence contract. It ran package tests, race tests and vet. Re-review confirmed the findings below were resolved, with no remaining findings in session-nine upload/recovery scope.
+
+The review found that digest-mismatched opened chunks could bypass the injected close operation and rely on an unchecked deferred close. Verification now checks close failure before treating corruption as repairable; a regression proves the original evidence remains untouched and no quarantine is created on that failure. Final EOF read errors are treated as storage failures, not corrupt bytes.
+
+The review also requested the combined documented failure sequence. The process test now kills after chunk hard-link publication before directory synchronization, injects a restarted receiver's chunk sync failure and confirms startup refuses success, then restarts fresh sender and receiver processes and verifies only the remaining chunk is uploaded.
+
+The process matrix also covers admission writes, admission rename, chunk writes and durable publication before acknowledgement delivery. Both processes are killed and the original source is removed; resume uses the saved snapshot and transfer ID. A separate dropped-response test confirms an accepted chunk is not retransmitted. Tests verify corruption quarantine and replacement, direct PUT repair, interrupted probes, reservation reconstruction, cancellation, malformed binding metadata, unexpected evidence, repeated independent corruption and injected write/close/sync/link failures. Stale incoming temporary files must be private regular files within the fixed chunk-size bound before removal.
+
+The existing staging reservation covers valid chunks and one bounded corrupt evidence file per index. Final assembly requires increased capacity or a separately reviewed evidence-retention transition. Unknown evidence, oversized chunks, symlinks and ambiguous ownership remain operator recovery cases. No destination assembly/publication or completion receipts were added. Transfer remains unreleased at 0.0.0-dev. Process-kill and injected-I/O checks do not establish hardware power-loss guarantees.

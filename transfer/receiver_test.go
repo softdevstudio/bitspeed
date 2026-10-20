@@ -214,7 +214,7 @@ func TestReceiverQuotaLockAndRecoveryGate(t *testing.T) {
 	path := filepath.Join(r.root, "sessions", m.TransferID, "chunks", "0")
 	os.WriteFile(path, []byte("bad!"), 0600)
 	w = perform(r, "GET", "/v1/transfers/"+m.TransferID, "", nil, 0)
-	if w.Code != 503 {
+	if w.Code != 200 || !strings.Contains(w.Body.String(), `"verified_chunks":0`) || !strings.Contains(w.Body.String(), `"missing_chunks":[0]`) {
 		t.Fatal("corrupt chunk reported progress")
 	}
 }
