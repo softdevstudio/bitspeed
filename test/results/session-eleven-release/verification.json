@@ -1,0 +1,23 @@
+{
+  "product": "bitspeed-transfer",
+  "version": "0.1.0",
+  "source_sha": "8ad7097055a06ab3720714b4b00d0e37ca993d3c",
+  "ci_run_id": 39392321791,
+  "release_run_id": 39392621965,
+  "native_smoke_targets": [
+    "linux/amd64",
+    "darwin/arm64",
+    "windows/amd64"
+  ],
+  "cross_build_only_targets": [
+    "linux/arm64",
+    "darwin/amd64"
+  ],
+  "operational_native_targets": [
+    "linux/amd64",
+    "darwin/arm64"
+  ],
+  "limited_native_targets": {
+    "windows/amd64": "version/help/unsupported-operation checks only"
+  }
+}

@@ -1,0 +1,20 @@
+PASS tag/latest checksum: SHA256SUMS
+PASS tag/latest checksum: bitspeed-inspect-darwin-amd64.tar.gz
+PASS tag/latest checksum: bitspeed-inspect-darwin-arm64.tar.gz
+PASS tag/latest checksum: bitspeed-inspect-linux-amd64.tar.gz
+PASS tag/latest checksum: bitspeed-inspect-linux-arm64.tar.gz
+PASS tag/latest checksum: bitspeed-inspect-verification.json
+PASS tag/latest checksum: bitspeed-inspect-windows-amd64.zip
+PASS tag/latest checksum: bitspeed-transfer-darwin-amd64.tar.gz
+PASS tag/latest checksum: bitspeed-transfer-darwin-arm64.tar.gz
+PASS tag/latest checksum: bitspeed-transfer-linux-amd64.tar.gz
+PASS tag/latest checksum: bitspeed-transfer-linux-arm64.tar.gz
+PASS tag/latest checksum: bitspeed-transfer-verification.json
+PASS tag/latest checksum: bitspeed-transfer-windows-amd64.zip
+PASS: Transfer preparation, staging, verified publication, receipt cache, process restart, repeat delivery and damaged-output rejection
+PASS: executable kill/restart/resume at partial chunk
+PASS: executable kill/restart/resume at chunk response
+PASS: executable kill/restart/resume at final response
+PASS: executable HTTPS listener, certificate verification, authenticated upload and completion
+PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, timeouts and native cancellation checks
+PASS public Transfer 0.1.0 source 8ad7097055a06ab3720714b4b00d0e37ca993d3c; Inspect archives and verification metadata unchanged

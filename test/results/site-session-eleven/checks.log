@@ -1,0 +1,31 @@
+WARN  deprecated: project config key languageCode was deprecated in Hugo v0.158.0 and will be removed in a future release. Use locale instead.
+Start building sites …
+hugo v0.168.0-e27a6760c5547237f87d353aebe0580feadb20f4+extended linux/amd64 BuildDate=2026-10-13T16:42:50Z VendorInfo=gohugoio
+
+
+                  │ EN
+──────────────────┼────
+ Pages            │ 38
+ Paginator pages  │  0
+ Non-page files   │  0
+ Static files     │  1
+ Processed images │  0
+ Aliases          │  2
+ Cleaned          │  0
+
+Total in 33 ms
+PASS: 27 rendered HTML pages, internal links/assets, substantive single H1, post frontmatter, contact navigation, release limits and no generated public tree
+PASS: all 19 protected theme/archetype blob hashes preserved in local files and new site tree
+PASS: separate independent content review; published only after public release asset proof
+Site commit: ac67b9a9046da931b810532befca54b560355478
+PASS live 200 https://bitspeed.org/
+PASS live 200 https://bitspeed.org/about/
+PASS live 200 https://bitspeed.org/contact/
+PASS live 200 https://bitspeed.org/download/
+PASS live 200 https://bitspeed.org/quick-start/
+PASS live 200 https://bitspeed.org/reference/
+PASS live 200 https://bitspeed.org/inspect/
+PASS live 200 https://bitspeed.org/transfer/
+PASS live 200 https://bitspeed.org/transfer-is-available/
+PASS live 200 https://bitspeed.org/images/inspect-evidence.svg
+PASS live 404 https://bitspeed.org/images/ukue-terminal.png

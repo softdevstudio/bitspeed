@@ -1,0 +1,78 @@
+[
+  {
+    "path": "archetypes/default.md",
+    "sha": "5ae3c0131c0dc857029ad387a9701b815c758f5b"
+  },
+  {
+    "path": "themes/launch/LICENSE.md",
+    "sha": "20e292675d48780c5c95894e369b880b668e856e"
+  },
+  {
+    "path": "themes/launch/README.md",
+    "sha": "b9745a7c0bbb1a95653f8fde8816f3f1536c89ce"
+  },
+  {
+    "path": "themes/launch/assets/css/main.css",
+    "sha": "2727e6fe02a8537fd7e185b0f7a5e5dd40b2cede"
+  },
+  {
+    "path": "themes/launch/layouts/404.html",
+    "sha": "c1085ce0ea6bb22ec93f8444d8c5dfee5b79268a"
+  },
+  {
+    "path": "themes/launch/layouts/_default/baseof.html",
+    "sha": "bfda4d94f145150f6ea4d1212dba82f289aa96b2"
+  },
+  {
+    "path": "themes/launch/layouts/_default/list.html",
+    "sha": "384de804c039f347da53da9f4a526106a6105d85"
+  },
+  {
+    "path": "themes/launch/layouts/_default/single.html",
+    "sha": "e3e8ced0c847d1e0254d49836d995a060d6b27a9"
+  },
+  {
+    "path": "themes/launch/layouts/archive/list.html",
+    "sha": "c768425eab4d5ae1716aa77a460fbde7bbcfa18d"
+  },
+  {
+    "path": "themes/launch/layouts/index.html",
+    "sha": "a05cc6ea5ecfc4e89b8d558122e948ced3a46abb"
+  },
+  {
+    "path": "themes/launch/layouts/page/single.html",
+    "sha": "3863a370b58dc75867d37bb799f0f88216cf51ed"
+  },
+  {
+    "path": "themes/launch/layouts/partials/card.html",
+    "sha": "463aeac3ebd1c968235e6994f9d48ec734bc5645"
+  },
+  {
+    "path": "themes/launch/layouts/partials/footer.html",
+    "sha": "40d8723c13addc9153f61548dee4819c8fd74f0c"
+  },
+  {
+    "path": "themes/launch/layouts/partials/header.html",
+    "sha": "c14d34e389846b6a891e58e06612901378fc06a2"
+  },
+  {
+    "path": "themes/launch/layouts/partials/list-body.html",
+    "sha": "c6bfe2be485f7d5c85fb63875e048d0d1f126934"
+  },
+  {
+    "path": "themes/launch/layouts/partials/styles.html",
+    "sha": "2dfe27365f5400f844a1393e24a5ca4ce9d21a11"
+  },
+  {
+    "path": "themes/launch/layouts/partials/taxonomy-body.html",
+    "sha": "b3f419a4cd4e5ba89e8cb2ef88621764cd34941f"
+  },
+  {
+    "path": "themes/launch/layouts/shortcodes/form-contact.html",
+    "sha": "8ffe982ece0995cd8c956ec971f3f33c907622d1"
+  },
+  {
+    "path": "themes/launch/theme.toml",
+    "sha": "1507aa283f0b135d12f26541df938ab1597a9f9c"
+  }
+]

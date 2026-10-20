@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from subprocess import run
 
-paths = ['/', '/about/', '/contact/', '/download/', '/quick-start/', '/reference/', '/inspect/', '/transfer/', '/images/inspect-evidence.svg', '/images/ukue-terminal.png']
+paths = ['/', '/about/', '/contact/', '/download/', '/quick-start/', '/reference/', '/inspect/', '/transfer/', '/transfer-is-available/', '/images/inspect-evidence.svg', '/images/ukue-terminal.png']
 
 def check(path):
     result = run(['curl', '--silent', '--show-error', '--max-time', '40', '--max-filesize', '2097152', '--write-out', '\\n%{http_code}', 'https://bitspeed.org' + path], capture_output=True, text=True, timeout=45)
@@ -18,7 +18,10 @@ def check(path):
     if path == '/contact/':
         assert 'info@bitspeed.org' in body
     if path == '/download/':
-        assert 'bitspeed-inspect-linux-amd64.tar.gz' in body and 'Cross-built only' in body
+        assert 'bitspeed-inspect-linux-amd64.tar.gz' in body and 'bitspeed-transfer-linux-amd64.tar.gz' in body and 'Cross-built only' in body
+        assert 'delivery unsupported' in body and 'bitspeed-transfer-verification.json' in body
+    if path in ('/transfer/', '/transfer-is-available/'):
+        assert 'Transfer 0.1.0' in body and 'Windows' in body
     return f'PASS live {status} https://bitspeed.org{path}'
 
 with ThreadPoolExecutor(max_workers=5) as pool:

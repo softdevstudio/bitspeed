@@ -1,0 +1,61 @@
+{
+  "version": "0.1.0",
+  "source_sha": "8ad7097055a06ab3720714b4b00d0e37ca993d3c",
+  "tag_sha": "8ad7097055a06ab3720714b4b00d0e37ca993d3c",
+  "tag_name": "transfer/v0.1.0",
+  "draft": false,
+  "assets": [
+    {
+      "name": "bitspeed-inspect-darwin-amd64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-darwin-amd64.tar.gz"
+    },
+    {
+      "name": "bitspeed-inspect-darwin-arm64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-darwin-arm64.tar.gz"
+    },
+    {
+      "name": "bitspeed-inspect-linux-amd64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-linux-amd64.tar.gz"
+    },
+    {
+      "name": "bitspeed-inspect-linux-arm64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-linux-arm64.tar.gz"
+    },
+    {
+      "name": "bitspeed-inspect-verification.json",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-verification.json"
+    },
+    {
+      "name": "bitspeed-inspect-windows-amd64.zip",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-inspect-windows-amd64.zip"
+    },
+    {
+      "name": "bitspeed-transfer-darwin-amd64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-darwin-amd64.tar.gz"
+    },
+    {
+      "name": "bitspeed-transfer-darwin-arm64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-darwin-arm64.tar.gz"
+    },
+    {
+      "name": "bitspeed-transfer-linux-amd64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-linux-amd64.tar.gz"
+    },
+    {
+      "name": "bitspeed-transfer-linux-arm64.tar.gz",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-linux-arm64.tar.gz"
+    },
+    {
+      "name": "bitspeed-transfer-verification.json",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-verification.json"
+    },
+    {
+      "name": "bitspeed-transfer-windows-amd64.zip",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/bitspeed-transfer-windows-amd64.zip"
+    },
+    {
+      "name": "SHA256SUMS",
+      "url": "https://github.com/softdevstudio/bitspeed/releases/download/transfer/v0.1.0/SHA256SUMS"
+    }
+  ]
+}
