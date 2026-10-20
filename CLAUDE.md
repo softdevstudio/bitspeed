@@ -123,6 +123,16 @@ Standards cleanup the same day, in a Claude session: AGENTS.md became CLAUDE.md 
 
 ## Next
 
-The initial development/release plan is complete, including the website work brought forward from session twelve. No new feature scope is approved. Future work should be bounded maintenance or a concrete user request, preserving separate tool versions, immutable released tags and accurate native/cross-build/unsupported-platform labels. Do not bump a version merely to repeat successful checks. Windows operational support requires its own proven native persistence design and crash tests before enabling it.
+YK approved this plan on October 20, 2026, to be done in short phases with a pause and report after each, waiting for his go-ahead before the next:
 
-Keep Inspect and Transfer independently releasable. Preserve the website template and stable download URLs. Any future latest release must retain both released products' verified archives and available verification metadata. Never create placeholder assets or rewrite Inspect 0.1.1 or Transfer 0.1.0.
+1. Site: rebalance the homepage so Inspect and Transfer get equal weight; add "when to use" comparison posts (Inspect and curl timing output; Transfer, rsync and rclone).
+2. Site: a real-world Inspect case study against public endpoints.
+3. Transfer: a clean command that removes stored chunks once a receipt confirms delivery.
+4. Transfer: progress output during send.
+5. Inspect: a CI check mode where compare exits nonzero when a chosen interval gets slower.
+6. Inspect: POST with a body, and a separately labelled warm-connection mode.
+7. Transfer: Windows support, starting with a native persistence design and crash tests.
+
+Code changes follow the code and completion standard: tests, independent review, recorded results and the automated release. Phase 1 is in progress.
+
+Keep Inspect and Transfer independently releasable. Preserve the website template and stable download URLs. Any future latest release must retain both released products' verified archives and available verification metadata. Never create placeholder assets or rewrite Inspect 0.1.1 or Transfer 0.1.0. Do not bump a version merely to repeat successful checks.
