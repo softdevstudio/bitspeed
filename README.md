@@ -2,7 +2,7 @@
 
 BitSpeed houses two independent Go tools. Inspect will explain HTTP transfer timing and compare saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-This is an unreleased development build. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain and compare remain unimplemented. Transfer has no implementation yet.
+This is an unreleased development build. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare remains unimplemented. Transfer has no implementation yet.
 
 ## Build and run
 
@@ -26,15 +26,26 @@ JSON goes to stdout; diagnostics go to stderr. Exit status is nonzero if any sam
 
 To try controlled failures, start fixture in another terminal and use its printed address with /disconnect or /timeout. Query values and fragments are redacted in saved URLs; original query values are used for the request. Paths, hostnames and location labels can still contain sensitive information. Never publish recordings without reviewing them. The recorder performs real GET requests, including redirects; use targets you intend to access.
 
+## Explain a recording
+
+```sh
+/tmp/bitspeed-inspect explain run.json
+/tmp/bitspeed-inspect explain --format=json run.json
+```
+
+The report separates measured fields, calculated intervals and labelled interpretations. Every calculation links to its evidence. Missing or ambiguous timing is unavailable; it is never turned into zero. First-byte waiting is not equated with origin processing time. Response reading includes header handling and scheduling. An incomplete response has no completed-payload rate. Reading a recording makes no network requests.
+
+Use - as the filename to read stdin. Explaining a valid failed recording exits successfully. See docs/explanations.md for the report schema, interval definitions and rule limits.
+
 ## Checks
 
 ```sh
 bash scripts/record-results.sh
 ```
 
-The script runs formatting checks, go vet, race-enabled tests and a build/version smoke check and an executable recorder check including SIGTERM cancellation. It records the environment, source-tree fingerprint and outcomes under test/results. CI runs on Linux and macOS and uploads its own results. The streamed-body test records its allocation check alongside the correctness results. Passing these checks is not an Inspect release: explanations and comparisons still need implementation and review.
+The script runs formatting checks, go vet, race-enabled tests and a build/version smoke check and an executable recorder check including SIGTERM cancellation. It records the environment, source-tree fingerprint and outcomes under test/results. CI runs on Linux and macOS and uploads its own results. The streamed-body test records its allocation check alongside the correctness results. Passing these checks is not an Inspect release: comparisons and release preparation remain ahead.
 
-The recording contract is in docs/recording-v1.md. AGENTS.md holds the agreed development sequence and session handoff.
+The recording contract is in docs/recording-v1.md and the report contract is in docs/explanations.md. AGENTS.md holds the agreed development sequence and session handoff.
 
 ## License
 

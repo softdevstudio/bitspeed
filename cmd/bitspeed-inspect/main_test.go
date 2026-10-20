@@ -3,9 +3,12 @@ package main
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"github.com/softdevstudio/bitspeed/inspect"
 	"github.com/softdevstudio/bitspeed/internal/fixture"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -66,10 +69,54 @@ func TestRecordCommand(t *testing.T) {
 			t.Fatal("invalid input wrote partial JSON")
 		}
 	}
-	for _, command := range []string{"record", "fixture"} {
+	for _, command := range []string{"record", "fixture", "explain"} {
 		var out, errOut bytes.Buffer
 		if err := run(context.Background(), []string{command, "--help"}, &out, &errOut); err != nil {
 			t.Fatal("help failed", err)
+		}
+	}
+}
+
+func TestExplainCommand(t *testing.T) {
+	s := httptest.NewServer(fixture.New(fixture.Config{}))
+	defer s.Close()
+	options := inspect.DefaultOptions()
+	options.Samples = 1
+	r, err := inspect.Record(context.Background(), s.URL+"/disconnect", options)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var input bytes.Buffer
+	if err := inspect.Encode(&input, r); err != nil {
+		t.Fatal(err)
+	}
+	for _, format := range []string{"text", "json"} {
+		var out, errOut bytes.Buffer
+		if err := explain([]string{"--format=" + format, "-"}, bytes.NewReader(input.Bytes()), &out, &errOut); err != nil {
+			t.Fatal(err)
+		}
+		if format == "json" && !json.Valid(out.Bytes()) {
+			t.Fatal("invalid JSON")
+		}
+		if format == "text" && !strings.Contains(out.String(), "Interpretation") {
+			t.Fatal("missing explanation")
+		}
+	}
+	path := filepath.Join(t.TempDir(), "recording.json")
+	if err := os.WriteFile(path, input.Bytes(), 0600); err != nil {
+		t.Fatal(err)
+	}
+	var out, errOut bytes.Buffer
+	if err := run(context.Background(), []string{"explain", path}, &out, &errOut); err != nil {
+		t.Fatal(err)
+	}
+	for _, args := range [][]string{nil, {"--format=bad", "-"}, {"missing-file"}, {"-"}} {
+		var out, errOut bytes.Buffer
+		if err := explain(args, strings.NewReader("{}"), &out, &errOut); err == nil {
+			t.Fatal("invalid explanation input accepted")
+		}
+		if out.Len() != 0 {
+			t.Fatal("invalid input produced partial report")
 		}
 	}
 }

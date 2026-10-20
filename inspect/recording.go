@@ -304,6 +304,19 @@ func validateEvidence(h Hop) error {
 		if !exists || winner.Kind != "connect_done" || winner.Outcome != "success" || h.RemoteAddress == nil || winner.Address != *h.RemoteAddress {
 			return errors.New("winning connection lacks supporting evidence")
 		}
+		acquired := 0
+		for _, e := range h.Events {
+			if e.Kind == "connection_acquired" {
+				if e.Outcome != "success" || e.Address != winner.Address || e.OffsetNS < winner.OffsetNS {
+					return errors.New("winning connection acquisition is inconsistent")
+				}
+				acquired++
+			}
+		}
+		if acquired != 1 {
+			return errors.New("winning connection requires unique acquisition evidence")
+		}
+
 	}
 	return nil
 }

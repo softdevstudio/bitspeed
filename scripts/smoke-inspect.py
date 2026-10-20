@@ -20,11 +20,20 @@ try:
         assert run.returncode == (0 if outcome == 'complete' else 1), run.stderr
         recording = json.loads(run.stdout)
         assert recording['samples'][0]['outcome'] == outcome
+        explanation = subprocess.run([binary, 'explain', '--format=json', '-'], input=run.stdout, capture_output=True, text=True, timeout=10)
+        assert explanation.returncode == 0, explanation.stderr
+        report = json.loads(explanation.stdout)
+        assert report['schema_version'] == 1 and len(report['source_sha256']) == 64
+        assert report['samples'][0]['hops'][0]['calculations']
+        terminal = subprocess.run([binary, 'explain', '-'], input=run.stdout, capture_output=True, text=True, timeout=10)
+        assert terminal.returncode == 0 and 'Calculated' in terminal.stdout
         if path == '/redirect':
             assert len(recording['samples'][0]['hops']) == 2
         if path == '/disconnect':
             hop = recording['samples'][0]['hops'][0]
             assert hop['body_bytes'] == 5 and not hop['body_complete']
+    invalid = subprocess.run([binary, 'explain', '-'], input='{}', capture_output=True, text=True, timeout=10)
+    assert invalid.returncode == 1 and not invalid.stdout
     bad = subprocess.run([binary, 'record', 'https://user:private@example.org/'], capture_output=True, text=True, timeout=10)
     assert bad.returncode == 1 and not bad.stdout and 'private' not in bad.stderr
     cancelled = subprocess.Popen([binary, 'record', '--samples=3', base + '/timeout'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -40,7 +49,7 @@ try:
         if cancelled.poll() is None:
             cancelled.kill()
             cancelled.communicate()
-    print('PASS: executable recording, redirects, truncated body, redaction, SIGTERM cancellation')
+    print('PASS: executable recording, explanations, redirects, truncated body, redaction, SIGTERM cancellation')
 finally:
     fixture.terminate()
     try:

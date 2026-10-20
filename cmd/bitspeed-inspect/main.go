@@ -38,11 +38,13 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		_, err := fmt.Fprintln(stdout, "bitspeed-inspect "+inspect.Version)
 		return err
 	case "--help", "help":
-		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture, record\nPlanned: explain, compare")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture, record, explain\nPlanned: compare")
 		return err
 	case "record":
 		return record(ctx, args[1:], stdout, stderr)
-	case "explain", "compare":
+	case "explain":
+		return explain(args[1:], os.Stdin, stdout, stderr)
+	case "compare":
 		return fmt.Errorf("%s is not implemented in this development build", args[0])
 	case "fixture":
 		return serveFixture(ctx, args[1:], stdout, stderr)
@@ -135,4 +137,40 @@ func record(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 		return errors.New("recording saved with failed, cancelled or unattempted samples")
 	}
 	return nil
+}
+
+func explain(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
+	flags := flag.NewFlagSet("explain", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	format := flags.String("format", "text", "report format: text or json")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+		return err
+	}
+	if flags.NArg() != 1 || (*format != "text" && *format != "json") {
+		return errors.New("usage: bitspeed-inspect explain [--format=text|json] FILE (use - for stdin)")
+	}
+	reader := stdin
+	if flags.Arg(0) != "-" {
+		file, err := os.Open(flags.Arg(0))
+		if err != nil {
+			return errors.New("cannot open recording file")
+		}
+		defer file.Close()
+		reader = file
+	}
+	recording, err := inspect.Decode(reader)
+	if err != nil {
+		return fmt.Errorf("invalid recording: %w", err)
+	}
+	report, err := inspect.Explain(recording)
+	if err != nil {
+		return err
+	}
+	if *format == "json" {
+		return inspect.WriteReportJSON(stdout, report)
+	}
+	return inspect.WriteReportText(stdout, report)
 }

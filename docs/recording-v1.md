@@ -38,4 +38,4 @@ Encode validates observations and checks the serialized size before writing. Dec
 
 ## Reports
 
-Recordings contain observations. Calculations and labelled interpretations will have their own derived-report schema with links to evidence paths and rule identifiers. explain and compare remain unimplemented in this session.
+Recordings contain observations. Calculations and labelled interpretations use the derived-report schema in docs/explanations.md, with links to evidence paths and rule identifiers. explain is implemented; compare remains unimplemented.
