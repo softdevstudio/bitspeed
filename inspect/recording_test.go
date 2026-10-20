@@ -13,11 +13,11 @@ func example() Recording {
 	status := 204
 	return Recording{
 		SchemaVersion: SchemaVersion, ToolVersion: Version, StartedAt: time.Now().UTC(),
-		Request: Request{Method: "GET", URL: "https://example.org/", ConnectionPolicy: "fresh"},
+		Request: Request{SamplesRequested: 1, MaxRedirects: 10, TimeoutNS: 1000000000, ConnectTimeoutNS: 1000000000, HeaderTimeoutNS: 1000000000, BodyTimeoutNS: 1000000000, Method: "GET", URL: "https://example.org/", ConnectionPolicy: "fresh"},
 		Samples: []Sample{{Index: 0, Outcome: "complete", ElapsedNS: 20,
 			Hops: []Hop{{URL: "https://example.org/", Outcome: "complete", ElapsedNS: 20,
 				StatusCode: &status, BodyComplete: true,
-				Events: []Event{{Kind: "first_byte", OffsetNS: 0}, {Kind: "body_done", OffsetNS: 20}}}}}},
+				Events: []Event{{Kind: "first_byte", OffsetNS: 0}, {Kind: "body_done", OffsetNS: 20}, {Kind: "hop_done", OffsetNS: 20}}}}}},
 	}
 }
 
@@ -76,6 +76,7 @@ func TestFailedHopWithoutStatus(t *testing.T) {
 	r.Samples[0].Outcome = "failed"
 	h := &r.Samples[0].Hops[0]
 	h.Outcome, h.StatusCode, h.BodyComplete, h.ErrorCode = "failed", nil, false, "connect_failed"
+	h.Events = []Event{{Kind: "hop_done", OffsetNS: h.ElapsedNS}}
 	if err := r.Validate(); err != nil {
 		t.Fatal(err)
 	}
@@ -135,7 +136,7 @@ func (brokenWriter) Write([]byte) (int, error) { return 0, errors.New("write fai
 
 func TestEncodeRejectsOversizedRecording(t *testing.T) {
 	r := example()
-	r.Request.LocationLabel = strings.Repeat("x", MaxRecordingBytes)
+	r.ToolVersion = strings.Repeat("x", MaxRecordingBytes)
 	var out bytes.Buffer
 	if Encode(&out, r) == nil || out.Len() != 0 {
 		t.Fatal("oversized recording must fail without partial output")
@@ -150,5 +151,46 @@ func TestErrorCodesCannotContainRawErrors(t *testing.T) {
 	h.ErrorCode = "Get https://example.org/?token=secret: timeout"
 	if r.Validate() == nil {
 		t.Fatal("raw network error accepted")
+	}
+}
+
+func TestStrictJSONFields(t *testing.T) {
+	var out bytes.Buffer
+	if err := Encode(&out, example()); err != nil {
+		t.Fatal(err)
+	}
+	raw := out.String()
+	cases := []string{
+		strings.Replace(raw, `"schema_version": 1`, `"schema_version": 1, "schema_version": 1`, 1),
+		strings.Replace(raw, `"schema_version": 1`, `"Schema_Version": 1`, 1),
+		strings.Replace(raw, `"decompression": false`, `"decompression": null`, 1),
+		strings.Replace(raw, `"decompression": false`, `"location_label": ""`, 1),
+		strings.Replace(raw, `"body_bytes": 0,`, ``, 1),
+		strings.Replace(raw, `"offset_ns": 0`, `"offset_ns": 0, "offset_ns": 1`, 1),
+		strings.Replace(raw, `"connection_reused": null,`, ``, 1),
+	}
+	for i, candidate := range cases {
+		if candidate == raw {
+			t.Fatalf("case %d did not mutate JSON", i)
+		}
+		if _, err := Decode(strings.NewReader(candidate)); err == nil {
+			t.Fatalf("case %d accepted", i)
+		}
+	}
+}
+
+func TestImportedConfigurationBounds(t *testing.T) {
+	for _, mutate := range []func(*Recording){
+		func(r *Recording) { r.Request.Decompression = true },
+		func(r *Recording) { r.Request.TimeoutNS = int64(2 * time.Hour) },
+		func(r *Recording) { r.Request.LocationLabel = strings.Repeat("x", 257) },
+		func(r *Recording) { reused := true; r.Samples[0].Hops[0].ConnectionReused = &reused },
+		func(r *Recording) { r.Samples[0].Hops = append(r.Samples[0].Hops, r.Samples[0].Hops[0]) },
+	} {
+		r := example()
+		mutate(&r)
+		if r.Validate() == nil {
+			t.Fatal("impossible configuration accepted")
+		}
 	}
 }

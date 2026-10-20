@@ -7,11 +7,15 @@ import (
 	"fmt"
 	"io"
 	"net/url"
+	"strings"
 	"time"
 )
 
 const SchemaVersion = 1
 const MaxRecordingBytes = 16 << 20
+const MaxSamples = 100
+const MaxHops = 11
+const MaxEvents = 256
 
 // Recording stores observations only. Derived reports must never alter this evidence.
 type Recording struct {
@@ -23,6 +27,13 @@ type Recording struct {
 }
 
 type Request struct {
+	SamplesRequested int    `json:"samples_requested"`
+	MaxRedirects     int    `json:"max_redirects"`
+	TimeoutNS        int64  `json:"timeout_ns"`
+	ConnectTimeoutNS int64  `json:"connect_timeout_ns"`
+	HeaderTimeoutNS  int64  `json:"header_timeout_ns"`
+	BodyTimeoutNS    int64  `json:"body_timeout_ns"`
+	IntervalNS       int64  `json:"interval_ns"`
 	Method           string `json:"method"`
 	URL              string `json:"url"`
 	ConnectionPolicy string `json:"connection_policy"`
@@ -38,17 +49,18 @@ type Sample struct {
 }
 
 type Hop struct {
-	URL              string  `json:"url"`
-	Outcome          string  `json:"outcome"`
-	ElapsedNS        int64   `json:"elapsed_ns"`
-	StatusCode       *int    `json:"status_code"`
-	Protocol         *string `json:"protocol"`
-	RemoteAddress    *string `json:"remote_address"`
-	ConnectionReused *bool   `json:"connection_reused"`
-	BodyBytes        int64   `json:"body_bytes"`
-	BodyComplete     bool    `json:"body_complete"`
-	Events           []Event `json:"events"`
-	ErrorCode        string  `json:"error_code,omitempty"`
+	WinningConnectAttempt *string `json:"winning_connect_attempt"`
+	URL                   string  `json:"url"`
+	Outcome               string  `json:"outcome"`
+	ElapsedNS             int64   `json:"elapsed_ns"`
+	StatusCode            *int    `json:"status_code"`
+	Protocol              *string `json:"protocol"`
+	RemoteAddress         *string `json:"remote_address"`
+	ConnectionReused      *bool   `json:"connection_reused"`
+	BodyBytes             int64   `json:"body_bytes"`
+	BodyComplete          bool    `json:"body_complete"`
+	Events                []Event `json:"events"`
+	ErrorCode             string  `json:"error_code,omitempty"`
 }
 
 // Event time is relative to its hop's monotonic start. Attempt links overlapping operations.
@@ -56,6 +68,8 @@ type Event struct {
 	Kind     string `json:"kind"`
 	OffsetNS int64  `json:"offset_ns"`
 	Attempt  string `json:"attempt,omitempty"`
+	Outcome  string `json:"outcome,omitempty"`
+	Address  string `json:"address,omitempty"`
 }
 
 // SafeURL rejects embedded credentials and redacts every query value and fragment.
@@ -111,14 +125,30 @@ func (r Recording) Validate() error {
 	if err := validateURL(r.Request.URL); err != nil {
 		return err
 	}
-	if len(r.Samples) == 0 {
+	config := Options{Samples: r.Request.SamplesRequested, MaxRedirects: r.Request.MaxRedirects, Timeout: time.Duration(r.Request.TimeoutNS), ConnectTimeout: time.Duration(r.Request.ConnectTimeoutNS), HeaderTimeout: time.Duration(r.Request.HeaderTimeoutNS), BodyTimeout: time.Duration(r.Request.BodyTimeoutNS), Interval: time.Duration(r.Request.IntervalNS), LocationLabel: r.Request.LocationLabel}
+	if err := config.validate(); err != nil {
+		return err
+	}
+	if r.Request.Decompression {
+		return errors.New("decompression is unsupported in schema v1")
+	}
+
+	if len(r.Samples) == 0 || len(r.Samples) > r.Request.SamplesRequested {
 		return errors.New("recording must contain at least one sample")
 	}
 	for i, s := range r.Samples {
-		if s.Index != i || !validOutcome(s.Outcome) || s.ElapsedNS < 0 || len(s.Hops) == 0 {
+		if s.Index != i || !validOutcome(s.Outcome) || s.ElapsedNS < 0 || len(s.Hops) == 0 || len(s.Hops) > r.Request.MaxRedirects+1 {
 			return fmt.Errorf("invalid sample %d", i)
 		}
+		remaining := s.ElapsedNS
 		for j, h := range s.Hops {
+			if h.ElapsedNS > remaining {
+				return errors.New("sequential hop durations exceed sample duration")
+			}
+			remaining -= h.ElapsedNS
+			if h.ConnectionReused != nil && *h.ConnectionReused {
+				return errors.New("fresh connection policy cannot report reuse")
+			}
 			if err := validateURL(h.URL); err != nil {
 				return fmt.Errorf("sample %d hop %d: %w", i, j, err)
 			}
@@ -131,21 +161,41 @@ func (r Recording) Validate() error {
 			if h.Outcome == "complete" && (!h.BodyComplete || h.StatusCode == nil || h.ErrorCode != "") {
 				return errors.New("complete hop requires complete body and status without error")
 			}
-			if h.Outcome != "complete" && (h.BodyComplete || h.ErrorCode == "") {
-				return errors.New("incomplete hop requires an error code and incomplete body")
+			if h.Outcome != "complete" && h.ErrorCode == "" {
+				return errors.New("incomplete hop requires an error code")
+			}
+			if (h.Outcome == "cancelled") != (h.ErrorCode == "cancelled") {
+				return errors.New("cancelled outcome requires cancelled error code")
 			}
 			if h.ErrorCode != "" && !validErrorCode(h.ErrorCode) {
 				return errors.New("unknown error code")
+			}
+			if len(h.Events) == 0 || len(h.Events) > MaxEvents {
+				return errors.New("invalid event count")
+			}
+			if err := validateEvidence(h); err != nil {
+				return err
 			}
 			var previous int64
 			for _, e := range h.Events {
 				if !validEvent(e.Kind) || e.OffsetNS < previous || e.OffsetNS > h.ElapsedNS {
 					return errors.New("invalid or unordered event")
 				}
+				if e.Outcome != "" && e.Outcome != "success" && e.Outcome != "failed" {
+					return errors.New("invalid operation outcome")
+				}
 				previous = e.OffsetNS
 			}
 			if s.Outcome == "complete" && h.Outcome != "complete" {
 				return errors.New("complete sample contains incomplete hop")
+			}
+		}
+		if s.Outcome != s.Hops[len(s.Hops)-1].Outcome {
+			return errors.New("sample outcome differs from final hop")
+		}
+		for _, h := range s.Hops[:len(s.Hops)-1] {
+			if h.Outcome != "complete" {
+				return errors.New("sample continued after a failed hop")
 			}
 		}
 	}
@@ -164,7 +214,7 @@ func validEvent(kind string) bool {
 func validErrorCode(code string) bool {
 	switch code {
 	case "dns_failed", "connect_failed", "tls_failed", "request_write_failed",
-		"response_failed", "body_failed", "timeout", "cancelled", "redirect_limit":
+		"response_failed", "body_failed", "timeout", "cancelled", "redirect_limit", "invalid_redirect", "event_limit", "unsupported_upgrade":
 		return true
 	}
 	return false
@@ -203,4 +253,57 @@ func Encode(w io.Writer, r Recording) error {
 		return io.ErrShortWrite
 	}
 	return err
+}
+
+func validateEvidence(h Hop) error {
+	last := h.Events[len(h.Events)-1]
+	if last.Kind != "hop_done" || last.OffsetNS != h.ElapsedNS {
+		return errors.New("hop must end with its termination event")
+	}
+	starts := map[string]Event{}
+	done := map[string]Event{}
+	bodyDone := false
+	for i, e := range h.Events {
+		if e.Kind == "hop_done" && i != len(h.Events)-1 {
+			return errors.New("premature hop termination event")
+		}
+		if e.Kind == "body_done" {
+			bodyDone = true
+		}
+		operation := strings.HasPrefix(e.Kind, "dns_") || strings.HasPrefix(e.Kind, "connect_") || strings.HasPrefix(e.Kind, "tls_")
+		if operation {
+			if e.Attempt == "" {
+				return errors.New("operation has no attempt identity")
+			}
+			if strings.HasSuffix(e.Kind, "_start") {
+				if _, exists := starts[e.Attempt]; exists {
+					return errors.New("duplicate operation identity")
+				}
+				starts[e.Attempt] = e
+			} else {
+				start, exists := starts[e.Attempt]
+				if !exists || strings.TrimSuffix(start.Kind, "_start") != strings.TrimSuffix(e.Kind, "_done") || start.Address != e.Address {
+					return errors.New("unpaired operation completion")
+				}
+				if _, exists := done[e.Attempt]; exists {
+					return errors.New("duplicate operation completion")
+				}
+				done[e.Attempt] = e
+			}
+		}
+		needsOutcome := e.Kind == "dns_done" || e.Kind == "connect_done" || e.Kind == "tls_done" || e.Kind == "request_written" || e.Kind == "connection_acquired"
+		if needsOutcome != (e.Outcome != "") {
+			return errors.New("operation outcome missing or misplaced")
+		}
+	}
+	if bodyDone != h.BodyComplete || (h.BodyComplete && h.StatusCode == nil) {
+		return errors.New("body completion evidence inconsistent")
+	}
+	if h.WinningConnectAttempt != nil {
+		winner, exists := done[*h.WinningConnectAttempt]
+		if !exists || winner.Kind != "connect_done" || winner.Outcome != "success" || h.RemoteAddress == nil || winner.Address != *h.RemoteAddress {
+			return errors.New("winning connection lacks supporting evidence")
+		}
+	}
+	return nil
 }

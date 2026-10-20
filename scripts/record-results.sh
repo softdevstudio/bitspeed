@@ -29,9 +29,10 @@ if [ -n "$unformatted" ]; then
   exit 1
 fi
 go vet ./...
-go test -race -count=1 -timeout=60s ./...
+go test -race -v -count=1 -timeout=60s ./...
 build_dir="$(mktemp -d)"
 trap 'rm -rf "$build_dir"' EXIT
 go build -o "$build_dir/bitspeed-inspect" ./cmd/bitspeed-inspect
 "$build_dir/bitspeed-inspect" --version
-printf 'PASS: formatting, vet, race tests, build, version smoke\n'
+python3 scripts/smoke-inspect.py "$build_dir/bitspeed-inspect"
+printf 'PASS: formatting, vet, race tests, build, version and recorder smoke\n'

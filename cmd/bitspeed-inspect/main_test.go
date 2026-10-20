@@ -3,6 +3,9 @@ package main
 import (
 	"bytes"
 	"context"
+	"github.com/softdevstudio/bitspeed/inspect"
+	"github.com/softdevstudio/bitspeed/internal/fixture"
+	"net/http/httptest"
 	"strings"
 	"testing"
 )
@@ -37,5 +40,36 @@ func TestFixtureShutdown(t *testing.T) {
 	}
 	if !strings.HasPrefix(out.String(), "http://127.0.0.1:") {
 		t.Fatal("missing listener URL")
+	}
+}
+
+func TestRecordCommand(t *testing.T) {
+	s := httptest.NewServer(fixture.New(fixture.Config{}))
+	defer s.Close()
+	for _, path := range []string{"/empty", "/disconnect"} {
+		var out, errOut bytes.Buffer
+		err := run(context.Background(), []string{"record", "--samples=1", s.URL + path}, &out, &errOut)
+		if (err != nil) != (path == "/disconnect") {
+			t.Fatalf("wrong exit result: %v", err)
+		}
+		r, decodeErr := inspect.Decode(&out)
+		if decodeErr != nil || len(r.Samples) != 1 {
+			t.Fatalf("invalid JSON output: %v", decodeErr)
+		}
+	}
+	for _, args := range [][]string{{"record", "--samples=0", s.URL}, {"record", "https://user:secret@example.org/"}, {"record"}} {
+		var out, errOut bytes.Buffer
+		if err := run(context.Background(), args, &out, &errOut); err == nil {
+			t.Fatal("invalid recording accepted")
+		}
+		if out.Len() != 0 {
+			t.Fatal("invalid input wrote partial JSON")
+		}
+	}
+	for _, command := range []string{"record", "fixture"} {
+		var out, errOut bytes.Buffer
+		if err := run(context.Background(), []string{command, "--help"}, &out, &errOut); err != nil {
+			t.Fatal("help failed", err)
+		}
 	}
 }

@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/softdevstudio/bitspeed/inspect"
@@ -17,7 +18,7 @@ import (
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 	if err := run(ctx, os.Args[1:], os.Stdout, os.Stderr); err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -37,9 +38,11 @@ func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 		_, err := fmt.Fprintln(stdout, "bitspeed-inspect "+inspect.Version)
 		return err
 	case "--help", "help":
-		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture\nPlanned: record, explain, compare")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Inspect development build\nAvailable: --version, fixture, record\nPlanned: explain, compare")
 		return err
-	case "record", "explain", "compare":
+	case "record":
+		return record(ctx, args[1:], stdout, stderr)
+	case "explain", "compare":
 		return fmt.Errorf("%s is not implemented in this development build", args[0])
 	case "fixture":
 		return serveFixture(ctx, args[1:], stdout, stderr)
@@ -55,6 +58,9 @@ func serveFixture(ctx context.Context, args []string, stdout, stderr io.Writer) 
 	headerDelay := flags.Duration("header-delay", 200*time.Millisecond, "delay before response headers")
 	chunkDelay := flags.Duration("chunk-delay", 100*time.Millisecond, "delay between body chunks")
 	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
 		return err
 	}
 	if flags.NArg() != 0 || *headerDelay < 0 || *chunkDelay < 0 {
@@ -95,4 +101,38 @@ func serveFixture(ctx context.Context, args []string, stdout, stderr io.Writer) 
 		return nil
 	}
 	return err
+}
+
+func record(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	o := inspect.DefaultOptions()
+	flags := flag.NewFlagSet("record", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	flags.IntVar(&o.Samples, "samples", o.Samples, "number of sequential samples (1-100)")
+	flags.IntVar(&o.MaxRedirects, "max-redirects", o.MaxRedirects, "maximum redirects per sample (0-10)")
+	flags.DurationVar(&o.Timeout, "timeout", o.Timeout, "total timeout per sample")
+	flags.DurationVar(&o.ConnectTimeout, "connect-timeout", o.ConnectTimeout, "DNS, dial and TLS timeout")
+	flags.DurationVar(&o.HeaderTimeout, "header-timeout", o.HeaderTimeout, "response header timeout after request writing")
+	flags.DurationVar(&o.BodyTimeout, "body-timeout", o.BodyTimeout, "total body reading timeout per hop")
+	flags.DurationVar(&o.Interval, "interval", o.Interval, "pause between samples (0-1m)")
+	flags.StringVar(&o.LocationLabel, "location", "", "operator-supplied location label")
+	if err := flags.Parse(args); err != nil {
+		if errors.Is(err, flag.ErrHelp) {
+			return nil
+		}
+		return err
+	}
+	if flags.NArg() != 1 {
+		return errors.New("usage: bitspeed-inspect record [flags] URL; writes JSON to stdout")
+	}
+	recording, err := inspect.Record(ctx, flags.Arg(0), o)
+	if err != nil {
+		return err
+	}
+	if err := inspect.Encode(stdout, recording); err != nil {
+		return err
+	}
+	if !inspect.RecordingSucceeded(recording) {
+		return errors.New("recording saved with failed, cancelled or unattempted samples")
+	}
+	return nil
 }
