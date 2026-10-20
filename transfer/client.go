@@ -98,7 +98,7 @@ func request(ctx context.Context, client *http.Client, method, target, token, ki
 		if retry != "true" && retry != "false" {
 			return nil, resp.StatusCode, ErrProtocol
 		}
-		known := map[string]bool{"invalid_request": true, "invalid_manifest": true, "invalid_index": true, "unauthorized": true, "unknown_transfer": true, "method_not_allowed": true, "manifest_conflict": true, "session_busy": true, "invalid_state": true, "length_required": true, "limit_exceeded": true, "unsupported_media_type": true, "unsupported_encoding": true, "chunk_length_mismatch": true, "chunk_digest_mismatch": true, "storage_unavailable": true, "capacity_exhausted": true, "recovery_required": true}
+		known := map[string]bool{"invalid_request": true, "invalid_manifest": true, "invalid_index": true, "unauthorized": true, "unknown_transfer": true, "method_not_allowed": true, "manifest_conflict": true, "session_busy": true, "invalid_state": true, "length_required": true, "limit_exceeded": true, "unsupported_media_type": true, "unsupported_encoding": true, "chunk_length_mismatch": true, "chunk_digest_mismatch": true, "storage_unavailable": true, "capacity_exhausted": true, "recovery_required": true, "chunks_missing": true, "destination_conflict": true, "transfer_failed": true, "final_digest_mismatch": true}
 		if !known[code] {
 			return nil, resp.StatusCode, ErrProtocol
 		}
@@ -113,7 +113,7 @@ func decodeStatus(data []byte, id string) (StoredStatus, error) {
 		return s, e
 	}
 	v, e := wireInt(fields["protocol_version"])
-	if e != nil || v != 1 || string(fields["receipt"]) != "null" || string(fields["error_code"]) != "null" {
+	if e != nil || v != 1 {
 		return s, ErrProtocol
 	}
 	if s.TransferID, e = wireString(fields["transfer_id"]); e != nil || s.TransferID != id {
@@ -123,7 +123,7 @@ func decodeStatus(data []byte, id string) (StoredStatus, error) {
 		return s, ErrProtocol
 	}
 	state, e := wireString(fields["state"])
-	if e != nil || state != string(Uploading) {
+	if e != nil || state != string(Uploading) && state != string(Completed) && state != string(Failed) {
 		return s, ErrProtocol
 	}
 	count, e := wireInt(fields["verified_chunks"])
@@ -158,11 +158,29 @@ func decodeStatus(data []byte, id string) (StoredStatus, error) {
 		return s, ErrProtocol
 	}
 	s.ProtocolVersion = 1
-	s.State = Uploading
+	s.State = State(state)
+	if s.State == Completed {
+		receipt, e := decodeReceipt(fields["receipt"])
+		if e != nil || receipt.TransferID != id || receipt.ManifestSHA256 != s.ManifestSHA256 || string(fields["error_code"]) != "null" {
+			return s, ErrProtocol
+		}
+		s.Receipt = &receipt
+	} else if s.State == Failed {
+		code, e := wireString(fields["error_code"])
+		if e != nil || !terminalCode(code) || string(fields["receipt"]) != "null" {
+			return s, ErrProtocol
+		}
+		s.ErrorCode = &code
+	} else if string(fields["receipt"]) != "null" || string(fields["error_code"]) != "null" {
+		return s, ErrProtocol
+	}
 	return s, nil
 }
 func statusMatches(s StoredStatus, m Manifest) bool {
 	identity, _ := m.Identity()
+	if s.State == Completed && (s.Receipt == nil || *s.Receipt != expectedReceipt(m)) {
+		return false
+	}
 	if s.ManifestSHA256 != identity || s.TransferID != m.TransferID || s.VerifiedChunks+len(s.MissingChunks) != len(m.ChunkSHA256) {
 		return false
 	}
@@ -176,8 +194,7 @@ func statusMatches(s StoredStatus, m Manifest) bool {
 	return s.VerifiedBytes == m.FileSize-missingBytes
 }
 
-// QueryStatus returns authenticated receiver observations. Completion is not
-// implemented: only uploading with a null receipt is accepted by this client.
+// QueryStatus returns authenticated receiver observations and validates receipt shape.
 func QueryStatus(ctx context.Context, base, token, id string) (StoredStatus, error) {
 	var empty StoredStatus
 	base, e := endpoint(base)
@@ -234,8 +251,14 @@ func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatu
 		return empty, ErrProtocol
 	}
 	s, e := decodeStatus(data, id)
-	if e != nil || !statusMatches(s, m) {
+	if e != nil || !statusMatches(s, m) || s.State == Failed {
 		return empty, ErrProtocol
+	}
+	if s.State == Completed {
+		if e = f.Close(); e != nil {
+			return empty, ErrStorage
+		}
+		return s, nil
 	}
 	for _, index := range s.MissingChunks {
 		length := chunkSizeAt(m, index)
@@ -269,7 +292,7 @@ func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatu
 		return empty, ErrProtocol
 	}
 	s, e = decodeStatus(data, id)
-	if e != nil || !statusMatches(s, m) || len(s.MissingChunks) != 0 {
+	if e != nil || !statusMatches(s, m) || s.State == Failed || s.State != Completed && len(s.MissingChunks) != 0 {
 		return empty, ErrProtocol
 	}
 	if e = f.Close(); e != nil {

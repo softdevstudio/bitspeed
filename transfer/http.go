@@ -94,13 +94,14 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		replyError(w, failure(400, "invalid_request", false))
 		return
 	}
+	isFinalize := tail == "finalize"
 	isStatus := tail == ""
 	isChunk := strings.HasPrefix(tail, "chunks/") && !strings.Contains(strings.TrimPrefix(tail, "chunks/"), "/")
-	if !isStatus && !isChunk {
+	if !isStatus && !isChunk && !isFinalize {
 		replyError(w, failure(400, "invalid_request", false))
 		return
 	}
-	if isStatus && req.Method != http.MethodGet || isChunk && req.Method != http.MethodPut {
+	if isStatus && req.Method != http.MethodGet || isChunk && req.Method != http.MethodPut || isFinalize && req.Method != http.MethodPost {
 		replyError(w, failure(405, "method_not_allowed", false))
 		return
 	}
@@ -125,6 +126,56 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 		replyJSON(w, 200, s)
+		return
+	}
+	if isFinalize {
+		if !contentType(req, "application/json") {
+			replyError(w, failure(415, "unsupported_media_type", false))
+			return
+		}
+		if req.ContentLength > 256 {
+			replyError(w, failure(413, "limit_exceeded", false))
+			return
+		}
+		data, e := io.ReadAll(io.LimitReader(req.Body, 257))
+		if e != nil || len(data) > 256 {
+			replyError(w, failure(400, "invalid_request", false))
+			return
+		}
+		fields, e := exactObject(data, "manifest_sha256")
+		if e != nil {
+			replyError(w, failure(400, "invalid_request", false))
+			return
+		}
+		identity, _ := m.Identity()
+		got, e := wireString(fields["manifest_sha256"])
+		if e != nil || !hex256(got) {
+			replyError(w, failure(400, "invalid_request", false))
+			return
+		}
+		if got != identity {
+			replyError(w, failure(409, "manifest_conflict", false))
+			return
+		}
+		s, e := r.finalize(ctx, m)
+		if e != nil {
+			replyError(w, e)
+			return
+		}
+		replyJSON(w, 200, s)
+		return
+	}
+	j, e := r.readJournal(m)
+	if e != nil {
+		replyError(w, e)
+		return
+	}
+	if j.State != Uploading {
+		code := "invalid_state"
+		if j.State == Failed {
+			code = "transfer_failed"
+		}
+		replyError(w, failure(409, code, false))
 		return
 	}
 	if !contentType(req, "application/octet-stream") {

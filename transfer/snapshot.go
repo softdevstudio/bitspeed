@@ -288,12 +288,12 @@ func reuse(ctx context.Context, spool, id string, ops snapshotOps) (Manifest, er
 	if e = privateDir(dir); e != nil {
 		return empty, e
 	}
-	entries, e := boundedEntries(dir, 2)
-	if e != nil || len(entries) != 2 {
+	entries, e := boundedEntries(dir, 4)
+	if e != nil || len(entries) < 2 {
 		return empty, ErrInvalidSpool
 	}
 	for _, entry := range entries {
-		if entry.Name() != "manifest.json" && entry.Name() != "snapshot" {
+		if entry.Name() != "manifest.json" && entry.Name() != "snapshot" && entry.Name() != "receipt.json" && entry.Name() != "receipt.json.tmp" {
 			return empty, ErrInvalidSpool
 		}
 	}
@@ -318,6 +318,23 @@ func reuse(ctx context.Context, spool, id string, ops snapshotOps) (Manifest, er
 	canonical, e := m.CanonicalJSON()
 	if e != nil || !bytes.Equal(canonical, data) || m.TransferID != id {
 		return empty, ErrInvalidSpool
+	}
+	for _, entry := range entries {
+		if entry.Name() == "receipt.json" {
+			data, e := readRegular(filepath.Join(dir, entry.Name()), MaxManifestBytes)
+			if e != nil {
+				return empty, ErrInvalidSpool
+			}
+			receipt, e := decodeReceipt(data)
+			if e != nil || receipt != expectedReceipt(m) {
+				return empty, ErrInvalidSpool
+			}
+		}
+		if entry.Name() == "receipt.json.tmp" {
+			if e := privateChunk(filepath.Join(dir, entry.Name()), MaxManifestBytes); e != nil {
+				return empty, ErrInvalidSpool
+			}
+		}
 	}
 	actual, e := hashSnapshot(ctx, filepath.Join(dir, "snapshot"), id, m.FileSize, m.ChunkSize, nil, ops)
 	if e != nil {

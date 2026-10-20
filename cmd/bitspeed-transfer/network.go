@@ -33,6 +33,9 @@ func options(args []string, allowed ...string) (map[string]string, error) {
 	return out, nil
 }
 func uploadOnly(ctx context.Context, args []string, stdout io.Writer) error {
+	return sendFile(ctx, args, stdout, true)
+}
+func sendFile(ctx context.Context, args []string, stdout io.Writer, upload bool) error {
 	v, e := options(args, "url", "token-file", "spool", "reuse")
 	if e != nil || v["--url"] == "" || v["--token-file"] == "" || v["--spool"] == "" || v["--reuse"] == "" {
 		return transfer.ErrConfig
@@ -41,7 +44,11 @@ func uploadOnly(ctx context.Context, args []string, stdout io.Writer) error {
 	if e != nil {
 		return e
 	}
-	s, e := transfer.UploadOnly(ctx, v["--url"], token, v["--spool"], v["--reuse"])
+	send := transfer.Send
+	if upload {
+		send = transfer.UploadOnly
+	}
+	s, e := send(ctx, v["--url"], token, v["--spool"], v["--reuse"])
 	if e != nil {
 		return e
 	}
@@ -49,7 +56,7 @@ func uploadOnly(ctx context.Context, args []string, stdout io.Writer) error {
 		Uploaded    bool                  `json:"uploaded"`
 		Transferred bool                  `json:"transferred"`
 		Status      transfer.StoredStatus `json:"status"`
-	}{true, false, s})
+	}{true, !upload, s})
 }
 func queryReceiver(ctx context.Context, args []string, stdout io.Writer) error {
 	v, e := options(args, "url", "token-file", "id")

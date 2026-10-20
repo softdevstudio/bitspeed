@@ -121,15 +121,15 @@ func DecodeManifest(data []byte) (Manifest, error) {
 }
 
 type StoredStatus struct {
-	ProtocolVersion int     `json:"protocol_version"`
-	TransferID      string  `json:"transfer_id"`
-	ManifestSHA256  string  `json:"manifest_sha256"`
-	State           State   `json:"state"`
-	VerifiedChunks  int     `json:"verified_chunks"`
-	VerifiedBytes   int64   `json:"verified_bytes"`
-	MissingChunks   []int   `json:"missing_chunks"`
-	Receipt         any     `json:"receipt"`
-	ErrorCode       *string `json:"error_code"`
+	ProtocolVersion int      `json:"protocol_version"`
+	TransferID      string   `json:"transfer_id"`
+	ManifestSHA256  string   `json:"manifest_sha256"`
+	State           State    `json:"state"`
+	VerifiedChunks  int      `json:"verified_chunks"`
+	VerifiedBytes   int64    `json:"verified_bytes"`
+	MissingChunks   []int    `json:"missing_chunks"`
+	Receipt         *Receipt `json:"receipt"`
+	ErrorCode       *string  `json:"error_code"`
 }
 type chunkAck struct {
 	ProtocolVersion int    `json:"protocol_version"`

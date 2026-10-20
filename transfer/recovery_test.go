@@ -36,13 +36,13 @@ func TestRecoveryRepairAndReservation(t *testing.T) {
 	}
 	server.Close()
 	r.Close()
-	restarted, e := NewReceiver(ReceiverConfig{Root: r.root, Token: testToken, MaxSessions: 1, MaxReservedBytes: 2*m.FileSize + spoolHeadroom})
+	restarted, e := NewReceiver(ReceiverConfig{Root: r.root, Token: testToken, MaxSessions: 1, MaxReservedBytes: 3*m.FileSize + spoolHeadroom})
 	if e != nil {
 		t.Fatal(e)
 	}
 	defer restarted.Close()
 	count, reserved, e := restarted.inventory()
-	if e != nil || count != 1 || reserved != 2*m.FileSize+spoolHeadroom {
+	if e != nil || count != 1 || reserved != 3*m.FileSize+spoolHeadroom {
 		t.Fatal(count, reserved, e)
 	}
 	s, e := restarted.status(context.Background(), m)

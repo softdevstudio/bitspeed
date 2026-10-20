@@ -114,8 +114,18 @@ func newReceiverContext(ctx context.Context, c ReceiverConfig, ops receiverOps) 
 	if e = r.cleanAdmissions(ctx); e != nil {
 		return nil, e
 	}
-	if files, fe := boundedEntries(filepath.Join(c.Root, "files"), 0); fe != nil || len(files) != 0 {
+	files, fe := boundedEntries(filepath.Join(c.Root, "files"), MaxReceiverSessions)
+	if fe != nil {
 		return nil, ErrRecovery
+	}
+	for _, file := range files {
+		id, ok := strings.CutSuffix(file.Name(), ".data")
+		if !ok || !hex256(id) {
+			return nil, ErrRecovery
+		}
+		if _, e = r.load(id); e != nil {
+			return nil, e
+		}
 	}
 	if e = syncDir(c.Root, ops.snapshotOps); e != nil {
 		return nil, e
@@ -217,7 +227,7 @@ func (r *Receiver) inventory() (int, int64, error) {
 		if e != nil {
 			return 0, 0, e
 		}
-		reserved += 2*m.FileSize + spoolHeadroom
+		reserved += reservation(m)
 	}
 	if len(entries) > r.maxSessions || reserved > r.maxReserved {
 		return 0, 0, ErrRecovery
@@ -246,13 +256,13 @@ func (r *Receiver) load(id string) (Manifest, error) {
 	if e := privateDir(dir); e != nil {
 		return m, ErrRecovery
 	}
-	entries, e := boundedEntries(dir, 3)
-	if e != nil || len(entries) != 3 {
+	entries, e := boundedEntries(dir, 8)
+	if e != nil || len(entries) < 3 {
 		return m, ErrRecovery
 	}
 	for _, entry := range entries {
 		switch entry.Name() {
-		case "manifest.json", "journal.json", "chunks":
+		case "manifest.json", "journal.json", "chunks", "journal.json.tmp", "completion.json", "completion.json.tmp", "assembly.tmp", "ready":
 		default:
 			return m, ErrRecovery
 		}
@@ -269,11 +279,15 @@ func (r *Receiver) load(id string) (Manifest, error) {
 	if !bytes.Equal(data, canonical) {
 		return m, ErrRecovery
 	}
-	identity, _ := m.Identity()
-	expected, _ := json.Marshal(journal{1, identity, Uploading, nil})
-	data, e = readRegular(filepath.Join(dir, "journal.json"), MaxManifestBytes)
-	if e != nil || !bytes.Equal(data, expected) {
-		return m, ErrRecovery
+	if _, e = r.readJournal(m); e != nil {
+		return m, e
+	}
+	if found, e := exists(filepath.Join(dir, "completion.json")); e != nil {
+		return m, e
+	} else if found {
+		if _, e = r.savedReceipt(m); e != nil {
+			return m, e
+		}
 	}
 	if e = privateDir(filepath.Join(dir, "chunks")); e != nil {
 		return m, ErrRecovery
@@ -315,6 +329,9 @@ func (r *Receiver) admit(ctx context.Context, m Manifest) (StoredStatus, bool, e
 			return StoredStatus{}, false, failure(409, "manifest_conflict", false)
 		}
 		s, e := r.status(ctx, m)
+		if e == nil && s.State == Failed {
+			return StoredStatus{}, false, failure(409, "transfer_failed", false)
+		}
 		return s, false, e
 	} else if !os.IsNotExist(e) {
 		return StoredStatus{}, false, ErrStorage
@@ -323,7 +340,7 @@ func (r *Receiver) admit(ctx context.Context, m Manifest) (StoredStatus, bool, e
 	if e != nil {
 		return StoredStatus{}, false, e
 	}
-	budget := 2*m.FileSize + spoolHeadroom
+	budget := reservation(m)
 	free, e := r.ops.space(r.root)
 	if e != nil {
 		return StoredStatus{}, false, ErrStorage
@@ -368,6 +385,9 @@ func (r *Receiver) admit(ctx context.Context, m Manifest) (StoredStatus, bool, e
 		return StoredStatus{}, false, e
 	}
 	s, e := r.status(ctx, m)
+	if e == nil && s.State == Failed {
+		return StoredStatus{}, false, failure(409, "transfer_failed", false)
+	}
 	return s, true, e
 }
 func chunkSizeAt(m Manifest, index int) int64 {
@@ -428,7 +448,7 @@ func (r *Receiver) verifyFile(ctx context.Context, path string, length int64, di
 	}
 	return ctx.Err()
 }
-func (r *Receiver) status(ctx context.Context, m Manifest) (StoredStatus, error) {
+func (r *Receiver) uploadStatus(ctx context.Context, m Manifest) (StoredStatus, error) {
 	identity, _ := m.Identity()
 	s := StoredStatus{ProtocolVersion: 1, TransferID: m.TransferID, ManifestSHA256: identity, State: Uploading, MissingChunks: []int{}}
 	dir := filepath.Join(r.root, "sessions", m.TransferID)

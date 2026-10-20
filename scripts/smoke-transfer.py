@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The unreleased Transfer skeleton must never report a successful transfer."""
+"""Exercise development preparation, staging, durable delivery and restart."""
 from pathlib import Path
 import subprocess
 import json
@@ -8,6 +8,7 @@ import sys
 import tempfile
 import queue
 import threading
+import hashlib
 
 binary = str(Path(sys.argv[1]).resolve())
 version = subprocess.run([binary, '--version'], capture_output=True, text=True, check=True, timeout=10)
@@ -51,6 +52,40 @@ with tempfile.TemporaryDirectory() as directory:
             assert json.loads(status.stdout) == staged['status']
             assert not list((receiver_root / 'files').iterdir())
             assert (receiver_root / 'sessions' / identity / 'chunks' / '0').read_bytes() == b'unchanged'
+            send_args = [binary, 'send', '--spool=' + str(spool), '--reuse=' + identity, '--url=' + base, '--token-file=' + str(token_file)]
+            completed = subprocess.run(send_args, capture_output=True, text=True, check=True, timeout=20)
+            delivered = json.loads(completed.stdout)
+            assert delivered['transferred'] and delivered['status']['state'] == 'completed'
+            receipt = delivered['status']['receipt']
+            output = receiver_root / 'files' / receipt['output_name']
+            assert output.read_bytes() == b'unchanged'
+            assert hashlib.sha256(output.read_bytes()).hexdigest() == receipt['file_sha256']
+            assert json.loads((spool / identity / 'receipt.json').read_text()) == receipt
+
+        finally:
+            receiver.terminate()
+            try:
+                _, diagnostics = receiver.communicate(timeout=15)
+            except subprocess.TimeoutExpired:
+                receiver.kill()
+                _, diagnostics = receiver.communicate()
+            assert '0123456789abcdef' not in diagnostics
+        # Start a new receiver and a new sender process with the saved identity.
+        receiver = subprocess.Popen([binary, 'serve', '--listen=127.0.0.1:0', '--root=' + str(receiver_root), '--token-file=' + str(token_file)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            lines = queue.Queue()
+            threading.Thread(target=lambda: lines.put(receiver.stdout.readline()), daemon=True).start()
+            base = lines.get(timeout=10).strip()
+            repeat_args = [binary, 'send', '--spool=' + str(spool), '--reuse=' + identity, '--url=' + base, '--token-file=' + str(token_file)]
+            repeated = subprocess.run(repeat_args, capture_output=True, text=True, check=True, timeout=20)
+            assert json.loads(repeated.stdout)['status']['receipt'] == receipt
+            assert len(list((receiver_root / 'files').iterdir())) == 1
+            output.write_bytes(b'damaged!!')
+            rejected = subprocess.run(repeat_args, capture_output=True, text=True, timeout=20)
+            assert rejected.returncode == 1 and not rejected.stdout
+            status = subprocess.run([binary, 'status', '--url=' + base, '--id=' + identity, '--token-file=' + str(token_file)], capture_output=True, text=True, check=True, timeout=10)
+            damaged = json.loads(status.stdout)
+            assert damaged['state'] == 'failed' and damaged['error_code'] == 'storage_corrupt' and damaged['receipt'] is None
         finally:
             receiver.terminate()
             try:
@@ -60,4 +95,5 @@ with tempfile.TemporaryDirectory() as directory:
                 _, diagnostics = receiver.communicate()
             assert '0123456789abcdef' not in diagnostics
 
-print('PASS: Transfer prepare/reuse, authenticated chunk staging and status, no destination publication; invalid operations fail closed')
+
+print('PASS: Transfer preparation, staging, verified publication, receipt cache, process restart, repeat delivery and damaged-output rejection')

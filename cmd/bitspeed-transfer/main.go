@@ -15,7 +15,7 @@ import (
 	"github.com/softdevstudio/bitspeed/transfer"
 )
 
-var errNotImplemented = errors.New("completed file delivery is not implemented; use explicit --prepare-only or --upload-only development stages")
+var errSendOptions = errors.New("invalid send options; use send --help")
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -45,14 +45,14 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) != 1 {
 			return errors.New("help takes no arguments")
 		}
-		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer development build\nAvailable: serve, status, send --prepare-only, send --upload-only\nChunk staging is incomplete delivery. Finalization is not implemented. Transfer is not released.\nSee docs/transfer-v1.md for the proposed protocol.")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer development build\nAvailable: serve, status, send, send --prepare-only, send --upload-only\nSend verifies and publishes one file; upload-only stages chunks. Transfer is not released.\nSee docs/transfer-v1.md for the proposed protocol.")
 		return err
 	case "serve", "send", "status":
 		if len(args) == 2 && args[1] == "--help" {
 			help := map[string]string{
-				"serve":  "serve --root=DIR --token-file=FILE [--listen=127.0.0.1:8080] [--tls-cert=FILE --tls-key=FILE]\nReceiver chunk staging only on supported Linux/macOS local filesystems.",
-				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE\nNot implemented: final assembly and destination publication.",
-				"status": "status --url=URL --token-file=FILE --id=ID\nAuthenticated chunk observations. Finalization is not implemented.",
+				"serve":  "serve --root=DIR --token-file=FILE [--listen=127.0.0.1:8080] [--tls-cert=FILE --tls-key=FILE]\nReceiver on supported Linux/macOS local filesystems.",
+				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE\nsend --spool=DIR --reuse=ID --url=URL --token-file=FILE\nPublishes a verified destination and retains a local receipt.",
+				"status": "status --url=URL --token-file=FILE --id=ID\nAuthenticated verified observations and completion receipt.",
 			}
 			text := help[args[0]]
 
@@ -72,9 +72,10 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 				if args[1] == "--upload-only" {
 					return uploadOnly(ctx, args[2:], stdout)
 				}
+				return sendFile(ctx, args[1:], stdout, false)
 			}
 		}
-		return errNotImplemented
+		return errSendOptions
 	default:
 		return errors.New("unknown command; use --help")
 	}
