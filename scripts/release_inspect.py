@@ -190,6 +190,25 @@ def find_release(tag):
         page += 1
 
 
+def release_title(v):
+    return 'BitSpeed ' + PRODUCT.title() + ' v' + v
+
+
+def retitle():
+    v = version()
+    tag = PRODUCT + '/v' + v
+    release = find_release(tag)
+    if release is None or release['draft']:
+        print('No published release to retitle for ' + tag)
+        return
+    title = release_title(v)
+    if release.get('name') == title:
+        print('Title already ' + title)
+        return
+    subprocess.run(['gh', 'release', 'edit', tag, '--repo', REPO, '--title', title], check=True)
+    print('Retitled ' + tag + ' to ' + title)
+
+
 def plan(sha):
     valid_sha(sha)
     if command('git', 'rev-parse', 'HEAD') != sha:
@@ -291,7 +310,7 @@ def publish(sha, output):
     if ref is None:
         subprocess.run(['gh', 'api', 'repos/' + REPO + '/git/refs', '-f', 'ref=refs/tags/' + tag, '-f', 'sha=' + sha], check=True, stdout=subprocess.DEVNULL)
     if existing is None:
-        subprocess.run(['gh', 'release', 'create', tag, '--repo', REPO, '--verify-tag', '--draft', '--title', 'BitSpeed ' + PRODUCT.title() + ' ' + v, '--notes', ('HTTP timing recording, explanations and comparisons.' if PRODUCT == 'inspect' else 'Verified resumable one-file delivery on supported Linux/macOS local filesystems. Windows operations are unsupported; its archive checks help/version and fail-closed behavior only. Linux arm64/macOS amd64 are cross-built without native runtime coverage.') + ' See included documentation and verification metadata.'], check=True)
+        subprocess.run(['gh', 'release', 'create', tag, '--repo', REPO, '--verify-tag', '--draft', '--title', release_title(v), '--notes', ('HTTP timing recording, explanations and comparisons.' if PRODUCT == 'inspect' else 'Verified resumable one-file delivery on supported Linux/macOS local filesystems. Windows operations are unsupported; its archive checks help/version and fail-closed behavior only. Linux arm64/macOS amd64 are cross-built without native runtime coverage.') + ' See included documentation and verification metadata.'], check=True)
     subprocess.run(['gh', 'release', 'upload', tag, '--repo', REPO, '--clobber', *map(str, assets), str(output / 'SHA256SUMS')], check=True)
     uploaded = find_release(tag)
     expected_names = {path.name for path in assets} | {'SHA256SUMS'}
@@ -312,6 +331,7 @@ if __name__ == '__main__':
     parser.add_argument('--product', choices=('inspect', 'transfer'), default='inspect')
     sub = parser.add_subparsers(dest='action', required=True)
     p = sub.add_parser('package'); p.add_argument('--goos', required=True); p.add_argument('--goarch', required=True); p.add_argument('--output', required=True); p.add_argument('--allow-dirty', action='store_true')
+    sub.add_parser('retitle')
     p = sub.add_parser('verify'); p.add_argument('archive'); p.add_argument('--version', required=True); p.add_argument('--sha', required=True); p.add_argument('--extract'); p.add_argument('--require-clean', action='store_true')
     for action in ('plan', 'publish'):
         p = sub.add_parser(action); p.add_argument('--sha', required=True)
@@ -321,4 +341,5 @@ if __name__ == '__main__':
     if args.action == 'package': package(args.goos, args.goarch, args.output, args.allow_dirty)
     elif args.action == 'verify': print(json.dumps(verify_archive(args.archive, args.version, args.sha, args.extract, args.require_clean)))
     elif args.action == 'plan': plan(args.sha)
+    elif args.action == 'retitle': retitle()
     else: publish(args.sha, args.output)

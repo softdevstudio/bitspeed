@@ -3,8 +3,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 result_dir="test/results"
 mkdir -p "$result_dir"
-run_id="$(date -u +%Y%m%dT%H%M%SZ)-$(go env GOOS)-$(go env GOARCH)-$$"
-result_path="$result_dir/$run_id"
+# One current run lives in test/results/latest; git history keeps earlier runs.
+result_path="$result_dir/latest"
+rm -rf "$result_path"
 mkdir "$result_path"
 exec > >(tee "$result_path/checks.log") 2>&1
 printf 'UTC: %s\n' "$(date -u +%FT%TZ)"

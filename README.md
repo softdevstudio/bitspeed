@@ -72,7 +72,7 @@ bash scripts/record-results.sh
 
 The script runs formatting checks, go vet, race-enabled tests and a build/version smoke check and an executable recorder check including SIGTERM cancellation. It records the environment, source-tree fingerprint and outcomes under test/results. CI runs on Linux and macOS and uploads its own results. The streamed-body test records its allocation check alongside the correctness results. Release automation also verifies packaged executables on Linux amd64, macOS arm64 and Windows amd64.
 
-The recording contract is in docs/recording-v1.md and the report contract is in docs/explanations.md. AGENTS.md holds the agreed development sequence and session handoff.
+The recording contract is in docs/recording-v1.md and the report contract is in docs/explanations.md. CLAUDE.md holds the agreed development sequence and session handoff.
 
 ## License
 

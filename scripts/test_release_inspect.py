@@ -13,6 +13,18 @@ class ReleaseGuards(unittest.TestCase):
         self.assertEqual(len({release.archive_name(release.PRODUCT, *t) for t in release.TARGETS}), 5)
         self.assertRaises(ValueError, release.archive_name, 'inspect', 'linux', 'unknown')
 
+    def test_retitle(self):
+        self.assertEqual(release.release_title('0.1.1'), 'BitSpeed ' + release.PRODUCT.title() + ' v0.1.1')
+        with patch.object(release, 'version', return_value='0.1.1'), patch.object(release.subprocess, 'run') as run:
+            with patch.object(release, 'find_release', return_value={'draft': False, 'name': 'BitSpeed Inspect 0.1.1'}):
+                release.retitle()
+            self.assertIn(release.release_title('0.1.1'), run.call_args[0][0])
+            run.reset_mock()
+            for found in (None, {'draft': True, 'name': 'x'}, {'draft': False, 'name': release.release_title('0.1.1')}):
+                with patch.object(release, 'find_release', return_value=found):
+                    release.retitle()
+            run.assert_not_called()
+
     def test_archive_paths(self):
         for name in ('../escape', '/absolute', 'a/../../b', 'C:/windows', 'a\\b'):
             with self.subTest(name=name):

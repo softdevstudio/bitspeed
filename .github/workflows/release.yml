@@ -34,6 +34,23 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: python scripts/release_inspect.py plan --sha "$CHECKED_SHA"
+  title:
+    needs: plan
+    if: needs.plan.outputs.build == 'false'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.plan.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/release_inspect.py retitle
   package:
     needs: plan
     if: needs.plan.outputs.build == 'true'

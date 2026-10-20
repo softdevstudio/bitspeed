@@ -34,7 +34,7 @@ def fetch(url, path):
 fetch(assets['SHA256SUMS'], downloads / 'SHA256SUMS')
 checks = release.checksum_map(downloads / 'SHA256SUMS')
 assert set(checks) == expected - {'SHA256SUMS'}
-previous = release.checksum_map(release.ROOT / 'test/results/session-five-release/SHA256SUMS')
+previous = release.checksum_map(release.ROOT / 'test/results/inspect-0.1.1-release/SHA256SUMS')
 for name, digest in previous.items():
     assert checks[name] == digest, 'Inspect bytes changed: ' + name
 

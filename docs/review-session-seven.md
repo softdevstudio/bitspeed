@@ -1,9 +1,0 @@
-# Sender snapshot review
-
-A separate independent task reviewed the local snapshot implementation, platform helpers, tests, preparation CLI and reference documentation without the implementation conversation. It ran scoped Go 1.27.3 race tests, reviewed the final fixes and reported no remaining blocking findings under the documented private-spool, trusted-parent and supported local-filesystem assumptions.
-
-The review found that existing spools needed parent synchronization to recover an interrupted initial directory creation. Parent synchronization now runs on every spool open, with a retry regression test. It also found trailing-slash symlink spellings bypassed the final-component check; API entry paths are normalized before filesystem access and symlink variants are tested. Finally, reuse could miss cancellation during recovery persistence; context checks and a regression test cover that boundary.
-
-Final review also confirmed bounded root/session/pending-directory scans, post-open permission checks, copy-pass digest comparison with saved bytes, explicit prepared/transferred output fields and correct separation from unimplemented network operations. Fault tests cover each checked write/sync/close boundary, short/corrupt writes, capacity failures, rename failure, source changes and cancellation. Process-kill tests exercise copying, manifest writing and the directory-publication boundary. A published snapshot cannot report successful recovery when recovery synchronization fails.
-
-Full formatting, nine Python release guard tests, vet, repository-wide race tests, both command builds and both CLI smoke scripts passed locally; environment, source fingerprints and outcomes are recorded under test/results. Linux/macOS push CI is checked after commit. These checks establish tested software behavior, not all hardware power-loss durability. Transfer remains 0.0.0-dev with no network transfer or release; Inspect 0.1.1 is unchanged.
