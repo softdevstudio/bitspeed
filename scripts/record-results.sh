@@ -40,3 +40,7 @@ go build -o "$build_dir/bitspeed-transfer" ./cmd/bitspeed-transfer
 "$build_dir/bitspeed-transfer" --version
 python3 scripts/smoke-transfer.py "$build_dir/bitspeed-transfer"
 printf 'PASS: formatting, vet, race tests, both command builds and CLI smoke\n'
+
+if [ "${BITSPEED_CHECK_SITE:-0}" = "1" ]; then
+  python3 scripts/check-site.py
+fi

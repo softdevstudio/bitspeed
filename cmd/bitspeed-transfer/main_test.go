@@ -34,7 +34,7 @@ func TestOperationalCommandsFailClosed(t *testing.T) {
 			args := append([]string{command}, tail...)
 			var out bytes.Buffer
 			err := run(args, &out)
-			if !errors.Is(err, errNotImplemented) || out.Len() != 0 || strings.Contains(err.Error(), "SECRET") {
+			if err == nil || out.Len() != 0 || strings.Contains(err.Error(), "SECRET") {
 				t.Fatal("operation must fail without output or reflected inputs", args, err)
 			}
 		}

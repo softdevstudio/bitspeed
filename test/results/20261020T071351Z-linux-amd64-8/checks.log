@@ -1,0 +1,541 @@
+UTC: 2026-10-20T07:13:51Z
+go version go1.27.3 linux/amd64
+linux
+amd64
+1
+Parent commit: 447a3fa36cbcf3d8a4194be37a9ee3b56e809a13
+Source tree SHA256: 3fa32d8f2e41628d4452a9493e47f323d076bf3a04bc0fdd49563cf2ebefc04b
+test_archive_paths (test_release_inspect.ReleaseGuards.test_archive_paths) ... ok
+test_archive_provenance (test_release_inspect.ReleaseGuards.test_archive_provenance) ... ok
+test_asset_names (test_release_inspect.ReleaseGuards.test_asset_names) ... ok
+test_checksums (test_release_inspect.ReleaseGuards.test_checksums) ... ok
+test_draft_discovery_and_pagination (test_release_inspect.ReleaseGuards.test_draft_discovery_and_pagination) ... ok
+test_exact_ci_and_main_gate (test_release_inspect.ReleaseGuards.test_exact_ci_and_main_gate) ... ok
+test_publisher_draft_retry_and_corrupt_upload (test_release_inspect.ReleaseGuards.test_publisher_draft_retry_and_corrupt_upload) ... ok
+test_publisher_rejects_missing_native_gate_before_upload (test_release_inspect.ReleaseGuards.test_publisher_rejects_missing_native_gate_before_upload) ... ok
+test_transfer_carry_requires_complete_verified_assets (test_release_inspect.ReleaseGuards.test_transfer_carry_requires_complete_verified_assets) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.020s
+
+OK
+Published inspect/v0.1.0
+=== RUN   TestCommands
+=== RUN   TestCommands/#00
+=== RUN   TestCommands/unknown
+=== RUN   TestCommands/--version_extra
+=== RUN   TestCommands/record
+=== RUN   TestCommands/explain
+=== RUN   TestCommands/compare
+=== RUN   TestCommands/fixture_--listen_0.0.0.0:0
+=== RUN   TestCommands/fixture_--listen_localhost:0
+=== RUN   TestCommands/fixture_--header-delay=-1s
+=== RUN   TestCommands/fixture_extra
+=== RUN   TestCommands/fixture_--bad
+--- PASS: TestCommands (0.00s)
+    --- PASS: TestCommands/#00 (0.00s)
+    --- PASS: TestCommands/unknown (0.00s)
+    --- PASS: TestCommands/--version_extra (0.00s)
+    --- PASS: TestCommands/record (0.00s)
+    --- PASS: TestCommands/explain (0.00s)
+    --- PASS: TestCommands/compare (0.00s)
+    --- PASS: TestCommands/fixture_--listen_0.0.0.0:0 (0.00s)
+    --- PASS: TestCommands/fixture_--listen_localhost:0 (0.00s)
+    --- PASS: TestCommands/fixture_--header-delay=-1s (0.00s)
+    --- PASS: TestCommands/fixture_extra (0.00s)
+    --- PASS: TestCommands/fixture_--bad (0.00s)
+=== RUN   TestFixtureShutdown
+--- PASS: TestFixtureShutdown (0.00s)
+=== RUN   TestRecordCommand
+--- PASS: TestRecordCommand (0.01s)
+=== RUN   TestExplainCommand
+--- PASS: TestExplainCommand (0.01s)
+=== RUN   TestCompareCommand
+--- PASS: TestCompareCommand (0.02s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-inspect	1.049s
+=== RUN   TestVersionAndHelp
+--- PASS: TestVersionAndHelp (0.00s)
+=== RUN   TestOperationalCommandsFailClosed
+--- PASS: TestOperationalCommandsFailClosed (0.00s)
+=== RUN   TestInvalidCommands
+--- PASS: TestInvalidCommands (0.00s)
+=== RUN   TestPreparationOptionsRejectBeforeIO
+--- PASS: TestPreparationOptionsRejectBeforeIO (0.00s)
+=== RUN   TestNetworkConfigurationRejectedBeforeIO
+--- PASS: TestNetworkConfigurationRejectedBeforeIO (0.00s)
+=== RUN   TestBoundedListenerExclusionAndClose
+--- PASS: TestBoundedListenerExclusionAndClose (0.00s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.012s
+=== RUN   TestCompareExactStatistics
+--- PASS: TestCompareExactStatistics (0.05s)
+=== RUN   TestCompareScopesAndBlocking
+=== RUN   TestCompareScopesAndBlocking/payload
+=== RUN   TestCompareScopesAndBlocking/encoding
+=== RUN   TestCompareScopesAndBlocking/unknown_encoding
+=== RUN   TestCompareScopesAndBlocking/other_encoding
+=== RUN   TestCompareScopesAndBlocking/query
+=== RUN   TestCompareScopesAndBlocking/status
+=== RUN   TestCompareScopesAndBlocking/protocol
+=== RUN   TestCompareScopesAndBlocking/target
+=== RUN   TestCompareScopesAndBlocking/chain
+=== RUN   TestCompareScopesAndBlocking/settings
+=== RUN   TestCompareScopesAndBlocking/tool
+=== RUN   TestCompareScopesAndBlocking/location
+=== RUN   TestCompareScopesAndBlocking/mixed_payload
+--- PASS: TestCompareScopesAndBlocking (0.23s)
+    --- PASS: TestCompareScopesAndBlocking/payload (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/encoding (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/unknown_encoding (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/other_encoding (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/query (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/status (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/protocol (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/target (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/chain (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/settings (0.02s)
+    --- PASS: TestCompareScopesAndBlocking/tool (0.01s)
+    --- PASS: TestCompareScopesAndBlocking/location (0.01s)
+    --- PASS: TestCompareScopesAndBlocking/mixed_payload (0.02s)
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/failure
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/unattempted
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/missing_phase
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/small
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/zero
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/overlap
+=== RUN   TestCompareFailuresCoverageZeroAndOverlap/higher
+--- PASS: TestCompareFailuresCoverageZeroAndOverlap (0.12s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/failure (0.02s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/unattempted (0.02s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/missing_phase (0.02s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/small (0.01s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/zero (0.02s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/overlap (0.01s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/higher (0.02s)
+=== RUN   TestComparisonOutputAndInvalidInput
+--- PASS: TestComparisonOutputAndInvalidInput (0.02s)
+=== RUN   TestNormalizeComparisonTarget
+--- PASS: TestNormalizeComparisonTarget (0.00s)
+=== RUN   TestPartialResponseStatisticsRemainDescriptive
+--- PASS: TestPartialResponseStatisticsRemainDescriptive (0.02s)
+=== RUN   TestScopedIPv6ZoneCasePreserved
+--- PASS: TestScopedIPv6ZoneCasePreserved (0.00s)
+=== RUN   TestComparisonMultipleHops
+--- PASS: TestComparisonMultipleHops (0.06s)
+=== RUN   TestExplainExactIntervalsAndEvidence
+--- PASS: TestExplainExactIntervalsAndEvidence (0.00s)
+=== RUN   TestExplainMissingAndAmbiguousEvidence
+=== RUN   TestExplainMissingAndAmbiguousEvidence/missing_write
+=== RUN   TestExplainMissingAndAmbiguousEvidence/failed_write
+=== RUN   TestExplainMissingAndAmbiguousEvidence/reversed_write
+=== RUN   TestExplainMissingAndAmbiguousEvidence/duplicate_write
+=== RUN   TestExplainMissingAndAmbiguousEvidence/missing_winner
+=== RUN   TestExplainMissingAndAmbiguousEvidence/duplicate_first_byte
+=== RUN   TestExplainMissingAndAmbiguousEvidence/zero_read
+=== RUN   TestExplainMissingAndAmbiguousEvidence/partial
+=== RUN   TestExplainMissingAndAmbiguousEvidence/tie
+--- PASS: TestExplainMissingAndAmbiguousEvidence (0.02s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/missing_write (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/failed_write (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/reversed_write (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/duplicate_write (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/missing_winner (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/duplicate_first_byte (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/zero_read (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/partial (0.00s)
+    --- PASS: TestExplainMissingAndAmbiguousEvidence/tie (0.00s)
+=== RUN   TestExplainSuccessfulAndFailedOperations
+--- PASS: TestExplainSuccessfulAndFailedOperations (0.00s)
+=== RUN   TestExplainControlledDelays
+    explain_test.go:189: fixture=/headers first_byte_wait_ns=80743964 response_read_ns=282556
+    explain_test.go:189: fixture=/body first_byte_wait_ns=176346 response_read_ns=121844921
+--- PASS: TestExplainControlledDelays (0.21s)
+=== RUN   TestExplainFailuresRedactionAndIncompleteBatch
+--- PASS: TestExplainFailuresRedactionAndIncompleteBatch (0.00s)
+=== RUN   TestExplainRejectsInvalidInputAndRendersSafely
+--- PASS: TestExplainRejectsInvalidInputAndRendersSafely (0.01s)
+=== RUN   TestExplainUsesWinningDial
+--- PASS: TestExplainUsesWinningDial (0.00s)
+=== RUN   TestTLSLifecycleEvidenceDependencies
+--- PASS: TestTLSLifecycleEvidenceDependencies (0.00s)
+=== RUN   TestAmbiguousBodyCompletionReason
+--- PASS: TestAmbiguousBodyCompletionReason (0.00s)
+=== RUN   TestRecorderFixtures
+=== RUN   TestRecorderFixtures//headers
+=== RUN   TestRecorderFixtures//body
+=== RUN   TestRecorderFixtures//empty
+=== RUN   TestRecorderFixtures//redirect
+=== RUN   TestRecorderFixtures//disconnect
+=== RUN   TestRecorderFixtures//missing
+--- PASS: TestRecorderFixtures (0.06s)
+    --- PASS: TestRecorderFixtures//headers (0.02s)
+    --- PASS: TestRecorderFixtures//body (0.02s)
+    --- PASS: TestRecorderFixtures//empty (0.00s)
+    --- PASS: TestRecorderFixtures//redirect (0.00s)
+    --- PASS: TestRecorderFixtures//disconnect (0.00s)
+    --- PASS: TestRecorderFixtures//missing (0.00s)
+=== RUN   TestRecorderTimeoutsAndCancellation
+=== RUN   TestRecorderTimeoutsAndCancellation/headers
+=== RUN   TestRecorderTimeoutsAndCancellation/body
+=== RUN   TestRecorderTimeoutsAndCancellation/total
+=== RUN   TestRecorderTimeoutsAndCancellation/cancel
+--- PASS: TestRecorderTimeoutsAndCancellation (0.08s)
+    --- PASS: TestRecorderTimeoutsAndCancellation/headers (0.03s)
+    --- PASS: TestRecorderTimeoutsAndCancellation/body (0.03s)
+    --- PASS: TestRecorderTimeoutsAndCancellation/total (0.03s)
+    --- PASS: TestRecorderTimeoutsAndCancellation/cancel (0.00s)
+=== RUN   TestRedirectLimitsAndPrivacy
+--- PASS: TestRedirectLimitsAndPrivacy (0.01s)
+=== RUN   TestTLSFailure
+--- PASS: TestTLSFailure (0.06s)
+=== RUN   TestConnectionRefused
+--- PASS: TestConnectionRefused (0.00s)
+=== RUN   TestRepeatedSamplesUseFreshConnections
+--- PASS: TestRepeatedSamplesUseFreshConnections (0.01s)
+=== RUN   TestStreamedLargeBody
+    recorder_test.go:219: streamed_bytes=33554432 total_allocated_bytes=242328
+--- PASS: TestStreamedLargeBody (0.04s)
+=== RUN   TestInvalidOptions
+--- PASS: TestInvalidOptions (0.00s)
+=== RUN   TestTracePairingAndLateCallbacks
+--- PASS: TestTracePairingAndLateCallbacks (0.00s)
+=== RUN   TestTraceDNSAndLimit
+--- PASS: TestTraceDNSAndLimit (0.00s)
+=== RUN   TestUpgradeRejectedWithoutReadingStream
+--- PASS: TestUpgradeRejectedWithoutReadingStream (0.00s)
+=== RUN   TestRecordedEncodingClassification
+=== RUN   TestRecordedEncodingClassification/#00
+=== RUN   TestRecordedEncodingClassification/gzip
+=== RUN   TestRecordedEncodingClassification/GZip
+=== RUN   TestRecordedEncodingClassification/br
+=== RUN   TestRecordedEncodingClassification/gzip,_br
+=== RUN   TestRecordedEncodingClassification/private-secret
+--- PASS: TestRecordedEncodingClassification (0.02s)
+    --- PASS: TestRecordedEncodingClassification/#00 (0.00s)
+    --- PASS: TestRecordedEncodingClassification/gzip (0.00s)
+    --- PASS: TestRecordedEncodingClassification/GZip (0.00s)
+    --- PASS: TestRecordedEncodingClassification/br (0.00s)
+    --- PASS: TestRecordedEncodingClassification/gzip,_br (0.00s)
+    --- PASS: TestRecordedEncodingClassification/private-secret (0.00s)
+=== RUN   TestRoundTripPreservesUnavailableAndZero
+--- PASS: TestRoundTripPreservesUnavailableAndZero (0.00s)
+=== RUN   TestInvalidRecordings
+=== RUN   TestInvalidRecordings/no_samples
+=== RUN   TestInvalidRecordings/method
+=== RUN   TestInvalidRecordings/sample_outcome
+=== RUN   TestInvalidRecordings/missing_timestamp
+=== RUN   TestInvalidRecordings/missing_tool_version
+=== RUN   TestInvalidRecordings/policy
+=== RUN   TestInvalidRecordings/raw_secret
+=== RUN   TestInvalidRecordings/hop_beyond_sample
+=== RUN   TestInvalidRecordings/missing_status
+=== RUN   TestInvalidRecordings/unordered
+=== RUN   TestInvalidRecordings/unknown_event
+=== RUN   TestInvalidRecordings/unknown_content_encoding
+=== RUN   TestInvalidRecordings/sample_index
+=== RUN   TestInvalidRecordings/negative_time
+=== RUN   TestInvalidRecordings/missing_hops
+=== RUN   TestInvalidRecordings/error_in_success
+=== RUN   TestInvalidRecordings/future_schema
+=== RUN   TestInvalidRecordings/negative_bytes
+=== RUN   TestInvalidRecordings/incomplete_body
+--- PASS: TestInvalidRecordings (0.00s)
+    --- PASS: TestInvalidRecordings/no_samples (0.00s)
+    --- PASS: TestInvalidRecordings/method (0.00s)
+    --- PASS: TestInvalidRecordings/sample_outcome (0.00s)
+    --- PASS: TestInvalidRecordings/missing_timestamp (0.00s)
+    --- PASS: TestInvalidRecordings/missing_tool_version (0.00s)
+    --- PASS: TestInvalidRecordings/policy (0.00s)
+    --- PASS: TestInvalidRecordings/raw_secret (0.00s)
+    --- PASS: TestInvalidRecordings/hop_beyond_sample (0.00s)
+    --- PASS: TestInvalidRecordings/missing_status (0.00s)
+    --- PASS: TestInvalidRecordings/unordered (0.00s)
+    --- PASS: TestInvalidRecordings/unknown_event (0.00s)
+    --- PASS: TestInvalidRecordings/unknown_content_encoding (0.00s)
+    --- PASS: TestInvalidRecordings/sample_index (0.00s)
+    --- PASS: TestInvalidRecordings/negative_time (0.00s)
+    --- PASS: TestInvalidRecordings/missing_hops (0.00s)
+    --- PASS: TestInvalidRecordings/error_in_success (0.00s)
+    --- PASS: TestInvalidRecordings/future_schema (0.00s)
+    --- PASS: TestInvalidRecordings/negative_bytes (0.00s)
+    --- PASS: TestInvalidRecordings/incomplete_body (0.00s)
+=== RUN   TestFailedHopWithoutStatus
+--- PASS: TestFailedHopWithoutStatus (0.00s)
+=== RUN   TestSafeURL
+--- PASS: TestSafeURL (0.00s)
+=== RUN   TestDecodeBoundaries
+--- PASS: TestDecodeBoundaries (0.47s)
+=== RUN   TestEncodeRejectsOversizedRecording
+--- PASS: TestEncodeRejectsOversizedRecording (0.73s)
+=== RUN   TestErrorCodesCannotContainRawErrors
+--- PASS: TestErrorCodesCannotContainRawErrors (0.00s)
+=== RUN   TestStrictJSONFields
+--- PASS: TestStrictJSONFields (0.00s)
+=== RUN   TestImportedConfigurationBounds
+--- PASS: TestImportedConfigurationBounds (0.00s)
+=== RUN   FuzzRecordingReports
+=== RUN   FuzzRecordingReports/seed#0
+=== RUN   FuzzRecordingReports/seed#1
+=== RUN   FuzzRecordingReports/seed#2
+=== RUN   FuzzRecordingReports/seed#3
+--- PASS: FuzzRecordingReports (0.01s)
+    --- PASS: FuzzRecordingReports/seed#0 (0.00s)
+    --- PASS: FuzzRecordingReports/seed#1 (0.00s)
+    --- PASS: FuzzRecordingReports/seed#2 (0.00s)
+    --- PASS: FuzzRecordingReports/seed#3 (0.00s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/inspect	3.282s
+=== RUN   TestFixtureBehaviors
+=== RUN   TestFixtureBehaviors//headers
+=== RUN   TestFixtureBehaviors//body
+=== RUN   TestFixtureBehaviors//redirect
+=== RUN   TestFixtureBehaviors//empty
+=== RUN   TestFixtureBehaviors//disconnect
+=== RUN   TestFixtureBehaviors//missing
+--- PASS: TestFixtureBehaviors (0.01s)
+    --- PASS: TestFixtureBehaviors//headers (0.00s)
+    --- PASS: TestFixtureBehaviors//body (0.00s)
+    --- PASS: TestFixtureBehaviors//redirect (0.00s)
+    --- PASS: TestFixtureBehaviors//empty (0.00s)
+    --- PASS: TestFixtureBehaviors//disconnect (0.00s)
+    --- PASS: TestFixtureBehaviors//missing (0.00s)
+=== RUN   TestDelayedHeadersAndCancellation
+--- PASS: TestDelayedHeadersAndCancellation (0.03s)
+=== RUN   TestBodyFlushesBeforeDelayedChunks
+--- PASS: TestBodyFlushesBeforeDelayedChunks (0.00s)
+=== RUN   TestTimeoutEndpoint
+--- PASS: TestTimeoutEndpoint (0.03s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.082s
+=== RUN   TestUploadAndAuthenticatedStatus
+=== RUN   TestUploadAndAuthenticatedStatus/a
+=== RUN   TestUploadAndAuthenticatedStatus/b
+=== RUN   TestUploadAndAuthenticatedStatus/d
+--- PASS: TestUploadAndAuthenticatedStatus (0.09s)
+    --- PASS: TestUploadAndAuthenticatedStatus/a (0.03s)
+    --- PASS: TestUploadAndAuthenticatedStatus/b (0.03s)
+    --- PASS: TestUploadAndAuthenticatedStatus/d (0.03s)
+=== RUN   TestClientRejectsRedirectAndUntrustedTLS
+2026/10/20 09:13:52 http: TLS handshake error from 127.0.0.1:40754: remote error: tls: bad certificate
+--- PASS: TestClientRejectsRedirectAndUntrustedTLS (0.06s)
+=== RUN   TestTokenFileRules
+--- PASS: TestTokenFileRules (0.00s)
+=== RUN   TestClientRejectsMalformedResponses
+--- PASS: TestClientRejectsMalformedResponses (0.01s)
+=== RUN   TestClientRefusesInventedProgressAndAck
+=== RUN   TestClientRefusesInventedProgressAndAck/progress
+=== RUN   TestClientRefusesInventedProgressAndAck/ack
+--- PASS: TestClientRefusesInventedProgressAndAck (0.01s)
+    --- PASS: TestClientRefusesInventedProgressAndAck/progress (0.01s)
+    --- PASS: TestClientRefusesInventedProgressAndAck/ack (0.01s)
+=== RUN   TestManifestCanonicalEmpty
+--- PASS: TestManifestCanonicalEmpty (0.00s)
+=== RUN   TestManifestShapeFailures
+=== RUN   TestManifestShapeFailures/bad_file_hash
+=== RUN   TestManifestShapeFailures/too_many_chunks
+=== RUN   TestManifestShapeFailures/ID_path
+=== RUN   TestManifestShapeFailures/zero_chunk
+=== RUN   TestManifestShapeFailures/small_chunk
+=== RUN   TestManifestShapeFailures/large_chunk
+=== RUN   TestManifestShapeFailures/null_hashes
+=== RUN   TestManifestShapeFailures/missing_hash
+=== RUN   TestManifestShapeFailures/extra_hash
+=== RUN   TestManifestShapeFailures/bad_chunk_hash
+=== RUN   TestManifestShapeFailures/version
+=== RUN   TestManifestShapeFailures/ID_uppercase
+=== RUN   TestManifestShapeFailures/negative_size
+=== RUN   TestManifestShapeFailures/over_size
+--- PASS: TestManifestShapeFailures (0.00s)
+    --- PASS: TestManifestShapeFailures/bad_file_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/too_many_chunks (0.00s)
+    --- PASS: TestManifestShapeFailures/ID_path (0.00s)
+    --- PASS: TestManifestShapeFailures/zero_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/small_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/large_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/null_hashes (0.00s)
+    --- PASS: TestManifestShapeFailures/missing_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/extra_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/bad_chunk_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/version (0.00s)
+    --- PASS: TestManifestShapeFailures/ID_uppercase (0.00s)
+    --- PASS: TestManifestShapeFailures/negative_size (0.00s)
+    --- PASS: TestManifestShapeFailures/over_size (0.00s)
+=== RUN   TestChunkLengthsAndLimits
+--- PASS: TestChunkLengthsAndLimits (0.08s)
+=== RUN   TestManifestIdentityBindsFields
+--- PASS: TestManifestIdentityBindsFields (0.00s)
+=== RUN   TestWireManifestStrict
+--- PASS: TestWireManifestStrict (0.21s)
+=== RUN   TestAuthenticationBeforeBodiesAndPaths
+--- PASS: TestAuthenticationBeforeBodiesAndPaths (0.00s)
+=== RUN   TestReceiverAdmissionChunkAndDuplicate
+--- PASS: TestReceiverAdmissionChunkAndDuplicate (0.03s)
+=== RUN   TestRequestBoundsAndInvalidPaths
+--- PASS: TestRequestBoundsAndInvalidPaths (0.01s)
+=== RUN   TestReceiverQuotaLockAndRecoveryGate
+--- PASS: TestReceiverQuotaLockAndRecoveryGate (0.01s)
+=== RUN   TestReceiverStorageFailureGates
+=== RUN   TestReceiverStorageFailureGates/write
+=== RUN   TestReceiverStorageFailureGates/short_write
+=== RUN   TestReceiverStorageFailureGates/corrupt_write
+=== RUN   TestReceiverStorageFailureGates/sync
+=== RUN   TestReceiverStorageFailureGates/close
+=== RUN   TestReceiverStorageFailureGates/link
+=== RUN   TestReceiverStorageFailureGates/recovery_sync
+--- PASS: TestReceiverStorageFailureGates (0.05s)
+    --- PASS: TestReceiverStorageFailureGates/write (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/short_write (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/corrupt_write (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/sync (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/close (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/link (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/recovery_sync (0.01s)
+=== RUN   TestAdmissionFailuresAndRetry
+=== RUN   TestAdmissionFailuresAndRetry/space
+=== RUN   TestAdmissionFailuresAndRetry/write
+=== RUN   TestAdmissionFailuresAndRetry/short
+=== RUN   TestAdmissionFailuresAndRetry/corrupt
+=== RUN   TestAdmissionFailuresAndRetry/close
+=== RUN   TestAdmissionFailuresAndRetry/sync
+=== RUN   TestAdmissionFailuresAndRetry/rename
+--- PASS: TestAdmissionFailuresAndRetry (0.02s)
+    --- PASS: TestAdmissionFailuresAndRetry/space (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/write (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/short (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/corrupt (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/close (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/sync (0.00s)
+    --- PASS: TestAdmissionFailuresAndRetry/rename (0.00s)
+=== RUN   TestConcurrentAdmission
+--- PASS: TestConcurrentAdmission (0.01s)
+=== RUN   TestPhysicalReservationsIncludeExistingAdmissions
+--- PASS: TestPhysicalReservationsIncludeExistingAdmissions (0.01s)
+=== RUN   TestPublishedChunkRecoverySyncGate
+--- PASS: TestPublishedChunkRecoverySyncGate (0.01s)
+=== RUN   TestReceiverStreamingAllocation
+    receiver_test.go:390: streamed_chunk_bytes=16777216 total_allocated_bytes=118400
+--- PASS: TestReceiverStreamingAllocation (0.06s)
+=== RUN   TestPrepareAndReuse
+=== RUN   TestPrepareAndReuse/0
+=== RUN   TestPrepareAndReuse/1
+=== RUN   TestPrepareAndReuse/65536
+=== RUN   TestPrepareAndReuse/65553
+--- PASS: TestPrepareAndReuse (0.02s)
+    --- PASS: TestPrepareAndReuse/0 (0.00s)
+    --- PASS: TestPrepareAndReuse/1 (0.00s)
+    --- PASS: TestPrepareAndReuse/65536 (0.01s)
+    --- PASS: TestPrepareAndReuse/65553 (0.01s)
+=== RUN   TestPreparationFailuresPublishNothing
+=== RUN   TestPreparationFailuresPublishNothing/capacity
+=== RUN   TestPreparationFailuresPublishNothing/space_error
+=== RUN   TestPreparationFailuresPublishNothing/write
+=== RUN   TestPreparationFailuresPublishNothing/short_write
+=== RUN   TestPreparationFailuresPublishNothing/corrupt_write
+=== RUN   TestPreparationFailuresPublishNothing/sync
+=== RUN   TestPreparationFailuresPublishNothing/close
+=== RUN   TestPreparationFailuresPublishNothing/rename
+=== RUN   TestPreparationFailuresPublishNothing/cancel
+=== RUN   TestPreparationFailuresPublishNothing/source_change
+=== RUN   TestPreparationFailuresPublishNothing/source_replace
+--- PASS: TestPreparationFailuresPublishNothing (0.02s)
+    --- PASS: TestPreparationFailuresPublishNothing/capacity (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/space_error (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/write (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/short_write (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/corrupt_write (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/sync (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/close (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/rename (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/cancel (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/source_change (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/source_replace (0.00s)
+=== RUN   TestEverySynchronizationAndCloseBoundary
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-1
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-2
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-3
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-4
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-5
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-6
+=== RUN   TestEverySynchronizationAndCloseBoundary/sync-7
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-1
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-2
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-3
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-4
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-5
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-6
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-7
+=== RUN   TestEverySynchronizationAndCloseBoundary/close-8
+=== RUN   TestEverySynchronizationAndCloseBoundary/write-1
+=== RUN   TestEverySynchronizationAndCloseBoundary/write-2
+--- PASS: TestEverySynchronizationAndCloseBoundary (0.05s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-1 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-2 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-3 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-4 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-5 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-6 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-7 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-1 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-2 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-3 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-4 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-5 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-6 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-7 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-8 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/write-1 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/write-2 (0.00s)
+=== RUN   TestReuseRejectsDamage
+=== RUN   TestReuseRejectsDamage/bytes
+=== RUN   TestReuseRejectsDamage/length
+=== RUN   TestReuseRejectsDamage/manifest
+=== RUN   TestReuseRejectsDamage/duplicate
+=== RUN   TestReuseRejectsDamage/unknown
+=== RUN   TestReuseRejectsDamage/symlink
+=== RUN   TestReuseRejectsDamage/mode
+--- PASS: TestReuseRejectsDamage (0.03s)
+    --- PASS: TestReuseRejectsDamage/bytes (0.00s)
+    --- PASS: TestReuseRejectsDamage/length (0.00s)
+    --- PASS: TestReuseRejectsDamage/manifest (0.00s)
+    --- PASS: TestReuseRejectsDamage/duplicate (0.00s)
+    --- PASS: TestReuseRejectsDamage/unknown (0.00s)
+    --- PASS: TestReuseRejectsDamage/symlink (0.00s)
+    --- PASS: TestReuseRejectsDamage/mode (0.01s)
+=== RUN   TestSpoolLockAndUnsafePaths
+--- PASS: TestSpoolLockAndUnsafePaths (0.00s)
+=== RUN   TestSnapshotMemoryBound
+    snapshot_test.go:317: 32 MiB sparse source snapshot preparation allocated 89096 bytes
+--- PASS: TestSnapshotMemoryBound (0.16s)
+=== RUN   TestKilledPreparationRecovery
+--- PASS: TestKilledPreparationRecovery (0.02s)
+=== RUN   TestParentSyncRetriedAndReuseCancellation
+--- PASS: TestParentSyncRetriedAndReuseCancellation (0.01s)
+=== RUN   TestSpoolTrailingSymlinkRejected
+--- PASS: TestSpoolTrailingSymlinkRejected (0.00s)
+=== RUN   TestKilledPublicationRecovery
+=== RUN   TestKilledPublicationRecovery/manifest
+=== RUN   TestKilledPublicationRecovery/rename
+--- PASS: TestKilledPublicationRecovery (0.04s)
+    --- PASS: TestKilledPublicationRecovery/manifest (0.02s)
+    --- PASS: TestKilledPublicationRecovery/rename (0.02s)
+=== RUN   TestBoundedDirectoryScans
+--- PASS: TestBoundedDirectoryScans (0.00s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/transfer	2.043s
+bitspeed-inspect 0.1.1
+PASS: executable recording, explanations, comparison, redirects, truncated body, redaction, timeouts and native cancellation checks
+bitspeed-transfer 0.0.0-dev
+PASS: Transfer prepare/reuse, authenticated chunk staging and status, no destination publication; invalid operations fail closed
+PASS: formatting, vet, race tests, both command builds and CLI smoke
+PASS live 200 https://bitspeed.org/
+PASS live 200 https://bitspeed.org/about/
+PASS live 200 https://bitspeed.org/contact/
+PASS live 200 https://bitspeed.org/download/
+PASS live 200 https://bitspeed.org/quick-start/
+PASS live 200 https://bitspeed.org/reference/
+PASS live 200 https://bitspeed.org/inspect/
+PASS live 200 https://bitspeed.org/transfer/
+PASS live 200 https://bitspeed.org/images/inspect-evidence.svg
+PASS live 404 https://bitspeed.org/images/ukue-terminal.png

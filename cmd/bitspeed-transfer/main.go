@@ -15,7 +15,7 @@ import (
 	"github.com/softdevstudio/bitspeed/transfer"
 )
 
-var errNotImplemented = errors.New("Transfer is not implemented; no files were read or written and no network connection was opened")
+var errNotImplemented = errors.New("completed file delivery is not implemented; use explicit --prepare-only or --upload-only development stages")
 
 func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -45,24 +45,34 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) != 1 {
 			return errors.New("help takes no arguments")
 		}
-		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer development skeleton\nPlanned commands: serve, send, status\nLocal send --prepare-only is available on Linux/macOS. Network transfer is not implemented. Transfer is not released.\nSee docs/transfer-v1.md for the proposed protocol.")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer development build\nAvailable: serve, status, send --prepare-only, send --upload-only\nChunk staging is incomplete delivery. Finalization is not implemented. Transfer is not released.\nSee docs/transfer-v1.md for the proposed protocol.")
 		return err
 	case "serve", "send", "status":
 		if len(args) == 2 && args[1] == "--help" {
 			help := map[string]string{
-				"serve":  "serve: planned authenticated receiver using a private storage root",
-				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. Not implemented: network upload and resume.",
-				"status": "status: planned authenticated receiver progress and completion query",
+				"serve":  "serve --root=DIR --token-file=FILE [--listen=127.0.0.1:8080] [--tls-cert=FILE --tls-key=FILE]\nReceiver chunk staging only on supported Linux/macOS local filesystems.",
+				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE\nNot implemented: final assembly and destination publication.",
+				"status": "status --url=URL --token-file=FILE --id=ID\nAuthenticated chunk observations. Finalization is not implemented.",
 			}
 			text := help[args[0]]
-			if args[0] != "send" {
-				text += "\nNot implemented. Operational flags are not accepted yet."
-			}
+
 			_, err := fmt.Fprintln(stdout, text)
 			return err
 		}
 		if args[0] == "send" && len(args) > 1 && args[1] == "--prepare-only" {
 			return prepareOnly(ctx, args[2:], stdout, stderr)
+		}
+		if len(args) > 1 || args[0] == "serve" || args[0] == "status" {
+			switch args[0] {
+			case "serve":
+				return serveReceiver(ctx, args[1:], stdout)
+			case "status":
+				return queryReceiver(ctx, args[1:], stdout)
+			case "send":
+				if args[1] == "--upload-only" {
+					return uploadOnly(ctx, args[2:], stdout)
+				}
+			}
 		}
 		return errNotImplemented
 	default:

@@ -2,7 +2,7 @@
 
 BitSpeed houses two independent Go tools. Inspect explains HTTP transfer timing and compares saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-Inspect 0.1.1 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has unreleased local snapshot preparation and a proposed persistence protocol; network file movement is not implemented.
+Inspect 0.1.1 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has unreleased local snapshot preparation and a proposed persistence protocol; authenticated chunk staging is available in development, while final assembly and publication are not implemented.
 
 ## Download
 
@@ -84,11 +84,13 @@ CI-gated release automation builds five archives with stable filenames, checks n
 
 ## Transfer development
 
-Transfer is a separate unreleased command. Build it with `go build -o /tmp/bitspeed-transfer ./cmd/bitspeed-transfer`. Local preparation works on Linux and macOS filesystems supporting file and directory synchronization. Its parent directory must be trusted and the spool private. No network transfer is performed:
+Transfer is a separate unreleased command. Build it with `go build -o /tmp/bitspeed-transfer ./cmd/bitspeed-transfer`. Local preparation works on Linux and macOS filesystems supporting file and directory synchronization. Its parent directory must be trusted and the spool private. These preparation commands perform no network requests:
 
 ```sh
 /tmp/bitspeed-transfer send --prepare-only --source=/path/to/stable-file --spool=/private/parent/sender-spool
 /tmp/bitspeed-transfer send --prepare-only --spool=/private/parent/sender-spool --reuse=TRANSFER_ID
 ```
 
-Preparation returns JSON with prepared true, transferred false and the manifest. Progress uses stderr without source paths. Reuse checks the saved bytes using their existing identity and never needs the original file. A cancelled/failed preparation exits nonzero. Normal send, serve and status remain unimplemented; no Transfer archive is published. See [docs/sender-spool.md](docs/sender-spool.md) for capacity, recovery, platform limits and failure behavior, and [docs/transfer-v1.md](docs/transfer-v1.md) for the proposed network protocol.
+Preparation returns JSON with prepared true, transferred false and the manifest. Progress uses stderr without source paths. Reuse checks the saved bytes using their existing identity and never needs the original file. A cancelled/failed preparation exits nonzero. Development serve, status and send --upload-only now support authenticated chunk staging with no completion receipt or destination file. Normal send and finalization remain unavailable; no Transfer archive is published. See [docs/sender-spool.md](docs/sender-spool.md) for capacity, recovery, platform limits and failure behavior, and [docs/transfer-v1.md](docs/transfer-v1.md) for the proposed network protocol.
+
+For a loopback staging exercise, see [docs/receiver-staging.md](docs/receiver-staging.md). Use a private token file, start serve with a dedicated private root, prepare the sender snapshot, then invoke send --upload-only using that snapshot ID. Its JSON says uploaded true and transferred false. This is an explicit development stage, not completed file delivery.

@@ -1,0 +1,11 @@
+# Receiver staging review
+
+A separate independent review task examined authentication, strict wire decoding, receiver admission/chunk persistence, the snapshot-backed client, CLI transport policy, tests and documentation without the implementation conversation. It ran package tests, vet, race tests, a build and executable Transfer smoke. Final targeted changes were reviewed again; no remaining blockers were found in session-eight scope.
+
+The review found that admission checked physical free space against only the new reservation. It now conservatively includes all prior reservations, with a regression where two sessions fit individually but exceed available capacity together. The review also identified full status scans on each PUT as unnecessary quadratic file reads. PUT now synchronizes its session metadata/ancestors and verifies its own chunk; full progress requests still rehash all chunks as specified.
+
+Admission metadata is re-read after synchronization and compared with intended canonical bytes before publication. Short, corrupt and failed writes/close operations cannot acknowledge admission. Chunk writes are verified in storage before no-replace linking and directory synchronization. Tests also cover a published chunk whose directory sync fails, then a failed recovery sync, before successful revalidation.
+
+Tests cover authentication before application body reads, malformed manifests, bounds, conflicts, physical/logical reservations, contention, body lengths/digests, duplicate validation, storage failures, streaming allocations, untrusted TLS, redirects, invented status/acknowledgements and response decoding. CLI smoke prepares a snapshot, starts a receiver, stages chunks, queries status and confirms that the destination directory is empty. Listener shutdown/slot accounting and sanitized invalid options are also tested. Full local results and source fingerprints are under test/results.
+
+The prototype returns only uploading with a null receipt. Upload-only JSON explicitly marks transferred false. Ambiguous/corrupt admission evidence blocks rather than being guessed or repaired. Full recovery/quarantine and crash acceptance remain session nine; final assembly and destination publication remain session ten. Transfer is unreleased. These tests do not establish every hardware or filesystem power-loss guarantee.
