@@ -2,7 +2,7 @@
 
 BitSpeed houses two independent Go tools. Inspect explains HTTP transfer timing and compares saved runs. Transfer will move a file in verified chunks and resume interrupted work. The project home is https://bitspeed.org.
 
-Inspect 0.1.1 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has no implementation yet.
+Inspect 0.1.1 is the first independent release. Inspect records HTTP and HTTPS GET transfers as validated JSON, retaining redirects, trace events and partial failures. Its local HTTP fixture supplies controlled test cases. Explain renders saved recordings as labelled text or JSON. Compare reports phase medians, observed ranges and scoped comparability checks. Transfer has an unreleased command skeleton and a proposed persistence protocol; file movement is not implemented.
 
 ## Download
 
@@ -81,3 +81,7 @@ Code is licensed under Apache 2.0. See LICENSE, NOTICE and THIRD_PARTY_LICENSES.
 ## Release packaging
 
 CI-gated release automation builds five archives with stable filenames, checks native Linux, macOS and Windows executables, and publishes only after the gates pass. See docs/releases.md for platform coverage, provenance, licensing and retry behavior. Transfer remains unreleased. No hosted service or account is required.
+
+## Transfer development
+
+Transfer is a separate unreleased command. Build it with `go build -o /tmp/bitspeed-transfer ./cmd/bitspeed-transfer`. It supports --version, --help and serve/send/status --help. Operational commands currently fail with no file or network activity. No Transfer archive is published. The proposed wire format, authentication, restart states and publication guarantees are in [docs/transfer-v1.md](docs/transfer-v1.md). Sender snapshot preparation is the next implementation session.

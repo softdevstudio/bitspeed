@@ -22,7 +22,7 @@ for p in sorted(root.rglob('*')):
     digest.update(p.as_posix().encode() + b'\0' + p.read_bytes() + b'\0')
 print('Source tree SHA256:', digest.hexdigest())
 PY
-go_files="$(find cmd inspect internal -name '*.go' -type f)"
+go_files="$(find cmd inspect transfer internal -name '*.go' -type f)"
 unformatted="$(gofmt -l $go_files)"
 if [ -n "$unformatted" ]; then
   printf 'Unformatted files:\n%s\n' "$unformatted"
@@ -36,4 +36,7 @@ trap 'rm -rf "$build_dir"' EXIT
 go build -o "$build_dir/bitspeed-inspect" ./cmd/bitspeed-inspect
 "$build_dir/bitspeed-inspect" --version
 python3 scripts/smoke-inspect.py "$build_dir/bitspeed-inspect"
-printf 'PASS: formatting, vet, race tests, build, version and recorder smoke\n'
+go build -o "$build_dir/bitspeed-transfer" ./cmd/bitspeed-transfer
+"$build_dir/bitspeed-transfer" --version
+python3 scripts/smoke-transfer.py "$build_dir/bitspeed-transfer"
+printf 'PASS: formatting, vet, race tests, both command builds and CLI smoke\n'
