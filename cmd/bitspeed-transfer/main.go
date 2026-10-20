@@ -45,7 +45,7 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) != 1 {
 			return errors.New("help takes no arguments")
 		}
-		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer development build\nAvailable: serve, status, send, send --prepare-only, send --upload-only\nSend verifies and publishes one file; upload-only stages chunks. Transfer is not released.\nSee docs/transfer-v1.md for the proposed protocol.")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer "+transfer.Version+"\nAvailable: serve, status, send, send --prepare-only, send --upload-only\nSend verifies and publishes one file; upload-only stages chunks. See docs/transfer-releases.md for platform limits.\nSee docs/transfer-v1.md for the protocol.")
 		return err
 	case "serve", "send", "status":
 		if len(args) == 2 && args[1] == "--help" {

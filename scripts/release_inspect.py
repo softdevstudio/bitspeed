@@ -235,6 +235,9 @@ def carry_other(output):
         return
     if present != allowed or 'SHA256SUMS' not in names:
         raise ValueError('previous other-product release assets are incomplete')
+    metadata = 'bitspeed-' + other + '-verification.json'
+    if metadata in names:
+        allowed.add(metadata)
     with tempfile.TemporaryDirectory() as temp:
         args = ['gh', 'release', 'download', latest['tag_name'], '--repo', REPO, '--dir', temp]
         for name in sorted(allowed | {'SHA256SUMS'}):
@@ -278,7 +281,7 @@ def publish(sha, output):
         limited_native_targets={'windows/amd64': 'version/help/unsupported-operation checks only'} if PRODUCT == 'transfer' else {})
     (output / ('bitspeed-' + PRODUCT + '-verification.json')).write_text(json.dumps(verification, indent=2) + '\n')
     assets = sorted(path for path in output.iterdir() if path.is_file() and path.name != 'SHA256SUMS')
-    allowed = {archive_name(p, *t) for p in ('inspect', 'transfer') for t in TARGETS} | {'bitspeed-' + PRODUCT + '-verification.json'}
+    allowed = {archive_name(p, *t) for p in ('inspect', 'transfer') for t in TARGETS} | {'bitspeed-' + p + '-verification.json' for p in ('inspect', 'transfer')}
     if any(path.name not in allowed for path in assets):
         raise ValueError('unexpected release asset')
     (output / 'SHA256SUMS').write_text(''.join(hash_file(path) + '  ' + path.name + '\n' for path in assets))

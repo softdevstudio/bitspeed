@@ -126,6 +126,22 @@ class ReleaseGuards(unittest.TestCase):
             self.assertEqual({p.name for p in output.iterdir()}, names)
 
 
+    def test_carry_preserves_available_verification_metadata(self):
+        other = 'transfer' if release.PRODUCT == 'inspect' else 'inspect'
+        names = {release.archive_name(other, *t) for t in release.TARGETS}
+        names.add('bitspeed-' + other + '-verification.json')
+        latest = {'tag_name': other + '/v0.1.0', 'assets': [{'name': n} for n in names | {'SHA256SUMS'}]}
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            def download(args, **kwargs):
+                destination = Path(args[args.index('--dir') + 1])
+                for name in names:
+                    (destination / name).write_bytes(b'verified bytes')
+                (destination / 'SHA256SUMS').write_text(''.join(release.hash_file(destination / name) + '  ' + name + '\n' for name in sorted(names)))
+            with patch.object(release, 'api', return_value=latest), patch.object(release.subprocess, 'run', side_effect=download):
+                release.carry_other(output)
+            self.assertEqual({p.name for p in output.iterdir()}, names)
+
     def test_plan_keeps_development_unpublished_and_stable_immutable(self):
         sha = 'a' * 40
         for v, existing, build, publish in [('0.0.0-dev', None, 'true', 'false'), ('0.1.0', None, 'true', 'true'), ('0.1.0', {'draft': False}, 'false', 'false')]:

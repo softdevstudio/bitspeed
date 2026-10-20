@@ -1,4 +1,4 @@
 package transfer
 
-// Version remains unreleased until the independent Transfer integrity gates pass.
-const Version = "0.0.0-dev"
+// Version is independent of Inspect and published only through verified CI gates.
+const Version = "0.1.0"
