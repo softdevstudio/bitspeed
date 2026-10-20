@@ -13,7 +13,7 @@ def check(path):
     assert status == (404 if path.endswith('ukue-terminal.png') else 200), (path, status)
     assert 'ukue' not in body.lower(), path
     if path == '/':
-        assert 'Know Where Transfer Time Goes' in body
+        assert 'Find the Slow Interval' in body
         assert body.count('href="/contact/"') + body.count('href=/contact/') >= 2
     if path == '/contact/':
         assert 'info@bitspeed.org' in body

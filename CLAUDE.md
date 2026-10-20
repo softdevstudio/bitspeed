@@ -133,6 +133,6 @@ YK approved this plan on October 20, 2026, to be done in short phases with a pau
 6. Inspect: POST with a body, and a separately labelled warm-connection mode.
 7. Transfer: Windows support, starting with a native persistence design and crash tests.
 
-Code changes follow the code and completion standard: tests, independent review, recorded results and the automated release. Phase 1 is in progress.
+Code changes follow the code and completion standard: tests, independent review, recorded results and the automated release. Phase 1 is done (site commit after 298ca9a: homepage hero now covers both tools with Try Inspect and Try Transfer buttons and the name.svg image; posts inspect-vs-curl and transfer-vs-rsync-rclone with their own images; Hugo build and internal links checked; scripts/check-site.py updated for the new hero title). Phase 2 waits for YK's go-ahead.
 
 Keep Inspect and Transfer independently releasable. Preserve the website template and stable download URLs. Any future latest release must retain both released products' verified archives and available verification metadata. Never create placeholder assets or rewrite Inspect 0.1.1 or Transfer 0.1.0. Do not bump a version merely to repeat successful checks.
