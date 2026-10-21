@@ -1,8 +1,11 @@
 package inspect
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha256"
 	"crypto/tls"
+	"encoding/hex"
 	"errors"
 	"io"
 	"net"
@@ -25,6 +28,19 @@ type Options struct {
 	BodyTimeout    time.Duration
 	Interval       time.Duration
 	LocationLabel  string
+	// Method is GET (the default when empty) or POST. Body and ContentType
+	// apply to POST only. Warm reuses connections across samples.
+	Method      string
+	Body        []byte
+	ContentType string
+	Warm        bool
+}
+
+func (o Options) method() string {
+	if o.Method == "" {
+		return "GET"
+	}
+	return o.Method
 }
 
 func DefaultOptions() Options {
@@ -35,6 +51,15 @@ func (o Options) validate() error {
 	if o.Samples < 1 || o.Samples > MaxSamples || o.MaxRedirects < 0 || o.MaxRedirects >= MaxHops || o.Interval < 0 || o.Interval > time.Minute || len(o.LocationLabel) > 256 {
 		return errors.New("invalid recording limits")
 	}
+	if m := o.method(); m != "GET" && m != "POST" {
+		return errors.New("method must be GET or POST")
+	}
+	if o.method() == "GET" && (o.Body != nil || o.ContentType != "") {
+		return errors.New("a request body and content type need POST")
+	}
+	if len(o.Body) > MaxRequestBodyBytes || len(o.ContentType) > 256 || strings.ContainsAny(o.ContentType, "\r\n") {
+		return errors.New("request body or content type out of bounds")
+	}
 	for _, d := range []time.Duration{o.Timeout, o.ConnectTimeout, o.HeaderTimeout, o.BodyTimeout} {
 		if d <= 0 || d > time.Hour {
 			return errors.New("timeouts must be positive and at most one hour")
@@ -43,7 +68,7 @@ func (o Options) validate() error {
 	return nil
 }
 
-// Record performs GET requests and streams bodies without storing response content.
+// Record performs GET or POST requests and streams response bodies without storing them.
 // Transport failures are observations, not function errors. Invalid input returns an error.
 func Record(ctx context.Context, target string, o Options) (Recording, error) {
 	if err := o.validate(); err != nil {
@@ -55,17 +80,37 @@ func Record(ctx context.Context, target string, o Options) (Recording, error) {
 	}
 	targetURL, _ := url.Parse(target)
 	targetURL.Fragment = ""
-	r := Recording{SchemaVersion: SchemaVersion, ToolVersion: Version, StartedAt: time.Now().UTC(), Request: Request{
-		Method: "GET", URL: safe, ConnectionPolicy: "fresh", SamplesRequested: o.Samples, MaxRedirects: o.MaxRedirects,
+	policy := "fresh"
+	if o.Warm {
+		policy = "warm"
+	}
+	request := Request{
+		Method: o.method(), URL: safe, ConnectionPolicy: policy, SamplesRequested: o.Samples, MaxRedirects: o.MaxRedirects,
 		TimeoutNS: int64(o.Timeout), ConnectTimeoutNS: int64(o.ConnectTimeout), HeaderTimeoutNS: int64(o.HeaderTimeout), BodyTimeoutNS: int64(o.BodyTimeout), IntervalNS: int64(o.Interval), LocationLabel: o.LocationLabel,
-	}, Samples: make([]Sample, 0, o.Samples)}
+	}
+	if request.Method == "POST" {
+		sum := sha256.Sum256(o.Body)
+		request.RequestBodyBytes, request.RequestBodySHA256, request.ContentType = int64(len(o.Body)), hex.EncodeToString(sum[:]), o.ContentType
+	}
+	r := Recording{SchemaVersion: wantSchema(request), ToolVersion: Version, StartedAt: time.Now().UTC(), Request: request, Samples: make([]Sample, 0, o.Samples)}
+	// Warm mode shares one keep-alive transport for the whole recording, so
+	// later samples can reuse connections. Each hop still records whether it did.
+	var shared *http.Transport
+	if o.Warm {
+		shared = newTransport(o, true)
+		defer shared.CloseIdleConnections()
+	}
 	for i := 0; i < o.Samples; i++ {
 		start := time.Now()
 		sampleCtx, cancel := context.WithTimeout(ctx, o.Timeout)
 		sample := Sample{Index: i, Outcome: "complete", Hops: make([]Hop, 0, o.MaxRedirects+1)}
 		current := targetURL
+		method, body := request.Method, o.Body
 		for j := 0; ; j++ {
-			h, next := recordHop(sampleCtx, current, o, j == o.MaxRedirects)
+			h, next := recordHop(sampleCtx, current, o, j == o.MaxRedirects, shared, method, body)
+			if r.SchemaVersion == 2 {
+				h.Method = method
+			}
 			sample.Hops = append(sample.Hops, h)
 			if h.Outcome != "complete" {
 				sample.Outcome = h.Outcome
@@ -73,6 +118,9 @@ func Record(ctx context.Context, target string, o Options) (Recording, error) {
 			}
 			if next == nil {
 				break
+			}
+			if s := *h.StatusCode; s == 301 || s == 302 || s == 303 {
+				method, body = "GET", nil
 			}
 			current = next
 		}
@@ -297,25 +345,39 @@ func (l *traceLog) finish(h *Hop) {
 	h.ConnectionReused = l.reused
 }
 
-func recordHop(parent context.Context, target *url.URL, o Options, atLimit bool) (h Hop, next *url.URL) {
+func newTransport(o Options, keepAlive bool) *http.Transport {
+	return &http.Transport{
+		Proxy: nil, DialContext: (&net.Dialer{Timeout: o.ConnectTimeout}).DialContext,
+		TLSHandshakeTimeout: o.ConnectTimeout, ResponseHeaderTimeout: o.HeaderTimeout,
+		DisableKeepAlives: !keepAlive, DisableCompression: true, ForceAttemptHTTP2: true, MaxResponseHeaderBytes: 1 << 20,
+	}
+}
+
+func recordHop(parent context.Context, target *url.URL, o Options, atLimit bool, shared *http.Transport, method string, body []byte) (h Hop, next *url.URL) {
 	safe, _ := SafeURL(target.String())
 	h = Hop{URL: safe, Outcome: "failed", Events: []Event{}}
 	ctx, cancel := context.WithCancelCause(parent)
 	defer cancel(nil)
 	log := &traceLog{start: time.Now(), events: make([]Event, 0, 24), cancel: cancel, connect: map[string][]string{}, successful: map[string][]string{}}
 	defer log.finish(&h)
-	transport := &http.Transport{
-		Proxy: nil, DialContext: (&net.Dialer{Timeout: o.ConnectTimeout}).DialContext,
-		TLSHandshakeTimeout: o.ConnectTimeout, ResponseHeaderTimeout: o.HeaderTimeout,
-		DisableKeepAlives: true, DisableCompression: true, ForceAttemptHTTP2: true, MaxResponseHeaderBytes: 1 << 20,
+	transport := shared
+	if transport == nil {
+		transport = newTransport(o, false)
+		defer transport.CloseIdleConnections()
 	}
-	defer transport.CloseIdleConnections()
-	req, err := http.NewRequestWithContext(httptrace.WithClientTrace(ctx, log.trace()), "GET", target.String(), nil)
+	var reader io.Reader
+	if method == "POST" {
+		reader = bytes.NewReader(body)
+	}
+	req, err := http.NewRequestWithContext(httptrace.WithClientTrace(ctx, log.trace()), method, target.String(), reader)
 	if err != nil {
 		h.ErrorCode = "response_failed"
 		return h, nil
 	}
 	req.Header.Set("User-Agent", "BitSpeed-Inspect/"+Version)
+	if method == "POST" && o.ContentType != "" {
+		req.Header.Set("Content-Type", o.ContentType)
+	}
 	response, err := transport.RoundTrip(req)
 	if err != nil {
 		h.ErrorCode = classifyError(ctx, err, false)

@@ -1,4 +1,4 @@
-# Inspect Recording Format Version 1
+# Inspect Recording Format Versions 1 and 2
 
 This is a development contract for the unreleased recorder. Earlier skeleton recordings need regeneration: version 1 now requires request limits and richer trace evidence. After the first release, incompatible changes require a new schema version.
 
@@ -39,3 +39,13 @@ Encode validates observations and checks the serialized size before writing. Dec
 ## Reports
 
 Recordings contain observations. Calculations and labelled interpretations use the derived-report schema in docs/explanations.md, with links to evidence paths and rule identifiers. explain and compare are implemented. See docs/comparisons.md for comparison statistics, scopes and verdict limits.
+
+## Schema 2 (Inspect 0.3.0)
+
+Schema 2 extends schema 1 for POST requests and warm connections. Inspect writes schema 1 whenever the request is GET with connection_policy fresh, so older releases keep reading those recordings, and schema 2 otherwise. Decode accepts both; a schema 2 recording of a plain fresh GET, or a schema 1 recording with any schema 2 field, is rejected.
+
+In schema 2, request.method is GET or POST and request.connection_policy is fresh or warm. A POST request adds request_body_sha256 (64 lowercase hex characters, always present), request_body_bytes (0 to 1 MiB, omitted when 0) and an optional content_type of at most 256 characters without line breaks. The body is never stored. A GET request carries none of these fields. Every schema 2 hop carries method: the first hop uses the request method; after a redirect, 307 and 308 keep the previous hop's method and body, and 301, 302 and 303 switch to GET without a body.
+
+Under the warm policy one keep-alive transport serves every sample of the recording, and connection_reused may be true; under fresh it must not be. Reused hops normally have no DNS, connect or TLS events, so those calculations are unavailable and comparison verdicts on them are withheld. Explanations of schema 2 recordings add connection_policy, and for POST request_body_bytes, request_body_sha256 and content_type when set, plus a method measurement per hop. Schema 1 explanations are unchanged.
+
+Comparisons block a verdict when method, connection_policy, request_body_bytes, request_body_sha256 or content_type differ, and the redirect-chain check includes each hop's method (schema 1 hops count as GET).

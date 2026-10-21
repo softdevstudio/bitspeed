@@ -40,6 +40,21 @@ JSON goes to stdout; diagnostics go to stderr. Exit status is nonzero if any sam
 
 To try controlled failures, start fixture in another terminal and use its printed address with /disconnect or /timeout. Query values and fragments are redacted in saved URLs; original query values are used for the request. Paths, hostnames and location labels can still contain sensitive information. Never publish recordings without reviewing them. The recorder performs real GET requests, including redirects; use targets you intend to access.
 
+### POST requests and warm connections
+
+From Inspect 0.3.0, record can send a POST body and can reuse connections across samples:
+
+```sh
+bitspeed-inspect record --method=POST --body-file=query.json --content-type=application/json https://api.example.com/search > post.json
+bitspeed-inspect record --connection=warm https://example.org/ > warm.json
+```
+
+The body file is read once, up to 1 MiB, and sent with every sample. The recording never contains the body. It keeps its size and SHA-256 so compare can tell whether two runs sent the same thing, and a short guessable body can be recovered from that hash, so treat recordings as sensitive. On a redirect, 307 and 308 resend the POST with its body, while 301, 302 and 303 switch to GET without it, the way browsers do; each hop records the method it sent. POST requests really are sent, so only point them at endpoints where repeating the request is safe.
+
+--connection=warm keeps one keep-alive connection pool for the whole recording. The first sample normally opens the connection and later samples reuse it, which each hop records in connection_reused. Connection phases are then missing for reused samples, so their verdicts are withheld; first-byte wait and response read are the useful intervals in warm mode. Warm and fresh recordings measure different things and compare blocks a verdict between them.
+
+Plain GET recordings with fresh connections are still written as schema 1, so Inspect 0.1.1 and 0.2.0 can read them. POST or warm recordings use schema 2, described in docs/recording-v1.md. Compare blocks a verdict when the method, body size, body SHA-256, content type or connection policy differ.
+
 ## Explain a recording
 
 ```sh

@@ -96,6 +96,16 @@ func Explain(r Recording) (Report, error) {
 	if r.Request.LocationLabel != "" {
 		report.Measurements = append(report.Measurements, measurement("location_label", r.Request.LocationLabel, "/request/location_label"))
 	}
+	// Schema 2 adds request facts that schema 1 never had; schema 1 reports stay unchanged.
+	if r.SchemaVersion == 2 {
+		report.Measurements = append(report.Measurements, measurement("connection_policy", r.Request.ConnectionPolicy, "/request/connection_policy"))
+		if r.Request.Method == "POST" {
+			report.Measurements = append(report.Measurements, measurement("request_body_bytes", r.Request.RequestBodyBytes, "/request"), measurement("request_body_sha256", r.Request.RequestBodySHA256, "/request"))
+			if r.Request.ContentType != "" {
+				report.Measurements = append(report.Measurements, measurement("content_type", r.Request.ContentType, "/request/content_type"))
+			}
+		}
+	}
 	for i, s := range r.Samples {
 		path := fmt.Sprintf("/samples/%d", i)
 		sr := SampleReport{Index: s.Index, Measurements: []Measurement{measurement("outcome", s.Outcome, path+"/outcome"), measurement("elapsed_ns", s.ElapsedNS, path+"/elapsed_ns")}, Hops: make([]HopReport, 0, len(s.Hops))}
@@ -209,6 +219,9 @@ func explainHop(h Hop, path string) HopReport {
 	}, Interpretations: []Interpretation{}}
 	if h.ErrorCode != "" {
 		hr.Measurements = append(hr.Measurements, measurement("error_code", h.ErrorCode, path+"/error_code"))
+	}
+	if h.Method != "" {
+		hr.Measurements = append(hr.Measurements, measurement("method", h.Method, path+"/method"))
 	}
 	tcp := winningTCP(h, path)
 	acquired := eventsOf(h, "connection_acquired")

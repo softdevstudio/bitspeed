@@ -11,7 +11,11 @@ import (
 	"time"
 )
 
-const SchemaVersion = 1
+// SchemaVersion is the newest recording schema. Plain GET recordings with fresh
+// connections are still written as schema 1 so older Inspect releases can read
+// them; POST or warm-connection recordings use schema 2.
+const SchemaVersion = 2
+const MaxRequestBodyBytes = 1 << 20
 const MaxRecordingBytes = 16 << 20
 const MaxSamples = 100
 const MaxHops = 11
@@ -39,6 +43,12 @@ type Request struct {
 	ConnectionPolicy string `json:"connection_policy"`
 	Decompression    bool   `json:"decompression"`
 	LocationLabel    string `json:"location_label,omitempty"`
+	// Schema 2 only. The body itself is never stored; its size and SHA-256
+	// identify it for comparisons. A short guessable body can be recovered
+	// from its hash, so treat recordings as sensitive.
+	RequestBodyBytes  int64  `json:"request_body_bytes,omitempty"`
+	RequestBodySHA256 string `json:"request_body_sha256,omitempty"`
+	ContentType       string `json:"content_type,omitempty"`
 }
 
 type Sample struct {
@@ -62,6 +72,8 @@ type Hop struct {
 	BodyComplete          bool    `json:"body_complete"`
 	Events                []Event `json:"events"`
 	ErrorCode             string  `json:"error_code,omitempty"`
+	// Schema 2 only: the method this hop sent, which redirects can change.
+	Method string `json:"method,omitempty"`
 }
 
 // Event time is relative to its hop's monotonic start. Attempt links overlapping operations.
@@ -114,14 +126,14 @@ func validOutcome(s string) bool {
 }
 
 func (r Recording) Validate() error {
-	if r.SchemaVersion != SchemaVersion {
+	if r.SchemaVersion != 1 && r.SchemaVersion != 2 {
 		return fmt.Errorf("unsupported schema version %d", r.SchemaVersion)
 	}
 	if r.ToolVersion == "" || r.StartedAt.IsZero() {
 		return errors.New("tool version and start time are required")
 	}
-	if r.Request.Method != "GET" || r.Request.ConnectionPolicy != "fresh" {
-		return errors.New("schema v1 requires GET and fresh connections")
+	if err := r.validateRequestShape(); err != nil {
+		return err
 	}
 	if err := validateURL(r.Request.URL); err != nil {
 		return err
@@ -147,8 +159,11 @@ func (r Recording) Validate() error {
 				return errors.New("sequential hop durations exceed sample duration")
 			}
 			remaining -= h.ElapsedNS
-			if h.ConnectionReused != nil && *h.ConnectionReused {
+			if h.ConnectionReused != nil && *h.ConnectionReused && r.Request.ConnectionPolicy == "fresh" {
 				return errors.New("fresh connection policy cannot report reuse")
+			}
+			if err := r.validateHopMethod(s.Hops, j); err != nil {
+				return fmt.Errorf("sample %d hop %d: %w", i, j, err)
 			}
 			if err := validateURL(h.URL); err != nil {
 				return fmt.Errorf("sample %d hop %d: %w", i, j, err)
@@ -331,4 +346,70 @@ func validEncoding(value string) bool {
 		return true
 	}
 	return false
+}
+
+// wantSchema is the schema a request needs: 1 for plain GET with fresh
+// connections, 2 for anything newer.
+func wantSchema(q Request) int {
+	if q.Method == "GET" && q.ConnectionPolicy == "fresh" {
+		return 1
+	}
+	return 2
+}
+
+func (r Recording) validateRequestShape() error {
+	q := r.Request
+	if (q.Method != "GET" && q.Method != "POST") || (q.ConnectionPolicy != "fresh" && q.ConnectionPolicy != "warm") {
+		return errors.New("method must be GET or POST and connection policy fresh or warm")
+	}
+	if r.SchemaVersion != wantSchema(q) {
+		return errors.New("schema 1 records plain GET with fresh connections; POST or warm connections need schema 2")
+	}
+	if q.Method == "GET" {
+		if q.RequestBodyBytes != 0 || q.RequestBodySHA256 != "" || q.ContentType != "" {
+			return errors.New("GET recordings carry no request body")
+		}
+		return nil
+	}
+	if q.RequestBodyBytes < 0 || q.RequestBodyBytes > MaxRequestBodyBytes || len(q.RequestBodySHA256) != 64 || !isLowerHex(q.RequestBodySHA256) {
+		return errors.New("POST recordings need a bounded body size and SHA-256")
+	}
+	if len(q.ContentType) > 256 || strings.ContainsAny(q.ContentType, "\r\n") {
+		return errors.New("invalid content type")
+	}
+	return nil
+}
+
+// validateHopMethod checks the method each hop sent. Schema 1 hops carry none.
+// In schema 2 the first hop uses the request method; after a redirect, 307 and
+// 308 keep the method and body while 301, 302 and 303 switch to GET.
+func (r Recording) validateHopMethod(hops []Hop, j int) error {
+	h := hops[j]
+	if r.SchemaVersion == 1 {
+		if h.Method != "" {
+			return errors.New("schema 1 hops carry no method")
+		}
+		return nil
+	}
+	want := r.Request.Method
+	if j > 0 {
+		prev := hops[j-1]
+		want = prev.Method
+		if prev.StatusCode != nil && (*prev.StatusCode == 301 || *prev.StatusCode == 302 || *prev.StatusCode == 303) {
+			want = "GET"
+		}
+	}
+	if h.Method != want {
+		return errors.New("hop method does not follow the request and redirect rules")
+	}
+	return nil
+}
+
+func isLowerHex(s string) bool {
+	for _, c := range s {
+		if !(c >= '0' && c <= '9' || c >= 'a' && c <= 'f') {
+			return false
+		}
+	}
+	return true
 }

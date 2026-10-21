@@ -66,6 +66,23 @@ try:
             if cancelled.poll() is None:
                 cancelled.kill()
                 cancelled.communicate()
+    with tempfile.TemporaryDirectory() as scratch:
+        body = Path(scratch) / 'body.json'
+        body.write_text('{"token":"SECRET-BODY"}')
+        posted = subprocess.run([binary, 'record', '--samples=2', '--method=POST', '--body-file=' + str(body), '--content-type=application/json', '--connection=warm', base + '/empty'], capture_output=True, text=True, timeout=20)
+        assert posted.returncode == 0, posted.stderr
+        warm = json.loads(posted.stdout)
+        assert warm['schema_version'] == 2 and warm['request']['method'] == 'POST' and warm['request']['connection_policy'] == 'warm' and 'SECRET-BODY' not in posted.stdout
+        assert warm['samples'][1]['hops'][0]['connection_reused'] is True and warm['samples'][1]['hops'][0]['method'] == 'POST'
+        warm_path = Path(scratch) / 'warm.json'
+        warm_path.write_text(posted.stdout)
+        plain = subprocess.run([binary, 'record', '--samples=2', base + '/empty'], capture_output=True, text=True, timeout=20)
+        assert plain.returncode == 0 and json.loads(plain.stdout)['schema_version'] == 1
+        mixed = subprocess.run([binary, 'compare', '--format=json', str(warm_path), '-'], input=plain.stdout, capture_output=True, text=True, timeout=10)
+        rules = {c['rule_id'] for c in json.loads(mixed.stdout)['checks'] if c['severity'] == 'blocking'}
+        assert mixed.returncode == 0 and {'request_setting_method_v1', 'request_setting_connection_policy_v1'} <= rules, rules
+        rejected = subprocess.run([binary, 'record', '--body-file=' + str(body), base + '/empty'], capture_output=True, text=True, timeout=10)
+        assert rejected.returncode == 1 and not rejected.stdout
     saved = Path(__file__).resolve().parents[1] / 'examples' / 'recordings'
     before, after = str(saved / 'before.json'), str(saved / 'after.json')
     public = Path(__file__).resolve().parents[1] / 'examples' / 'public' / 'results' / 'github-ubuntu'
@@ -74,7 +91,7 @@ try:
         gated = subprocess.run([binary, 'compare', *args], capture_output=True, text=True, timeout=10)
         assert gated.returncode == code, (args, gated.returncode, gated.stderr)
         assert (code == 1) == (gated.stdout == ''), args
-    print('PASS: executable recording, explanations, comparison, compare gate exit codes, redirects, truncated body, redaction, timeouts and native cancellation checks')
+    print('PASS: executable recording, explanations, comparison, compare gate exit codes, POST bodies, warm connections, redirects, truncated body, redaction, timeouts and native cancellation checks')
 finally:
     fixture.terminate()
     try:

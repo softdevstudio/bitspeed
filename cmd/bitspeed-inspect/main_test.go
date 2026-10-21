@@ -213,3 +213,34 @@ func TestCompareGateExitCodes(t *testing.T) {
 		}
 	}
 }
+
+func TestRecordPostAndWarmFlags(t *testing.T) {
+	s := httptest.NewServer(fixture.New(fixture.Config{}))
+	defer s.Close()
+	dir := t.TempDir()
+	body := filepath.Join(dir, "body.json")
+	os.WriteFile(body, []byte(`{"q":"SECRET"}`), 0600)
+	big := filepath.Join(dir, "big")
+	os.WriteFile(big, make([]byte, inspect.MaxRequestBodyBytes+1), 0600)
+	var out, errOut bytes.Buffer
+	if err := record(context.Background(), []string{"--samples=2", "--method=POST", "--body-file=" + body, "--content-type=application/json", "--connection=warm", s.URL + "/empty"}, &out, &errOut); err != nil {
+		t.Fatal(err, errOut.String())
+	}
+	r, err := inspect.Decode(bytes.NewReader(out.Bytes()))
+	if err != nil || r.SchemaVersion != 2 || r.Request.Method != "POST" || r.Request.ConnectionPolicy != "warm" || r.Request.RequestBodyBytes != 14 || strings.Contains(out.String(), "SECRET") {
+		t.Fatal(r.Request, err)
+	}
+	for _, args := range [][]string{
+		{"--body-file=" + body, s.URL},
+		{"--method=POST", "--body-file=" + big, s.URL},
+		{"--method=POST", "--body-file=" + filepath.Join(dir, "missing"), s.URL},
+		{"--connection=sticky", s.URL},
+		{"--method=PUT", s.URL},
+		{"--content-type=text/plain", s.URL},
+	} {
+		var o, e bytes.Buffer
+		if err := record(context.Background(), append([]string{"--samples=1"}, args...), &o, &e); err == nil || o.Len() != 0 {
+			t.Fatal("accepted", args, err)
+		}
+	}
+}

@@ -12,7 +12,7 @@ import (
 func example() Recording {
 	status := 204
 	return Recording{
-		SchemaVersion: SchemaVersion, ToolVersion: Version, StartedAt: time.Now().UTC(),
+		SchemaVersion: 1, ToolVersion: Version, StartedAt: time.Now().UTC(),
 		Request: Request{SamplesRequested: 1, MaxRedirects: 10, TimeoutNS: 1000000000, ConnectTimeoutNS: 1000000000, HeaderTimeoutNS: 1000000000, BodyTimeoutNS: 1000000000, Method: "GET", URL: "https://example.org/", ConnectionPolicy: "fresh"},
 		Samples: []Sample{{Index: 0, Outcome: "complete", ElapsedNS: 20,
 			Hops: []Hop{{URL: "https://example.org/", Outcome: "complete", ElapsedNS: 20,
@@ -39,7 +39,8 @@ func TestRoundTripPreservesUnavailableAndZero(t *testing.T) {
 func TestInvalidRecordings(t *testing.T) {
 	tests := map[string]func(*Recording){
 		"unknown content encoding": func(r *Recording) { value := "private-raw-value"; r.Samples[0].Hops[0].ContentEncoding = &value },
-		"future schema":            func(r *Recording) { r.SchemaVersion++ },
+		"future schema":            func(r *Recording) { r.SchemaVersion = 3 },
+		"plain GET as schema 2":    func(r *Recording) { r.SchemaVersion = 2 },
 		"missing timestamp":        func(r *Recording) { r.StartedAt = time.Time{} },
 		"missing tool version":     func(r *Recording) { r.ToolVersion = "" },
 		"no samples":               func(r *Recording) { r.Samples = nil },

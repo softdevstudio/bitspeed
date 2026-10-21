@@ -131,6 +131,10 @@ func record(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 	flags.DurationVar(&o.BodyTimeout, "body-timeout", o.BodyTimeout, "total body reading timeout per hop")
 	flags.DurationVar(&o.Interval, "interval", o.Interval, "pause between samples (0-1m)")
 	flags.StringVar(&o.LocationLabel, "location", "", "operator-supplied location label")
+	flags.StringVar(&o.Method, "method", "GET", "request method: GET or POST")
+	bodyFile := flags.String("body-file", "", "POST body from this file (at most 1 MiB); only its size and SHA-256 are recorded")
+	flags.StringVar(&o.ContentType, "content-type", "", "Content-Type header for a POST body")
+	connection := flags.String("connection", "fresh", "fresh (new connection per request) or warm (reuse connections across samples)")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -139,6 +143,26 @@ func record(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 	}
 	if flags.NArg() != 1 {
 		return errors.New("usage: bitspeed-inspect record [flags] URL; writes JSON to stdout")
+	}
+	switch *connection {
+	case "fresh":
+	case "warm":
+		o.Warm = true
+	default:
+		return errors.New("--connection must be fresh or warm")
+	}
+	if o.Method == "POST" {
+		o.Body = []byte{}
+	}
+	if *bodyFile != "" {
+		if o.Method != "POST" {
+			return errors.New("--body-file needs --method=POST")
+		}
+		body, err := readBodyFile(*bodyFile)
+		if err != nil {
+			return err
+		}
+		o.Body = body
 	}
 	recording, err := inspect.Record(ctx, flags.Arg(0), o)
 	if err != nil {
@@ -151,6 +175,22 @@ func record(ctx context.Context, args []string, stdout, stderr io.Writer) error 
 		return errors.New("recording saved with failed, cancelled or unattempted samples")
 	}
 	return nil
+}
+
+func readBodyFile(path string) ([]byte, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, errors.New("cannot read --body-file")
+	}
+	defer f.Close()
+	body, err := io.ReadAll(io.LimitReader(f, inspect.MaxRequestBodyBytes+1))
+	if err != nil {
+		return nil, errors.New("cannot read --body-file")
+	}
+	if len(body) > inspect.MaxRequestBodyBytes {
+		return nil, errors.New("--body-file is larger than 1 MiB")
+	}
+	return body, nil
 }
 
 func explain(args []string, stdin io.Reader, stdout, stderr io.Writer) error {

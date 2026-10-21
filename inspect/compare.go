@@ -169,6 +169,21 @@ func Compare(baseline, candidate Recording) (Comparison, error) {
 			c.Checks = append(c.Checks, check("request_setting_"+setting.name+"_v1", "blocking", "all", "Request settings differ: "+setting.name+".", requestRefs(setting.name)...))
 		}
 	}
+	// Schema 2 request bodies. These fields are absent from schema 1 and from
+	// GET recordings, so the evidence points at the whole request object.
+	bodies := []struct {
+		name string
+		a, b any
+	}{
+		{"request_body_bytes", baseline.Request.RequestBodyBytes, candidate.Request.RequestBodyBytes},
+		{"request_body_sha256", baseline.Request.RequestBodySHA256, candidate.Request.RequestBodySHA256},
+		{"content_type", baseline.Request.ContentType, candidate.Request.ContentType},
+	}
+	for _, setting := range bodies {
+		if setting.a != setting.b {
+			c.Checks = append(c.Checks, check("request_setting_"+setting.name+"_v1", "blocking", "all", "Request settings differ: "+setting.name+".", comparisonRef("baseline_recording", "/request"), comparisonRef("candidate_recording", "/request")))
+		}
+	}
 	if baseline.ToolVersion != candidate.ToolVersion {
 		c.Checks = append(c.Checks, check("tool_version_v1", "caution", "all", "Recorder versions differ; equivalent measurement behavior is not established.", comparisonRef("baseline_recording", "/tool_version"), comparisonRef("candidate_recording", "/tool_version")))
 	}
@@ -184,7 +199,12 @@ func Compare(baseline, candidate Recording) (Comparison, error) {
 		for _, s := range r.Samples {
 			parts := []string{}
 			for _, h := range s.Hops {
-				parts = append(parts, normalizedTarget(h.URL))
+				// Schema 2 hops also carry their method; schema 1 hops are GET.
+				method := h.Method
+				if method == "" {
+					method = "GET"
+				}
+				parts = append(parts, method+" "+normalizedTarget(h.URL))
 			}
 			values = append(values, strings.Join(parts, "\n"))
 		}
