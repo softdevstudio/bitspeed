@@ -23,7 +23,7 @@ func LoadToken(path string) (string, error) {
 		return "", ErrUnsupported
 	}
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > 65 {
+	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > 66 {
 		return "", ErrConfig
 	}
 	f, e := openSource(path)
@@ -35,12 +35,16 @@ func LoadToken(path string) (string, error) {
 	if e != nil || !sameSource(info, opened) {
 		return "", ErrConfig
 	}
-	data, e := io.ReadAll(io.LimitReader(f, 66))
+	data, e := io.ReadAll(io.LimitReader(f, 67))
 	ce := f.Close()
 	if e != nil || ce != nil {
 		return "", ErrConfig
 	}
-	token := strings.TrimSuffix(string(data), "\n")
+	// One trailing newline is allowed, in Unix or Windows form.
+	token, found := strings.CutSuffix(string(data), "\r\n")
+	if !found {
+		token = strings.TrimSuffix(token, "\n")
+	}
 	if !hex256(token) {
 		return "", ErrConfig
 	}

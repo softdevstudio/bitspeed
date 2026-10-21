@@ -14,9 +14,6 @@ import threading
 from urllib.parse import urlsplit
 
 binary = str(Path(sys.argv[1]).resolve())
-if os.name == 'nt':
-    print('SKIP: Windows transfer operations are explicitly unsupported')
-    sys.exit(0)
 
 
 def run(*args):

@@ -13,9 +13,6 @@ import threading
 from urllib.parse import urlsplit
 
 binary = str(Path(sys.argv[1]).resolve())
-if os.name == 'nt':
-    print('SKIP: Windows receiver operations are explicitly unsupported')
-    sys.exit(0)
 with tempfile.TemporaryDirectory() as directory:
     root = Path(directory)
     cert, key = root / 'cert.pem', root / 'key.pem'

@@ -74,14 +74,14 @@ func TestClientRejectsRedirectAndUntrustedTLS(t *testing.T) {
 func TestTokenFileRules(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "token")
-	for _, body := range []string{testToken, testToken + "\n"} {
+	for _, body := range []string{testToken, testToken + "\n", testToken + "\r\n"} {
 		os.WriteFile(file, []byte(body), 0600)
 		token, e := LoadToken(file)
 		if e != nil || token != testToken {
 			t.Fatal(e)
 		}
 	}
-	for _, body := range []string{testToken + "\n\n", strings.ToUpper(testToken), " " + testToken, "SECRET"} {
+	for _, body := range []string{testToken + "\n\n", testToken + "\r\n\n", testToken + "\n\r\n", testToken + "\r", strings.ToUpper(testToken), " " + testToken, "SECRET"} {
 		os.WriteFile(file, []byte(body), 0600)
 		if _, e := LoadToken(file); e == nil || strings.Contains(e.Error(), "SECRET") {
 			t.Fatal("invalid token accepted or exposed", e)
