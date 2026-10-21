@@ -45,3 +45,25 @@ jobs:
         with:
           name: case-study-${{ matrix.label }}
           path: out/
+  commit:
+    needs: record
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: case-study-*
+          path: dl
+      - name: Commit recordings to examples/public/results
+        run: |
+          rm -rf examples/public/results
+          mkdir -p examples/public/results
+          for d in dl/case-study-*; do cp -r "$d" "examples/public/results/${d#dl/case-study-}"; done
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/public/results
+          git commit -m "examples: record public-endpoint Inspect case study [skip ci]" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
