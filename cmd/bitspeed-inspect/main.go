@@ -22,9 +22,22 @@ func main() {
 	defer stop()
 	if err := run(ctx, os.Args[1:], os.Stdout, os.Stderr); err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		var gate gateExit
+		if errors.As(err, &gate) {
+			os.Exit(gate.code)
+		}
 		os.Exit(1)
 	}
 }
+
+// gateExit carries the compare gate's exit status: 3 for a regression, 4 when
+// a gated interval can't be judged. Ordinary errors keep exit status 1.
+type gateExit struct {
+	code int
+	msg  string
+}
+
+func (g gateExit) Error() string { return g.msg }
 
 func run(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
@@ -192,6 +205,10 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 	flags := flag.NewFlagSet("compare", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	format := flags.String("format", "text", "comparison format: text or json")
+	failIfSlower := flags.String("fail-if-slower", "", "comma-separated intervals that must not get slower; exit 3 on a regression, 4 if undecided")
+	minChange := flags.Duration("min-change", 0, "with --fail-if-slower, ignore slowdowns smaller than this")
+	minPercent := flags.Float64("min-percent", 0, "with --fail-if-slower, ignore slowdowns smaller than this percent")
+	allowUndecided := flags.Bool("allow-undecided", false, "with --fail-if-slower, pass when a gated interval can't be judged")
 	if err := flags.Parse(args); err != nil {
 		if errors.Is(err, flag.ErrHelp) {
 			return nil
@@ -199,7 +216,20 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 		return err
 	}
 	if flags.NArg() != 2 || (*format != "text" && *format != "json") || (flags.Arg(0) == "-" && flags.Arg(1) == "-") {
-		return errors.New("usage: bitspeed-inspect compare [--format=text|json] BASELINE CANDIDATE (at most one - for stdin)")
+		return errors.New("usage: bitspeed-inspect compare [--format=text|json] [--fail-if-slower=INTERVALS [--min-change=DURATION] [--min-percent=N] [--allow-undecided]] BASELINE CANDIDATE (at most one - for stdin)")
+	}
+	var gate *inspect.Gate
+	if *failIfSlower != "" {
+		metrics, err := inspect.ParseGateMetrics(*failIfSlower)
+		if err != nil {
+			return err
+		}
+		if *minChange < 0 || *minPercent < 0 {
+			return errors.New("--min-change and --min-percent must not be negative")
+		}
+		gate = &inspect.Gate{Metrics: metrics, MinChangeNS: float64(*minChange), MinPercent: *minPercent, AllowUndecided: *allowUndecided}
+	} else if *minChange != 0 || *minPercent != 0 || *allowUndecided {
+		return errors.New("--min-change, --min-percent and --allow-undecided need --fail-if-slower")
 	}
 	baseline, err := readRecording(flags.Arg(0), stdin)
 	if err != nil {
@@ -214,7 +244,40 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 		return err
 	}
 	if *format == "json" {
-		return inspect.WriteComparisonJSON(stdout, report)
+		err = inspect.WriteComparisonJSON(stdout, report)
+	} else {
+		err = inspect.WriteComparisonText(stdout, report)
 	}
-	return inspect.WriteComparisonText(stdout, report)
+	if err != nil || gate == nil {
+		return err
+	}
+	result, err := inspect.EvaluateGate(report, *gate)
+	if err != nil {
+		return err
+	}
+	for _, f := range result.Findings {
+		line := fmt.Sprintf("gate: %s", f.Metric)
+		if f.Hop >= 0 {
+			line += fmt.Sprintf(" hop %d", f.Hop)
+		}
+		line += ": " + f.Outcome + " (" + f.Verdict
+		if f.AbsoluteChange != nil {
+			line += fmt.Sprintf(", %+.3f ms", *f.AbsoluteChange/1e6)
+		}
+		if f.PercentChange != nil {
+			line += fmt.Sprintf(", %+.1f%%", *f.PercentChange)
+		}
+		line += ") " + f.Reason
+		if _, err = fmt.Fprintln(stderr, line); err != nil {
+			return err
+		}
+	}
+	switch result.Outcome {
+	case "regressed":
+		return gateExit{3, "gate failed: a gated interval got slower in these samples"}
+	case "undecided":
+		return gateExit{4, "gate undecided: a gated interval could not be judged; see gate lines above"}
+	}
+	_, err = fmt.Fprintln(stderr, "gate passed")
+	return err
 }

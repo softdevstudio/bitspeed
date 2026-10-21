@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/softdevstudio/bitspeed/inspect"
 	"github.com/softdevstudio/bitspeed/internal/fixture"
 	"net/http/httptest"
@@ -153,6 +154,52 @@ func TestCompareCommand(t *testing.T) {
 		}
 		if out.Len() != 0 {
 			t.Fatal("invalid comparison produced output")
+		}
+	}
+}
+
+func TestCompareGateExitCodes(t *testing.T) {
+	before, after := filepath.Join("..", "..", "examples", "recordings", "before.json"), filepath.Join("..", "..", "examples", "recordings", "after.json")
+	cases := []struct {
+		args []string
+		code int
+	}{
+		{[]string{"--fail-if-slower=first_byte_wait", before, after}, 0},
+		{[]string{"--fail-if-slower=first_byte_wait", after, before}, 3},
+		{[]string{"--format=json", "--fail-if-slower=first_byte_wait", after, before}, 3},
+		{[]string{"--fail-if-slower=first_byte_wait", "--min-change=200ms", after, before}, 0},
+		{[]string{"--fail-if-slower=dns_resolution", before, after}, 4},
+		{[]string{"--fail-if-slower=dns_resolution", "--allow-undecided", before, after}, 0},
+		{[]string{"--fail-if-slower=observed_payload_rate", before, after}, 1},
+		{[]string{"--min-change=1ms", before, after}, 1},
+		{[]string{"--fail-if-slower=first_byte_wait", "--min-percent=-1", before, after}, 1},
+	}
+	for _, c := range cases {
+		var out, errOut bytes.Buffer
+		err := compare(c.args, strings.NewReader(""), &out, &errOut)
+		code := 0
+		if err != nil {
+			code = 1
+			var g gateExit
+			if errors.As(err, &g) {
+				code = g.code
+			}
+		}
+		if code != c.code {
+			t.Fatal(c.args, code, err, errOut.String())
+		}
+		if code == 0 || code >= 3 {
+			// The comparison itself is always written in full, gate or not.
+			if out.Len() == 0 || !strings.Contains(errOut.String(), "gate: ") {
+				t.Fatal("gate run must print the comparison and gate lines", c.args)
+			}
+			for _, a := range c.args {
+				if a == "--format=json" && !json.Valid(out.Bytes()) {
+					t.Fatal("gate must not change JSON output")
+				}
+			}
+		} else if out.Len() != 0 {
+			t.Fatal("rejected options produced output", c.args)
 		}
 	}
 }
