@@ -156,6 +156,12 @@ func TestGateZeroBaselineNeverObservedAndBadThresholds(t *testing.T) {
 	if r, _ := EvaluateGate(oneMetric(nil, never), Gate{Metrics: []string{"tls_handshake"}}); r.Outcome != "pass" || r.Findings[0].Verdict != "not_applicable" {
 		t.Fatal("an interval absent from every sample can't have got slower", r)
 	}
+	for _, severity := range []string{"blocking", "caution"} {
+		blocked := oneMetric([]ComparabilityCheck{{Severity: severity, Scope: "all"}}, never)
+		if r, _ := EvaluateGate(blocked, Gate{Metrics: []string{"tls_handshake"}}); r.Outcome != "undecided" {
+			t.Fatal("an absent interval in a "+severity+" comparison must stay undecided", r)
+		}
+	}
 	oneSided := gateMetric("tls_handshake", "unavailable", stats(0, 10, 0), stats(10, 0, 5e6), nil, nil)
 	if r, _ := EvaluateGate(oneMetric(nil, oneSided), Gate{Metrics: []string{"tls_handshake"}}); r.Outcome != "undecided" {
 		t.Fatal("one-sided unavailability must stay undecided", r)

@@ -106,7 +106,7 @@ func EvaluateGate(c Comparison, g Gate) (GateResult, error) {
 			case "not_comparable":
 				f.Outcome, f.Reason = "undecided", "comparability checks block a verdict for this interval"
 			case "unavailable":
-				if neverObserved(m) {
+				if neverObserved(m) && !qualified(m, c.Checks, hop.Checks) {
 					f.Verdict = "not_applicable"
 					f.Outcome, f.Reason = "pass", "this interval did not occur in any sample of either recording"
 				} else {
@@ -181,4 +181,19 @@ func withheld(m MetricComparison, global, local []ComparabilityCheck) string {
 		return "too few available values for a verdict; record at least three complete samples on each side"
 	}
 	return ""
+}
+
+// qualified reports whether any blocking or cautionary check applies to this
+// interval. compare reports unavailable before it looks at checks, so the gate
+// must not treat an absent interval as not applicable in a blocked or
+// cautioned comparison, such as different targets or failed samples.
+func qualified(m MetricComparison, global, local []ComparabilityCheck) bool {
+	for _, checks := range [][]ComparabilityCheck{global, local} {
+		for _, c := range checks {
+			if (c.Scope == "all" || responseMetric(m.Name)) && (c.Severity == "blocking" || c.Severity == "caution") {
+				return true
+			}
+		}
+	}
+	return false
 }
