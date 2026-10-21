@@ -55,13 +55,12 @@ with ThreadPoolExecutor(max_workers=4) as pool:
 release.PRODUCT = 'transfer'
 for target in release.TARGETS:
     info = release.verify_archive(downloads / release.archive_name('transfer', *target), version, sha, require_clean=True)
-    if target[0] == 'windows':
-        assert info['operational_support'] == 'unsupported'
+    assert info['operational_support'] == 'see included platform documentation'
 verification = json.loads((downloads / 'bitspeed-transfer-verification.json').read_text())
 assert verification['source_sha'] == sha and verification['version'] == version
-assert verification['operational_native_targets'] == ['linux/amd64', 'darwin/arm64']
+assert verification['operational_native_targets'] == ['linux/amd64', 'darwin/arm64', 'windows/amd64']
 assert verification['cross_build_only_targets'] == ['linux/arm64', 'darwin/amd64']
-assert 'windows/amd64' in verification['limited_native_targets']
+assert verification['limited_native_targets'] == {}
 native = {('Linux', 'x86_64'): ('linux', 'amd64'), ('Darwin', 'arm64'): ('darwin', 'arm64')}.get((platform.system(), platform.machine()))
 if native:
     destination = downloads / 'native-transfer'

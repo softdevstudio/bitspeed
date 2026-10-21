@@ -121,13 +121,11 @@ jobs:
         shell: bash
         run: python scripts/smoke-transfer.py "$PWD/native/$NATIVE_BINARY" "$VERSION"
       - name: Native executable interruption recovery
-        if: runner.os != 'Windows'
         env:
           NATIVE_BINARY: ${{ matrix.binary }}
         shell: bash
         run: python scripts/smoke-transfer-interruption.py "$PWD/native/$NATIVE_BINARY"
       - name: Native executable TLS listener
-        if: runner.os != 'Windows'
         env:
           NATIVE_BINARY: ${{ matrix.binary }}
         shell: bash

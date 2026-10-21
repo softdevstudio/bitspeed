@@ -105,11 +105,11 @@ Code is licensed under Apache 2.0. See LICENSE, NOTICE and THIRD_PARTY_LICENSES.
 
 ## Release packaging
 
-CI-gated release automation builds five archives with stable filenames, checks native Linux, macOS and Windows executables, and publishes only after the gates pass. See docs/releases.md for platform coverage, provenance, licensing and retry behavior. Transfer is separately versioned; Windows operations are unsupported. No hosted service or account is required.
+CI-gated release automation builds five archives with stable filenames, checks native Linux, macOS and Windows executables, and publishes only after the gates pass. See docs/releases.md for platform coverage, provenance, licensing and retry behavior. Transfer is separately versioned, and from 0.4.0 its Windows archive delivers files on local NTFS. No hosted service or account is required.
 
 ## Transfer development
 
-Transfer 0.1.0 is a separate command for supported Linux/macOS local filesystems. Build it with `go build -o /tmp/bitspeed-transfer ./cmd/bitspeed-transfer`. Local preparation works on Linux and macOS filesystems supporting file and directory synchronization. Its parent directory must be trusted and the spool private. These preparation commands perform no network requests:
+Transfer is a separate command for supported Linux and macOS local filesystems and, from 0.4.0, local NTFS volumes on Windows. Build it with `go build -o /tmp/bitspeed-transfer ./cmd/bitspeed-transfer`. Local preparation works on filesystems supporting file and directory synchronization. Its parent directory must be trusted and the spool private. These preparation commands perform no network requests:
 
 ```sh
 /tmp/bitspeed-transfer send --prepare-only --source=/path/to/stable-file --spool=/private/parent/sender-spool
@@ -131,4 +131,14 @@ bitspeed-transfer clean --root=/private/parent/receiver-root --dry-run
 bitspeed-transfer clean --root=/private/parent/receiver-root
 ```
 
-Clean takes the receiver's root lock, so it refuses to run while serve is using that root. It first runs the same recovery checks as starting the receiver, which re-verifies every completed destination against its manifest. Then it removes the stored chunk files of completed sessions only. Destinations, receipts, witnesses, journals, corrupt-chunk evidence and every unfinished session stay as they are. The JSON output lists each session with the chunks removed and the bytes they held, an estimate of the space returned. --dry-run runs the same recovery as starting the receiver, which can repair or mark sessions just as serve would, and then reports what it would remove without removing chunks. Clean skips the receiver's write test, so it works on a full disk unless recovery itself has something to write. A completed transfer keeps working afterwards: status and a repeated send still return its receipt. Clean does not change the receiver's reservation limit, and removing whole sessions still follows the offline procedure in docs/finalization.md. The Windows archive supports version/help and explicit unsupported-operation checks only; Linux arm64/macOS amd64 are cross-built without native runtime coverage.
+Clean takes the receiver's root lock, so it refuses to run while serve is using that root. It first runs the same recovery checks as starting the receiver, which re-verifies every completed destination against its manifest. Then it removes the stored chunk files of completed sessions only. Destinations, receipts, witnesses, journals, corrupt-chunk evidence and every unfinished session stay as they are. The JSON output lists each session with the chunks removed and the bytes they held, an estimate of the space returned. --dry-run runs the same recovery as starting the receiver, which can repair or mark sessions just as serve would, and then reports what it would remove without removing chunks. Clean skips the receiver's write test, so it works on a full disk unless recovery itself has something to write. A completed transfer keeps working afterwards: status and a repeated send still return its receipt. Clean does not change the receiver's reservation limit, and removing whole sessions still follows the offline procedure in docs/finalization.md. Linux arm64/macOS amd64 are cross-built without native runtime coverage.
+
+From Transfer 0.4.0 every command also works on Windows 10, Server 2019 and later, on local NTFS volumes on fixed drives. Create the token file inside your profile so it inherits a private access list, with plain ASCII and no byte order mark:
+
+```powershell
+$bytes = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+-join ($bytes | ForEach-Object { $_.ToString("x2") }) | Set-Content -NoNewline -Encoding ascii $HOME\bitspeed-token
+bitspeed-transfer serve --root=$HOME\bitspeed-receiver --token-file=$HOME\bitspeed-token
+```
+
+Privacy on Windows is checked through access lists instead of mode bits. A root or spool that Transfer creates gets a protected list for you, SYSTEM and Administrators. One you create yourself must allow no other account, which a folder under your profile normally satisfies and a folder directly under C:\ does not. While preparing a snapshot Transfer holds the source with read-only sharing, so preparation is refused while another program has the file open for writing. docs/windows-persistence.md maps each persistence step to its Windows call and lists the limits.

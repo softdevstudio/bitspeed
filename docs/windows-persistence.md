@@ -28,7 +28,9 @@ Another program can hold a published destination open without sharing write acce
 
 A receiver root or spool directory created by the user must already have a private DACL: only allow entries for the current user, SYSTEM and Administrators, inherited or explicit. A folder under the user's profile normally qualifies. A folder made directly under C:\ normally does not, because it inherits access for Authenticated Users. Let Transfer create the root, or tighten an existing one with `icacls DIR /inheritance:r /grant:r "%USERNAME%:(OI)(CI)F" SYSTEM:(OI)(CI)F Administrators:(OI)(CI)F`. The token file needs the same kind of DACL, which a file created in the profile normally has.
 
-Allow entries for any other account, deny entries that are not understood, and object or callback entries all make the check fail. Deny entries for any account are accepted because they only remove access.
+The owner must be one of those three accounts too, because an owner can change the list at any time. Allow entries for OWNER RIGHTS are accepted, since they grant access only to that checked owner; Python's private temporary folders use them. Allow entries for any other account, a missing list, and object or callback entries all make the check fail. Deny entries for any account are accepted because they only remove access.
+
+Token files may end with one newline in Unix or Windows form, so a file saved by a Windows editor works. The README shows a PowerShell command that writes one in plain ASCII.
 
 ## What the guarantees mean
 

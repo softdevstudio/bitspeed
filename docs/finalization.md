@@ -1,6 +1,6 @@
 # Verified delivery and retention
 
-Transfer 0.1.0 implements delivery on supported Linux/macOS local filesystems. Native and cross-build coverage is listed in transfer-releases.md; Windows operations are unsupported. Inspect remains independently released. Build Transfer from source and follow receiver-staging.md for a private token, supported filesystem, receiver root and prepared sender snapshot. Keep the source stable during preparation. Normal delivery uses the existing snapshot, never the original source:
+Transfer implements delivery on supported Linux and macOS local filesystems and, from 0.4.0, on local NTFS volumes on Windows, using the calls in windows-persistence.md. Native and cross-build coverage is listed in transfer-releases.md. Inspect remains independently released. Build Transfer from source and follow receiver-staging.md for a private token, supported filesystem, receiver root and prepared sender snapshot. Keep the source stable during preparation. Normal delivery uses the existing snapshot, never the original source:
 
 ```sh
 bitspeed-transfer send --spool=/private/parent/sender --reuse=TRANSFER_ID --url=http://127.0.0.1:8080 --token-file=token

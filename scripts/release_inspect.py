@@ -47,7 +47,7 @@ def archive_name(product, goos, arch):
 
 
 def reference_docs():
-    return ('recording-v1.md', 'explanations.md', 'comparisons.md', 'releases.md') if PRODUCT == 'inspect' else ('sender-spool.md', 'receiver-staging.md', 'transfer-v1.md', 'finalization.md', 'transfer-releases.md')
+    return ('recording-v1.md', 'explanations.md', 'comparisons.md', 'releases.md') if PRODUCT == 'inspect' else ('sender-spool.md', 'receiver-staging.md', 'transfer-v1.md', 'finalization.md', 'transfer-releases.md', 'windows-persistence.md')
 
 
 def package(goos, arch, output, allow_dirty=False):
@@ -83,8 +83,8 @@ def package(goos, arch, output, allow_dirty=False):
         info = dict(product='bitspeed-' + PRODUCT, version=version(), source_sha=sha, dirty=dirty,
                     go_version=goversion, goos=goos, goarch=arch, cgo_enabled=False,
                     native_smoke_required=[goos, arch] in [list(t) for t in NATIVE],
-                    operational_support='unsupported' if PRODUCT == 'transfer' and goos == 'windows' else 'see included platform documentation',
-                    native_smoke_scope='version/help/unsupported-operation checks only' if PRODUCT == 'transfer' and goos == 'windows' else 'product operations on native targets')
+                    operational_support='see included platform documentation',
+                    native_smoke_scope='product operations on native targets')
         (stage / 'BUILD_INFO.json').write_text(json.dumps(info, indent=2) + '\n')
         files = sorted(p for p in stage.rglob('*') if p.is_file())
         if goos == 'windows':
@@ -312,8 +312,8 @@ def publish(sha, output):
     verification = dict(product='bitspeed-' + PRODUCT, version=v, source_sha=sha, ci_run_id=int(os.environ['CI_RUN_ID']), release_run_id=int(run),
         native_smoke_targets=[goos + '/' + arch for goos, arch in NATIVE],
         cross_build_only_targets=[goos + '/' + arch for goos, arch in TARGETS if (goos, arch) not in NATIVE],
-        operational_native_targets=['linux/amd64', 'darwin/arm64'] if PRODUCT == 'transfer' else [goos + '/' + arch for goos, arch in NATIVE],
-        limited_native_targets={'windows/amd64': 'version/help/unsupported-operation checks only'} if PRODUCT == 'transfer' else {})
+        operational_native_targets=[goos + '/' + arch for goos, arch in NATIVE],
+        limited_native_targets={})
     (output / ('bitspeed-' + PRODUCT + '-verification.json')).write_text(json.dumps(verification, indent=2) + '\n')
     assets = sorted(path for path in output.iterdir() if path.is_file() and path.name != 'SHA256SUMS')
     allowed = {archive_name(p, *t) for p in ('inspect', 'transfer') for t in TARGETS} | {'bitspeed-' + p + '-verification.json' for p in ('inspect', 'transfer')}
@@ -326,7 +326,7 @@ def publish(sha, output):
     if ref is None:
         subprocess.run(['gh', 'api', 'repos/' + REPO + '/git/refs', '-f', 'ref=refs/tags/' + tag, '-f', 'sha=' + sha], check=True, stdout=subprocess.DEVNULL)
     if existing is None:
-        subprocess.run(['gh', 'release', 'create', tag, '--repo', REPO, '--verify-tag', '--draft', '--title', release_title(v), '--notes', ('HTTP timing recording, explanations and comparisons.' if PRODUCT == 'inspect' else 'Verified resumable one-file delivery on supported Linux/macOS local filesystems. Windows operations are unsupported; its archive checks help/version and fail-closed behavior only. Linux arm64/macOS amd64 are cross-built without native runtime coverage.') + ' See included documentation and verification metadata.'], check=True)
+        subprocess.run(['gh', 'release', 'create', tag, '--repo', REPO, '--verify-tag', '--draft', '--title', release_title(v), '--notes', ('HTTP timing recording, explanations and comparisons.' if PRODUCT == 'inspect' else 'Verified resumable one-file delivery on supported Linux and macOS local filesystems and on local NTFS volumes on Windows. Linux arm64/macOS amd64 are cross-built without native runtime coverage.') + ' See included documentation and verification metadata.'], check=True)
     subprocess.run(['gh', 'release', 'upload', tag, '--repo', REPO, '--clobber', *map(str, assets), str(output / 'SHA256SUMS')], check=True)
     uploaded = find_release(tag)
     expected_names = {path.name for path in assets} | {'SHA256SUMS'}

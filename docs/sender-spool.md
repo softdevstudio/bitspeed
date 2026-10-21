@@ -1,6 +1,6 @@
 # Local sender snapshots
 
-Transfer 0.1.0 can prepare or revalidate a local snapshot on Linux and macOS. It sends no HTTP requests. Windows preparation fails with an unsupported-platform error before file activity. Cross-compilation does not establish persistence support.
+Transfer can prepare or revalidate a local snapshot on Linux and macOS and, from 0.4.0, on Windows. It sends no HTTP requests. On Windows the source is opened with read-only sharing, so preparation is refused while another program holds it open for writing, and writers, renames and deletes are blocked until the copy finishes; see windows-persistence.md. Cross-compilation does not establish persistence support.
 
 Use send --prepare-only --source=FILE --spool=DIR, optionally --chunk-size=BYTES (default 4194304). Options require =VALUE; unknown or duplicate options are rejected without reflecting values. For reuse, use send --prepare-only --spool=DIR --reuse=ID, without a source or chunk-size option. JSON stdout contains prepared true, transferred false and the canonical manifest as a nested object. Human progress on stderr reports stage and byte counts; neither output persists the source path. Success means a locally prepared snapshot, not delivery to a receiver. Interrupted stdout can leave a safely prepared directory without a printed ID; inspect the private spool directories and reuse the saved ID rather than editing metadata.
 
