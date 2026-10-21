@@ -193,6 +193,25 @@ func Compare(baseline, candidate Recording) (Comparison, error) {
 	if c.Baseline.Completed != c.Baseline.Requested || c.Candidate.Completed != c.Candidate.Requested {
 		c.Checks = append(c.Checks, check("failed_or_missing_samples_v1", "caution", "all", "Failed, cancelled or unattempted samples prevent a performance-change verdict.", comparisonRef("comparison", "/baseline"), comparisonRef("comparison", "/candidate")))
 	}
+	// Warm runs can reuse connections differently, for example when one server
+	// closes keep-alive connections. Equal settings then don't mean equal work.
+	reuse := func(r Recording) string {
+		counts := map[int][2]int{}
+		for _, s := range r.Samples {
+			for j, h := range s.Hops {
+				c := counts[j]
+				c[0]++
+				if h.ConnectionReused != nil && *h.ConnectionReused {
+					c[1]++
+				}
+				counts[j] = c
+			}
+		}
+		return fmt.Sprint(counts)
+	}
+	if (baseline.Request.ConnectionPolicy == "warm" || candidate.Request.ConnectionPolicy == "warm") && reuse(baseline) != reuse(candidate) {
+		c.Checks = append(c.Checks, check("connection_reuse_v1", "caution", "all", "Connection reuse differs between recordings; reused and new connections do different work.", comparisonRef("baseline_recording", "/samples"), comparisonRef("candidate_recording", "/samples")))
+	}
 	// A chain signature includes hop targets, not just length. Mixed chains block index-based interpretation.
 	chains := func(r Recording) []string {
 		values := []string{}

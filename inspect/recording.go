@@ -233,7 +233,7 @@ func validEvent(kind string) bool {
 func validErrorCode(code string) bool {
 	switch code {
 	case "dns_failed", "connect_failed", "tls_failed", "request_write_failed",
-		"response_failed", "body_failed", "timeout", "cancelled", "redirect_limit", "invalid_redirect", "event_limit", "unsupported_upgrade":
+		"response_failed", "body_failed", "timeout", "cancelled", "redirect_limit", "invalid_redirect", "event_limit", "unsupported_upgrade", "cross_origin_body_redirect":
 		return true
 	}
 	return false
@@ -374,7 +374,10 @@ func (r Recording) validateRequestShape() error {
 	if q.RequestBodyBytes < 0 || q.RequestBodyBytes > MaxRequestBodyBytes || len(q.RequestBodySHA256) != 64 || !isLowerHex(q.RequestBodySHA256) {
 		return errors.New("POST recordings need a bounded body size and SHA-256")
 	}
-	if len(q.ContentType) > 256 || strings.ContainsAny(q.ContentType, "\r\n") {
+	if q.RequestBodyBytes == 0 && q.RequestBodySHA256 != emptySHA256 {
+		return errors.New("an empty POST body has a fixed SHA-256")
+	}
+	if !validContentType(q.ContentType) {
 		return errors.New("invalid content type")
 	}
 	return nil
@@ -389,11 +392,17 @@ func (r Recording) validateHopMethod(hops []Hop, j int) error {
 		if h.Method != "" {
 			return errors.New("schema 1 hops carry no method")
 		}
+		if j > 0 && (hops[j-1].StatusCode == nil || !isRedirect(*hops[j-1].StatusCode)) {
+			return errors.New("a later hop must follow a redirect status")
+		}
 		return nil
 	}
 	want := r.Request.Method
 	if j > 0 {
 		prev := hops[j-1]
+		if prev.StatusCode == nil || !isRedirect(*prev.StatusCode) {
+			return errors.New("a later hop must follow a redirect status")
+		}
 		want = prev.Method
 		if prev.StatusCode != nil && (*prev.StatusCode == 301 || *prev.StatusCode == 302 || *prev.StatusCode == 303) {
 			want = "GET"
@@ -408,6 +417,22 @@ func (r Recording) validateHopMethod(hops []Hop, j int) error {
 func isLowerHex(s string) bool {
 	for _, c := range s {
 		if !(c >= '0' && c <= '9' || c >= 'a' && c <= 'f') {
+			return false
+		}
+	}
+	return true
+}
+
+const emptySHA256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+// validContentType accepts an empty value or a header value of at most 256
+// bytes with no control characters other than tab.
+func validContentType(v string) bool {
+	if len(v) > 256 {
+		return false
+	}
+	for i := 0; i < len(v); i++ {
+		if c := v[i]; (c < 0x20 && c != '\t') || c == 0x7f {
 			return false
 		}
 	}

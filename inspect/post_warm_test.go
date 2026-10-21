@@ -1,11 +1,13 @@
 package inspect
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"io"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -209,4 +211,173 @@ func TestComparePostBodiesAndValidation(t *testing.T) {
 			t.Fatal("invalid options accepted", o.Method, len(o.Body), o.ContentType)
 		}
 	}
+}
+
+// staleServer answers the first request on each connection, keeps the
+// connection open, then reads the next request and closes without answering,
+// the way a server with a short keep-alive timeout looks to a client.
+func staleServer(t *testing.T) string {
+	t.Helper()
+	ln, e := net.Listen("tcp", "127.0.0.1:0")
+	if e != nil {
+		t.Fatal(e)
+	}
+	t.Cleanup(func() { ln.Close() })
+	go func() {
+		for {
+			c, err := ln.Accept()
+			if err != nil {
+				return
+			}
+			go func(c net.Conn) {
+				defer c.Close()
+				br := bufio.NewReader(c)
+				if req, err := http.ReadRequest(br); err == nil {
+					io.Copy(io.Discard, req.Body)
+					io.WriteString(c, "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nok")
+				}
+				if req, err := http.ReadRequest(br); err == nil {
+					io.Copy(io.Discard, req.Body)
+				}
+			}(c)
+		}
+	}()
+	return "http://" + ln.Addr().String() + "/"
+}
+
+func TestWarmRecordingSurvivesStaleConnections(t *testing.T) {
+	url := staleServer(t)
+	o := DefaultOptions()
+	o.Samples = 4
+	o.Warm = true
+	r, e := Record(context.Background(), url, o)
+	if e != nil || !RecordingSucceeded(r) {
+		t.Fatal("a retried request on a stale connection must still be recorded", e)
+	}
+	retried := 0
+	for _, s := range r.Samples {
+		h := s.Hops[0]
+		if len(eventsNamed(h, "connection_acquired")) > 1 {
+			retried++
+			if h.WinningConnectAttempt != nil {
+				t.Fatal("a retried hop cannot claim one winning connection")
+			}
+			if h.ConnectionReused == nil || *h.ConnectionReused {
+				t.Fatal("the connection that served the retry was new")
+			}
+		}
+	}
+	if retried == 0 {
+		t.Fatal("the stale server should have forced at least one retry")
+	}
+	report, e := Explain(r)
+	if e != nil {
+		t.Fatal(e)
+	}
+	_ = report
+	// POST is not replayed by the transport, so a stale connection fails the sample honestly.
+	p := postOptions("x")
+	p.Warm, p.Samples = true, 3
+	if r, e = Record(context.Background(), url, p); e != nil || RecordingSucceeded(r) {
+		t.Fatal("a POST on a stale connection must be recorded as failed, not retried", e)
+	}
+}
+
+func eventsNamed(h Hop, kind string) []Event {
+	var out []Event
+	for _, e := range h.Events {
+		if e.Kind == kind {
+			out = append(out, e)
+		}
+	}
+	return out
+}
+
+func TestReviewFixesForPostAndWarm(t *testing.T) {
+	s, log := postServer(t)
+	other, otherLog := postServer(t)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/away", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, other.URL+"/echo", http.StatusTemporaryRedirect)
+	})
+	away := httptest.NewServer(mux)
+	defer away.Close()
+	o := postOptions("secret-body")
+	o.Samples = 1
+	r, e := Record(context.Background(), away.URL+"/away", o)
+	if e != nil || len(r.Samples[0].Hops) != 1 || r.Samples[0].Hops[0].ErrorCode != "cross_origin_body_redirect" || len(otherLog.requests) != 0 {
+		t.Fatal("a 307 to another origin must not resend the body", r.Samples, e)
+	}
+	_ = log
+
+	for _, ct := range []string{"a\x01b", "a\x7fb", "a\nb"} {
+		bad := postOptions("x")
+		bad.ContentType = ct
+		if _, e := Record(context.Background(), s.URL+"/echo", bad); e == nil {
+			t.Fatalf("content type %q accepted", ct)
+		}
+	}
+	empty, e := Record(context.Background(), s.URL+"/echo", postOptions(""))
+	if e != nil || empty.Request.RequestBodySHA256 != emptySHA256 {
+		t.Fatal(e)
+	}
+	forged := empty
+	forged.Request.RequestBodySHA256 = strings.Repeat("a", 64)
+	if forged.Validate() == nil {
+		t.Fatal("a zero-byte body with another digest was accepted")
+	}
+
+	// A later hop that doesn't follow a redirect is invalid in either schema.
+	two, e := Record(context.Background(), s.URL+"/r307", o)
+	if e != nil {
+		t.Fatal(e)
+	}
+	status := 200
+	two.Samples[0].Hops[0].StatusCode = &status
+	if two.Validate() == nil {
+		t.Fatal("hop after a 200 accepted")
+	}
+
+	// Two warm runs where one server closes connections: reuse differs, so a verdict is cautioned.
+	closing := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Connection", "close")
+		io.WriteString(w, "ok")
+	}))
+	defer closing.Close()
+	w := DefaultOptions()
+	w.Samples, w.Warm = 4, true
+	kept, e := Record(context.Background(), s.URL+"/echo", w)
+	if e != nil {
+		t.Fatal(e)
+	}
+	closed, e := Record(context.Background(), closing.URL+"/echo", w)
+	if e != nil {
+		t.Fatal(e)
+	}
+	closed.Request.URL, closed.Samples = kept.Request.URL, retarget(closed.Samples, kept.Samples[0].Hops[0].URL)
+	c, _ := Compare(kept, closed)
+	found := false
+	for _, k := range c.Checks {
+		if k.RuleID == "connection_reuse_v1" && k.Severity == "caution" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatal("different reuse patterns must be cautioned", c.Checks)
+	}
+	if c, _ = Compare(kept, kept); len(c.Checks) != 0 {
+		t.Fatal(c.Checks)
+	}
+}
+
+func retarget(samples []Sample, url string) []Sample {
+	out := make([]Sample, len(samples))
+	for i, s := range samples {
+		s.Hops = append([]Hop(nil), s.Hops...)
+		for j := range s.Hops {
+			s.Hops[j].URL = url
+		}
+		out[i] = s
+	}
+	return out
 }

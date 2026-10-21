@@ -100,7 +100,7 @@ func Explain(r Recording) (Report, error) {
 	if r.SchemaVersion == 2 {
 		report.Measurements = append(report.Measurements, measurement("connection_policy", r.Request.ConnectionPolicy, "/request/connection_policy"))
 		if r.Request.Method == "POST" {
-			report.Measurements = append(report.Measurements, measurement("request_body_bytes", r.Request.RequestBodyBytes, "/request"), measurement("request_body_sha256", r.Request.RequestBodySHA256, "/request"))
+			report.Measurements = append(report.Measurements, measurement("request_body_bytes", r.Request.RequestBodyBytes, "/request"), measurement("request_body_sha256", r.Request.RequestBodySHA256, "/request/request_body_sha256"))
 			if r.Request.ContentType != "" {
 				report.Measurements = append(report.Measurements, measurement("content_type", r.Request.ContentType, "/request/content_type"))
 			}
@@ -357,6 +357,8 @@ func failureExplanation(code string) string {
 		return "The recorder stopped when its trace-event limit was reached."
 	case "unsupported_upgrade":
 		return "The recorder rejected an HTTP protocol upgrade."
+	case "cross_origin_body_redirect":
+		return "The recorder did not follow a 307 or 308 redirect that would resend the POST body to another origin."
 	default:
 		return "The recorder reported a response failure."
 	}

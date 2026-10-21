@@ -57,7 +57,7 @@ func (o Options) validate() error {
 	if o.method() == "GET" && (o.Body != nil || o.ContentType != "") {
 		return errors.New("a request body and content type need POST")
 	}
-	if len(o.Body) > MaxRequestBodyBytes || len(o.ContentType) > 256 || strings.ContainsAny(o.ContentType, "\r\n") {
+	if len(o.Body) > MaxRequestBodyBytes || !validContentType(o.ContentType) {
 		return errors.New("request body or content type out of bounds")
 	}
 	for _, d := range []time.Duration{o.Timeout, o.ConnectTimeout, o.HeaderTimeout, o.BodyTimeout} {
@@ -147,20 +147,21 @@ var errBodyTimeout = errors.New("body timeout")
 var errEventLimit = errors.New("event limit")
 
 type traceLog struct {
-	limited    bool
-	mu         sync.Mutex
-	start      time.Time
-	events     []Event
-	frozen     bool
-	cancel     context.CancelCauseFunc
-	connect    map[string][]string
-	successful map[string][]string
-	dns        string
-	tls        string
-	count      int
-	winner     *string
-	remote     *string
-	reused     *bool
+	limited      bool
+	mu           sync.Mutex
+	start        time.Time
+	events       []Event
+	frozen       bool
+	cancel       context.CancelCauseFunc
+	connect      map[string][]string
+	successful   map[string][]string
+	dns          string
+	tls          string
+	count        int
+	winner       *string
+	acquisitions int
+	remote       *string
+	reused       *bool
 }
 
 func (l *traceLog) addLocked(kind, attempt, outcome, address string) {
@@ -282,9 +283,17 @@ func (l *traceLog) trace() *httptrace.ClientTrace {
 			reused := info.Reused
 			l.remote = &address
 			l.reused = &reused
-			if ids := l.successful[address]; len(ids) == 1 && ids[0] != "" {
+			l.acquisitions++
+			if ids := l.successful[address]; l.acquisitions == 1 && len(ids) == 1 && ids[0] != "" {
 				winner := ids[0]
 				l.winner = &winner
+			} else {
+				// A second acquisition means the transport retried the request,
+				// typically after a reused keep-alive connection turned out to be
+				// closed. No single connection explains the hop, so keep every
+				// event, report the connection that served the response and
+				// claim no winning connect attempt.
+				l.winner = nil
 			}
 			l.addLocked("connection_acquired", "", "success", address)
 		},
@@ -424,6 +433,9 @@ func recordHop(parent context.Context, target *url.URL, o Options, atLimit bool,
 					h.ErrorCode = "invalid_redirect"
 				} else if atLimit {
 					h.ErrorCode = "redirect_limit"
+				} else if method == "POST" && (status == 307 || status == 308) && !sameOrigin(target, candidate) {
+					// 307 and 308 would resend the body. Never send it to another origin.
+					h.ErrorCode = "cross_origin_body_redirect"
 				} else {
 					candidate.Fragment = ""
 					next = candidate
@@ -492,4 +504,17 @@ func RecordingSucceeded(r Recording) bool {
 		}
 	}
 	return true
+}
+
+func sameOrigin(a, b *url.URL) bool {
+	port := func(u *url.URL) string {
+		if p := u.Port(); p != "" {
+			return p
+		}
+		if strings.EqualFold(u.Scheme, "https") {
+			return "443"
+		}
+		return "80"
+	}
+	return strings.EqualFold(a.Scheme, b.Scheme) && strings.EqualFold(a.Hostname(), b.Hostname()) && port(a) == port(b)
 }
