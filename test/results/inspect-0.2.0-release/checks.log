@@ -1,0 +1,9 @@
+UTC: 2026-10-21T15:52:33Z
+Release: inspect/v0.2.0 "BitSpeed Inspect v0.2.0", tag at dd45cac (the commit carrying the publisher wait fix); BUILD_INFO source_sha dd45cacb0dc78b562b9c6370ab726c71b9896664
+Earlier attempts from a339f25 refused at the publish gate because GitHub's jobs API showed finished jobs as in progress; nothing was created then.
+Latest release: inspect/v0.2.0, 13 assets (both products' archives and verification JSON, combined SHA256SUMS)
+PASS latest checksum: all 12 assets match SHA256SUMS
+PASS downloaded binaries report bitspeed-inspect 0.2.0 and bitspeed-transfer 0.3.0 (carried)
+PASS scripts/smoke-inspect.py on the downloaded Linux amd64 binary, including gate exit codes 0/3/4/1
+PASS all 13 bitspeed.org download links resolve to latest assets
+Demo (released binary): saved recordings slow-as-candidate exit 3, fast-as-candidate exit 0; bitspeed.org repeat run first_byte_wait +8.0% inconclusive, pass
