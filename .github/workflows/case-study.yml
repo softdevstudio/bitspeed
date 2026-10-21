@@ -1,0 +1,47 @@
+name: Public case study
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['examples/public/targets.txt']
+permissions:
+  contents: read
+jobs:
+  record:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-latest, archive: bitspeed-inspect-linux-amd64.tar.gz, label: github-ubuntu}
+          - {runner: macos-latest, archive: bitspeed-inspect-darwin-arm64.tar.gz, label: github-macos}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download released Inspect and verify checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dl && cd dl
+          gh release download inspect/v0.1.1 --repo "$GITHUB_REPOSITORY" -p "${{ matrix.archive }}" -p SHA256SUMS
+          grep " ${{ matrix.archive }}$" SHA256SUMS > want
+          if command -v sha256sum >/dev/null; then sha256sum -c want; else shasum -a 256 -c want; fi
+          tar xzf "${{ matrix.archive }}" bitspeed-inspect
+          ./bitspeed-inspect --version
+      - name: Record public targets
+        run: |
+          out="out/${{ matrix.label }}"; mkdir -p "$out"
+          uname -a > "$out/environment.txt"; date -u +%FT%TZ >> "$out/environment.txt"
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            case "$name" in \#*) continue;; esac
+            ./dl/bitspeed-inspect record --samples=10 --interval=1s --location="${{ matrix.label }}" "$url" > "$out/$name.json" 2> "$out/$name.stderr" || echo "record $name exited $?" >> "$out/status.txt"
+            ./dl/bitspeed-inspect explain "$out/$name.json" > "$out/$name.explain.txt" 2>&1 || true
+          done < examples/public/targets.txt
+          ./dl/bitspeed-inspect compare "$out/bitspeed-home.json" "$out/bitspeed-home-again.json" > "$out/compare-bitspeed-repeat.txt" 2>&1 || true
+          ./dl/bitspeed-inspect compare "$out/example-com.json" "$out/bitspeed-home.json" > "$out/compare-example-vs-bitspeed.txt" 2>&1 || true
+      - uses: actions/upload-artifact@v4
+        with:
+          name: case-study-${{ matrix.label }}
+          path: out/

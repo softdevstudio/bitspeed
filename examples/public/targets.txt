@@ -1,0 +1,6 @@
+# name url, recorded in this order, 10 samples each, one second apart
+bitspeed-home https://bitspeed.org/
+example-com https://example.com/
+github-redirect http://github.com/
+cdn-large-file https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js
+bitspeed-home-again https://bitspeed.org/
