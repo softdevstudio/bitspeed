@@ -309,6 +309,13 @@ func TestReviewFixesForPostAndWarm(t *testing.T) {
 		t.Fatal("a 307 to another origin must not resend the body", r.Samples, e)
 	}
 	_ = log
+	get := r
+	get.Samples = append([]Sample(nil), r.Samples...)
+	get.Samples[0].Hops = append([]Hop(nil), r.Samples[0].Hops...)
+	get.Samples[0].Hops[0].Method = "GET"
+	if get.Validate() == nil {
+		t.Fatal("a GET hop cannot carry cross_origin_body_redirect")
+	}
 
 	for _, ct := range []string{"a\x01b", "a\x7fb", "a\nb"} {
 		bad := postOptions("x")

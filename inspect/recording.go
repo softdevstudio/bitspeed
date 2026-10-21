@@ -388,6 +388,9 @@ func (r Recording) validateRequestShape() error {
 // 308 keep the method and body while 301, 302 and 303 switch to GET.
 func (r Recording) validateHopMethod(hops []Hop, j int) error {
 	h := hops[j]
+	if h.ErrorCode == "cross_origin_body_redirect" && (r.SchemaVersion != 2 || h.Method != "POST") {
+		return errors.New("only a schema 2 POST hop can stop at a cross-origin body redirect")
+	}
 	if r.SchemaVersion == 1 {
 		if h.Method != "" {
 			return errors.New("schema 1 hops carry no method")
