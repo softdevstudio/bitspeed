@@ -1,0 +1,12 @@
+UTC: 2026-10-21T17:53:43Z
+Release: transfer/v0.4.0 "BitSpeed Transfer v0.4.0" from 4f56355 (tag object 4f56355feb6d77218bc9b057a104a91dbdbbb320)
+Gates on the exact commit: CI 39646895503 success; Transfer Windows 39646895950 success (windows-latest, Windows Server 2025 10.0.26100, go1.27.3; full transfer tests, race tests, Windows-specific tests and the three executable smoke scripts; output in windows-workflow-annotations.txt); Release Transfer 39647165173 success on the first attempt (plan with Windows gate, five package jobs, native linux-amd64, darwin-arm64 and windows-amd64 each running delivery, interruption and TLS smoke, publish)
+Latest release: transfer/v0.4.0, 13 assets
+PASS latest checksum: all 12 assets match SHA256SUMS (downloaded through the assets API)
+PASS all five Transfer archives: clean provenance for 0.4.0 at 4f56355, operational_support "see included platform documentation", windows-persistence.md included
+PASS verification metadata: operational native targets linux/amd64, darwin/arm64, windows/amd64; no limited targets; cross-build only linux/arm64, darwin/amd64
+PASS Inspect archives and verification metadata identical to the Inspect 0.3.0 release (carried)
+PASS downloaded binaries report bitspeed-transfer 0.4.0 and bitspeed-inspect 0.3.0
+PASS smoke-transfer.py, smoke-transfer-interruption.py and smoke-transfer-tls.py on the downloaded Linux amd64 binary
+PASS every releases/latest/download name used by bitspeed.org exists in the latest release
+Review: independent review found no blockers; should-fix items addressed before the version bump (see docs/transfer-releases.md)

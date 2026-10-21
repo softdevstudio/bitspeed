@@ -1,0 +1,27 @@
+=== notice smoke-transfer-tls
+PASS: executable HTTPS listener, certificate verification, authenticated upload and completion
+=== notice smoke-transfer-interruption
+PASS: executable kill/restart/resume at partial chunk
+PASS: executable kill/restart/resume at chunk response
+PASS: executable kill/restart/resume at final response
+=== notice smoke-transfer
+PASS: Transfer preparation, staging, verified publication, receipt cache, offline clean, progress output, process restart, repeat delivery and damaged-output rejection
+=== notice windows-tests
+=== RUN   TestWindowsPrivateDirectoriesAndFiles
+--- PASS: TestWindowsPrivateDirectoriesAndFiles (0.14s)
+=== RUN   TestWindowsFlushesReadHandlesAndDirectories
+--- PASS: TestWindowsFlushesReadHandlesAndDirectories (0.01s)
+=== RUN   TestWindowsRenameAndNoReplaceLink
+--- PASS: TestWindowsRenameAndNoReplaceLink (0.02s)
+=== RUN   TestWindowsSourceWritersAreRefusedAndBlocked
+--- PASS: TestWindowsSourceWritersAreRefusedAndBlocked (0.04s)
+=== RUN   TestWindowsLockAndFilesystem
+--- PASS: TestWindowsLockAndFilesystem (0.01s)
+=== RUN   TestWindowsRemoteRootsAreRefused
+--- PASS: TestWindowsRemoteRootsAreRefused (0.02s)
+PASS
+ok  	github.com/softdevstudio/bitspeed/transfer	0.258s
+=== notice environment
+4f56355feb6d77218bc9b057a104a91dbdbbb320
+go version go1.27.3 windows/amd64
+Windows-2025Server-10.0.26100-SP0
