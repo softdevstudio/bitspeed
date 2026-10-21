@@ -160,6 +160,8 @@ func TestCompareCommand(t *testing.T) {
 
 func TestCompareGateExitCodes(t *testing.T) {
 	before, after := filepath.Join("..", "..", "examples", "recordings", "before.json"), filepath.Join("..", "..", "examples", "recordings", "after.json")
+	public := filepath.Join("..", "..", "examples", "public", "results", "github-ubuntu")
+	siteA, siteB := filepath.Join(public, "example-com.json"), filepath.Join(public, "bitspeed-home.json")
 	cases := []struct {
 		args []string
 		code int
@@ -168,11 +170,14 @@ func TestCompareGateExitCodes(t *testing.T) {
 		{[]string{"--fail-if-slower=first_byte_wait", after, before}, 3},
 		{[]string{"--format=json", "--fail-if-slower=first_byte_wait", after, before}, 3},
 		{[]string{"--fail-if-slower=first_byte_wait", "--min-change=200ms", after, before}, 0},
-		{[]string{"--fail-if-slower=dns_resolution", before, after}, 4},
-		{[]string{"--fail-if-slower=dns_resolution", "--allow-undecided", before, after}, 0},
+		{[]string{"--fail-if-slower=dns_resolution", before, after}, 0},
+		{[]string{"--fail-if-slower=first_byte_wait", siteA, siteB}, 4},
+		{[]string{"--fail-if-slower=first_byte_wait", "--allow-undecided", siteA, siteB}, 0},
 		{[]string{"--fail-if-slower=observed_payload_rate", before, after}, 1},
 		{[]string{"--min-change=1ms", before, after}, 1},
 		{[]string{"--fail-if-slower=first_byte_wait", "--min-percent=-1", before, after}, 1},
+		{[]string{"--fail-if-slower=first_byte_wait", "--min-percent=NaN", after, before}, 1},
+		{[]string{"--fail-if-slower=first_byte_wait", "--min-percent=+Inf", after, before}, 1},
 	}
 	for _, c := range cases {
 		var out, errOut bytes.Buffer
@@ -193,10 +198,15 @@ func TestCompareGateExitCodes(t *testing.T) {
 			if out.Len() == 0 || !strings.Contains(errOut.String(), "gate: ") {
 				t.Fatal("gate run must print the comparison and gate lines", c.args)
 			}
+			plain := []string{}
 			for _, a := range c.args {
-				if a == "--format=json" && !json.Valid(out.Bytes()) {
-					t.Fatal("gate must not change JSON output")
+				if a == "--format=json" || !strings.HasPrefix(a, "--") {
+					plain = append(plain, a)
 				}
+			}
+			var ungated, ignored bytes.Buffer
+			if err := compare(plain, strings.NewReader(""), &ungated, &ignored); err != nil || !bytes.Equal(ungated.Bytes(), out.Bytes()) {
+				t.Fatal("the gate must not change stdout", c.args, err)
 			}
 		} else if out.Len() != 0 {
 			t.Fatal("rejected options produced output", c.args)

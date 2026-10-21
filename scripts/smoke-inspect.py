@@ -68,7 +68,9 @@ try:
                 cancelled.communicate()
     saved = Path(__file__).resolve().parents[1] / 'examples' / 'recordings'
     before, after = str(saved / 'before.json'), str(saved / 'after.json')
-    for args, code in ((['--fail-if-slower=first_byte_wait', before, after], 0), (['--fail-if-slower=first_byte_wait', after, before], 3), (['--fail-if-slower=dns_resolution', before, after], 4), (['--fail-if-slower=dns_resolution', '--allow-undecided', before, after], 0), (['--fail-if-slower=observed_payload_rate', before, after], 1)):
+    public = Path(__file__).resolve().parents[1] / 'examples' / 'public' / 'results' / 'github-ubuntu'
+    site_a, site_b = str(public / 'example-com.json'), str(public / 'bitspeed-home.json')
+    for args, code in ((['--fail-if-slower=first_byte_wait', before, after], 0), (['--fail-if-slower=first_byte_wait', after, before], 3), (['--fail-if-slower=first_byte_wait', site_a, site_b], 4), (['--fail-if-slower=first_byte_wait', '--allow-undecided', site_a, site_b], 0), (['--fail-if-slower=observed_payload_rate', before, after], 1)):
         gated = subprocess.run([binary, 'compare', *args], capture_output=True, text=True, timeout=10)
         assert gated.returncode == code, (args, gated.returncode, gated.stderr)
         assert (code == 1) == (gated.stdout == ''), args

@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math"
 	"net"
 	"net/http"
 	"os"
@@ -224,8 +225,8 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 		if err != nil {
 			return err
 		}
-		if *minChange < 0 || *minPercent < 0 {
-			return errors.New("--min-change and --min-percent must not be negative")
+		if *minChange < 0 || *minPercent < 0 || math.IsNaN(*minPercent) || math.IsInf(*minPercent, 0) {
+			return errors.New("--min-change and --min-percent must be finite and not negative")
 		}
 		gate = &inspect.Gate{Metrics: metrics, MinChangeNS: float64(*minChange), MinPercent: *minPercent, AllowUndecided: *allowUndecided}
 	} else if *minChange != 0 || *minPercent != 0 || *allowUndecided {
@@ -268,9 +269,8 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 			line += fmt.Sprintf(", %+.1f%%", *f.PercentChange)
 		}
 		line += ") " + f.Reason
-		if _, err = fmt.Fprintln(stderr, line); err != nil {
-			return err
-		}
+		// A broken stderr must not hide the gate's exit status.
+		_, _ = fmt.Fprintln(stderr, line)
 	}
 	switch result.Outcome {
 	case "regressed":
@@ -278,6 +278,6 @@ func compare(args []string, stdin io.Reader, stdout, stderr io.Writer) error {
 	case "undecided":
 		return gateExit{4, "gate undecided: a gated interval could not be judged; see gate lines above"}
 	}
-	_, err = fmt.Fprintln(stderr, "gate passed")
-	return err
+	_, _ = fmt.Fprintln(stderr, "gate passed")
+	return nil
 }
