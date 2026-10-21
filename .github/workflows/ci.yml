@@ -33,7 +33,18 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
-      - run: go vet ./transfer/... ./cmd/bitspeed-transfer/...
-      - run: go test -count=1 -v -run Windows ./transfer
-      - run: go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/...
-      - run: go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/...
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: vet and tests
+        shell: bash
+        run: |
+          set -o pipefail
+          status=0
+          go vet ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee vet.log || status=1
+          go test -count=1 -v -run Windows ./transfer 2>&1 | tee windows.log || status=1
+          python scripts/annotate-log.py notice windows-tests windows.log 120
+          go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test.log || { status=1; python scripts/annotate-log.py error tests test.log 250; }
+          go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee race.log || { status=1; python scripts/annotate-log.py error race race.log 120; }
+          [ -s vet.log ] && python scripts/annotate-log.py warning vet vet.log 60
+          exit $status
