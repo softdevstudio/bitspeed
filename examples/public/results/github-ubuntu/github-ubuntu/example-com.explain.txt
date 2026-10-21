@@ -1,0 +1,656 @@
+BitSpeed Inspect explanation
+Source SHA256: "382d9211eb84c64475c839fb1ec78f082b9586ba0dac081c086745af7ebc845e"
+  Measured "url": "https://example.com/" [recording:"/request/url"]
+  Measured "method": "GET" [recording:"/request/method"]
+  Measured "samples_requested": 10 [recording:"/request/samples_requested"]
+  Measured "location_label": "github-ubuntu" [recording:"/request/location_label"]
+Sample 0
+  Measured "outcome": "complete" [recording:"/samples/0/outcome"]
+  Measured "elapsed_ns": 82406247 [recording:"/samples/0/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/0/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/0/hops/0/outcome"]
+  Measured "elapsed_ns": 82390859 [recording:"/samples/0/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/0/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/0/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/0/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/0/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/0/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/0/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/0/hops/0/body_complete"]
+  Calculated "dns_resolution": 22.196361 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/0/hops/0/events/0"
+    Evidence "recording":"/samples/0/hops/0/events/1"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "tcp_connect": 15.830584 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/0/hops/0/events/2"
+    Evidence "recording":"/samples/0/hops/0/events/3"
+    Evidence "recording":"/samples/0/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "tls_handshake": 27.754405 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/0/hops/0/events/4"
+    Evidence "recording":"/samples/0/hops/0/events/5"
+    Evidence "recording":"/samples/0/hops/0/events/2"
+    Evidence "recording":"/samples/0/hops/0/events/3"
+    Evidence "recording":"/samples/0/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/0/hops/0/remote_address"
+    Evidence "recording":"/samples/0/hops/0/events/6"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "connection_setup": 65.996193 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/0/hops/0/events/2"
+    Evidence "recording":"/samples/0/hops/0/events/3"
+    Evidence "recording":"/samples/0/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/0/hops/0/events/6"
+    Evidence "recording":"/samples/0/hops/0/remote_address"
+    Evidence "recording":"/samples/0/hops/0/events/4"
+    Evidence "recording":"/samples/0/hops/0/events/5"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "first_byte_wait": 16.133232 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/0/hops/0/events/7"
+    Evidence "recording":"/samples/0/hops/0/events/8"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "response_read": 0.202003 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/0/hops/0/events/8"
+    Evidence "recording":"/samples/0/hops/0/events/9"
+    Evidence "recording":"/samples/0/hops/0/body_complete"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Calculated "observed_payload_rate": 2856393.222 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/0/hops/0/body_bytes"
+    Evidence "recording":"/samples/0/hops/0/body_complete"
+    Evidence "report":"/samples/0/hops/0/calculations/5"
+    Evidence "recording":"/samples/0/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/0/hops/0/calculations/3"
+    Evidence "report":"/samples/0/hops/0/calculations/4"
+    Evidence "report":"/samples/0/hops/0/calculations/5"
+Sample 1
+  Measured "outcome": "complete" [recording:"/samples/1/outcome"]
+  Measured "elapsed_ns": 44893707 [recording:"/samples/1/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/1/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/1/hops/0/outcome"]
+  Measured "elapsed_ns": 44856408 [recording:"/samples/1/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/1/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/1/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/1/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/1/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/1/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/1/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/1/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.838708 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/1/hops/0/events/0"
+    Evidence "recording":"/samples/1/hops/0/events/1"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "tcp_connect": 11.033603 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/1/hops/0/events/2"
+    Evidence "recording":"/samples/1/hops/0/events/3"
+    Evidence "recording":"/samples/1/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "tls_handshake": 15.549372 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/1/hops/0/events/4"
+    Evidence "recording":"/samples/1/hops/0/events/5"
+    Evidence "recording":"/samples/1/hops/0/events/2"
+    Evidence "recording":"/samples/1/hops/0/events/3"
+    Evidence "recording":"/samples/1/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/1/hops/0/remote_address"
+    Evidence "recording":"/samples/1/hops/0/events/6"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "connection_setup": 27.673874 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/1/hops/0/events/2"
+    Evidence "recording":"/samples/1/hops/0/events/3"
+    Evidence "recording":"/samples/1/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/1/hops/0/events/6"
+    Evidence "recording":"/samples/1/hops/0/remote_address"
+    Evidence "recording":"/samples/1/hops/0/events/4"
+    Evidence "recording":"/samples/1/hops/0/events/5"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "first_byte_wait": 16.810919 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/1/hops/0/events/7"
+    Evidence "recording":"/samples/1/hops/0/events/8"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "response_read": 0.314558 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/1/hops/0/events/8"
+    Evidence "recording":"/samples/1/hops/0/events/9"
+    Evidence "recording":"/samples/1/hops/0/body_complete"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Calculated "observed_payload_rate": 1834319.903 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/1/hops/0/body_bytes"
+    Evidence "recording":"/samples/1/hops/0/body_complete"
+    Evidence "report":"/samples/1/hops/0/calculations/5"
+    Evidence "recording":"/samples/1/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/1/hops/0/calculations/3"
+    Evidence "report":"/samples/1/hops/0/calculations/4"
+    Evidence "report":"/samples/1/hops/0/calculations/5"
+Sample 2
+  Measured "outcome": "complete" [recording:"/samples/2/outcome"]
+  Measured "elapsed_ns": 42395724 [recording:"/samples/2/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/2/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/2/hops/0/outcome"]
+  Measured "elapsed_ns": 42365547 [recording:"/samples/2/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/2/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/2/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/2/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/2/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/2/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/2/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/2/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.922799 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/2/hops/0/events/0"
+    Evidence "recording":"/samples/2/hops/0/events/1"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "tcp_connect": 8.975536 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/2/hops/0/events/2"
+    Evidence "recording":"/samples/2/hops/0/events/3"
+    Evidence "recording":"/samples/2/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "tls_handshake": 14.981567 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/2/hops/0/events/4"
+    Evidence "recording":"/samples/2/hops/0/events/5"
+    Evidence "recording":"/samples/2/hops/0/events/2"
+    Evidence "recording":"/samples/2/hops/0/events/3"
+    Evidence "recording":"/samples/2/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/2/hops/0/remote_address"
+    Evidence "recording":"/samples/2/hops/0/events/6"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "connection_setup": 25.119400 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/2/hops/0/events/2"
+    Evidence "recording":"/samples/2/hops/0/events/3"
+    Evidence "recording":"/samples/2/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/2/hops/0/events/6"
+    Evidence "recording":"/samples/2/hops/0/remote_address"
+    Evidence "recording":"/samples/2/hops/0/events/4"
+    Evidence "recording":"/samples/2/hops/0/events/5"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "first_byte_wait": 17.057514 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/2/hops/0/events/7"
+    Evidence "recording":"/samples/2/hops/0/events/8"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "response_read": 0.135834 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/2/hops/0/events/8"
+    Evidence "recording":"/samples/2/hops/0/events/9"
+    Evidence "recording":"/samples/2/hops/0/body_complete"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Calculated "observed_payload_rate": 4247831.912 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/2/hops/0/body_bytes"
+    Evidence "recording":"/samples/2/hops/0/body_complete"
+    Evidence "report":"/samples/2/hops/0/calculations/5"
+    Evidence "recording":"/samples/2/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/2/hops/0/calculations/3"
+    Evidence "report":"/samples/2/hops/0/calculations/4"
+    Evidence "report":"/samples/2/hops/0/calculations/5"
+Sample 3
+  Measured "outcome": "complete" [recording:"/samples/3/outcome"]
+  Measured "elapsed_ns": 38884082 [recording:"/samples/3/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/3/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/3/hops/0/outcome"]
+  Measured "elapsed_ns": 38850079 [recording:"/samples/3/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/3/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/3/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/3/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/3/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/3/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/3/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/3/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.752839 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/3/hops/0/events/0"
+    Evidence "recording":"/samples/3/hops/0/events/1"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "tcp_connect": 9.626282 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/3/hops/0/events/2"
+    Evidence "recording":"/samples/3/hops/0/events/3"
+    Evidence "recording":"/samples/3/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "tls_handshake": 13.348369 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/3/hops/0/events/4"
+    Evidence "recording":"/samples/3/hops/0/events/5"
+    Evidence "recording":"/samples/3/hops/0/events/2"
+    Evidence "recording":"/samples/3/hops/0/events/3"
+    Evidence "recording":"/samples/3/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/3/hops/0/remote_address"
+    Evidence "recording":"/samples/3/hops/0/events/6"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "connection_setup": 23.959213 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/3/hops/0/events/2"
+    Evidence "recording":"/samples/3/hops/0/events/3"
+    Evidence "recording":"/samples/3/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/3/hops/0/events/6"
+    Evidence "recording":"/samples/3/hops/0/remote_address"
+    Evidence "recording":"/samples/3/hops/0/events/4"
+    Evidence "recording":"/samples/3/hops/0/events/5"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "first_byte_wait": 14.665185 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/3/hops/0/events/7"
+    Evidence "recording":"/samples/3/hops/0/events/8"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "response_read": 0.158253 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/3/hops/0/events/8"
+    Evidence "recording":"/samples/3/hops/0/events/9"
+    Evidence "recording":"/samples/3/hops/0/body_complete"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Calculated "observed_payload_rate": 3646060.422 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/3/hops/0/body_bytes"
+    Evidence "recording":"/samples/3/hops/0/body_complete"
+    Evidence "report":"/samples/3/hops/0/calculations/5"
+    Evidence "recording":"/samples/3/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/3/hops/0/calculations/3"
+    Evidence "report":"/samples/3/hops/0/calculations/4"
+    Evidence "report":"/samples/3/hops/0/calculations/5"
+Sample 4
+  Measured "outcome": "complete" [recording:"/samples/4/outcome"]
+  Measured "elapsed_ns": 44693518 [recording:"/samples/4/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/4/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/4/hops/0/outcome"]
+  Measured "elapsed_ns": 44665064 [recording:"/samples/4/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/4/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/4/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/4/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/4/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/4/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/4/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/4/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.738859 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/4/hops/0/events/0"
+    Evidence "recording":"/samples/4/hops/0/events/1"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "tcp_connect": 11.128701 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/4/hops/0/events/2"
+    Evidence "recording":"/samples/4/hops/0/events/3"
+    Evidence "recording":"/samples/4/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "tls_handshake": 16.027866 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/4/hops/0/events/4"
+    Evidence "recording":"/samples/4/hops/0/events/5"
+    Evidence "recording":"/samples/4/hops/0/events/2"
+    Evidence "recording":"/samples/4/hops/0/events/3"
+    Evidence "recording":"/samples/4/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/4/hops/0/remote_address"
+    Evidence "recording":"/samples/4/hops/0/events/6"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "connection_setup": 28.119994 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/4/hops/0/events/2"
+    Evidence "recording":"/samples/4/hops/0/events/3"
+    Evidence "recording":"/samples/4/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/4/hops/0/events/6"
+    Evidence "recording":"/samples/4/hops/0/remote_address"
+    Evidence "recording":"/samples/4/hops/0/events/4"
+    Evidence "recording":"/samples/4/hops/0/events/5"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "first_byte_wait": 16.283152 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/4/hops/0/events/7"
+    Evidence "recording":"/samples/4/hops/0/events/8"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "response_read": 0.201965 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/4/hops/0/events/8"
+    Evidence "recording":"/samples/4/hops/0/events/9"
+    Evidence "recording":"/samples/4/hops/0/body_complete"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Calculated "observed_payload_rate": 2856930.656 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/4/hops/0/body_bytes"
+    Evidence "recording":"/samples/4/hops/0/body_complete"
+    Evidence "report":"/samples/4/hops/0/calculations/5"
+    Evidence "recording":"/samples/4/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/4/hops/0/calculations/3"
+    Evidence "report":"/samples/4/hops/0/calculations/4"
+    Evidence "report":"/samples/4/hops/0/calculations/5"
+Sample 5
+  Measured "outcome": "complete" [recording:"/samples/5/outcome"]
+  Measured "elapsed_ns": 47602775 [recording:"/samples/5/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/5/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/5/hops/0/outcome"]
+  Measured "elapsed_ns": 47557581 [recording:"/samples/5/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/5/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/5/hops/0/protocol"]
+  Measured "remote_address": "172.66.147.243:443" [recording:"/samples/5/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/5/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/5/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/5/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/5/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.842536 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/5/hops/0/events/0"
+    Evidence "recording":"/samples/5/hops/0/events/1"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "tcp_connect": 12.475535 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/5/hops/0/events/2"
+    Evidence "recording":"/samples/5/hops/0/events/3"
+    Evidence "recording":"/samples/5/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "tls_handshake": 16.308657 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/5/hops/0/events/4"
+    Evidence "recording":"/samples/5/hops/0/events/5"
+    Evidence "recording":"/samples/5/hops/0/events/2"
+    Evidence "recording":"/samples/5/hops/0/events/3"
+    Evidence "recording":"/samples/5/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/5/hops/0/remote_address"
+    Evidence "recording":"/samples/5/hops/0/events/6"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "connection_setup": 29.787197 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/5/hops/0/events/2"
+    Evidence "recording":"/samples/5/hops/0/events/3"
+    Evidence "recording":"/samples/5/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/5/hops/0/events/6"
+    Evidence "recording":"/samples/5/hops/0/remote_address"
+    Evidence "recording":"/samples/5/hops/0/events/4"
+    Evidence "recording":"/samples/5/hops/0/events/5"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "first_byte_wait": 17.459336 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/5/hops/0/events/7"
+    Evidence "recording":"/samples/5/hops/0/events/8"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "response_read": 0.252680 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/5/hops/0/events/8"
+    Evidence "recording":"/samples/5/hops/0/events/9"
+    Evidence "recording":"/samples/5/hops/0/body_complete"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Calculated "observed_payload_rate": 2283520.659 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/5/hops/0/body_bytes"
+    Evidence "recording":"/samples/5/hops/0/body_complete"
+    Evidence "report":"/samples/5/hops/0/calculations/5"
+    Evidence "recording":"/samples/5/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/5/hops/0/calculations/3"
+    Evidence "report":"/samples/5/hops/0/calculations/4"
+    Evidence "report":"/samples/5/hops/0/calculations/5"
+Sample 6
+  Measured "outcome": "complete" [recording:"/samples/6/outcome"]
+  Measured "elapsed_ns": 44591301 [recording:"/samples/6/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/6/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/6/hops/0/outcome"]
+  Measured "elapsed_ns": 44562037 [recording:"/samples/6/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/6/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/6/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/6/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/6/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/6/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/6/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/6/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.901356 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/6/hops/0/events/0"
+    Evidence "recording":"/samples/6/hops/0/events/1"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "tcp_connect": 8.818116 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/6/hops/0/events/2"
+    Evidence "recording":"/samples/6/hops/0/events/3"
+    Evidence "recording":"/samples/6/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "tls_handshake": 14.221849 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/6/hops/0/events/4"
+    Evidence "recording":"/samples/6/hops/0/events/5"
+    Evidence "recording":"/samples/6/hops/0/events/2"
+    Evidence "recording":"/samples/6/hops/0/events/3"
+    Evidence "recording":"/samples/6/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/6/hops/0/remote_address"
+    Evidence "recording":"/samples/6/hops/0/events/6"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "connection_setup": 24.213186 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/6/hops/0/events/2"
+    Evidence "recording":"/samples/6/hops/0/events/3"
+    Evidence "recording":"/samples/6/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/6/hops/0/events/6"
+    Evidence "recording":"/samples/6/hops/0/remote_address"
+    Evidence "recording":"/samples/6/hops/0/events/4"
+    Evidence "recording":"/samples/6/hops/0/events/5"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "first_byte_wait": 19.816337 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/6/hops/0/events/7"
+    Evidence "recording":"/samples/6/hops/0/events/8"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "response_read": 0.479706 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/6/hops/0/events/8"
+    Evidence "recording":"/samples/6/hops/0/events/9"
+    Evidence "recording":"/samples/6/hops/0/body_complete"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Calculated "observed_payload_rate": 1202820.061 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/6/hops/0/body_bytes"
+    Evidence "recording":"/samples/6/hops/0/body_complete"
+    Evidence "report":"/samples/6/hops/0/calculations/5"
+    Evidence "recording":"/samples/6/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/6/hops/0/calculations/3"
+    Evidence "report":"/samples/6/hops/0/calculations/4"
+    Evidence "report":"/samples/6/hops/0/calculations/5"
+Sample 7
+  Measured "outcome": "complete" [recording:"/samples/7/outcome"]
+  Measured "elapsed_ns": 51428883 [recording:"/samples/7/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/7/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/7/hops/0/outcome"]
+  Measured "elapsed_ns": 51393727 [recording:"/samples/7/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/7/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/7/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/7/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/7/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/7/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/7/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/7/hops/0/body_complete"]
+  Calculated "dns_resolution": 3.246493 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/7/hops/0/events/0"
+    Evidence "recording":"/samples/7/hops/0/events/1"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "tcp_connect": 11.124569 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/7/hops/0/events/2"
+    Evidence "recording":"/samples/7/hops/0/events/3"
+    Evidence "recording":"/samples/7/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "tls_handshake": 16.356902 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/7/hops/0/events/4"
+    Evidence "recording":"/samples/7/hops/0/events/5"
+    Evidence "recording":"/samples/7/hops/0/events/2"
+    Evidence "recording":"/samples/7/hops/0/events/3"
+    Evidence "recording":"/samples/7/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/7/hops/0/remote_address"
+    Evidence "recording":"/samples/7/hops/0/events/6"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "connection_setup": 30.929138 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/7/hops/0/events/2"
+    Evidence "recording":"/samples/7/hops/0/events/3"
+    Evidence "recording":"/samples/7/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/7/hops/0/events/6"
+    Evidence "recording":"/samples/7/hops/0/remote_address"
+    Evidence "recording":"/samples/7/hops/0/events/4"
+    Evidence "recording":"/samples/7/hops/0/events/5"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "first_byte_wait": 20.294729 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/7/hops/0/events/7"
+    Evidence "recording":"/samples/7/hops/0/events/8"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "response_read": 0.115989 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/7/hops/0/events/8"
+    Evidence "recording":"/samples/7/hops/0/events/9"
+    Evidence "recording":"/samples/7/hops/0/body_complete"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Calculated "observed_payload_rate": 4974609.661 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/7/hops/0/body_bytes"
+    Evidence "recording":"/samples/7/hops/0/body_complete"
+    Evidence "report":"/samples/7/hops/0/calculations/5"
+    Evidence "recording":"/samples/7/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/7/hops/0/calculations/3"
+    Evidence "report":"/samples/7/hops/0/calculations/4"
+    Evidence "report":"/samples/7/hops/0/calculations/5"
+Sample 8
+  Measured "outcome": "complete" [recording:"/samples/8/outcome"]
+  Measured "elapsed_ns": 43869706 [recording:"/samples/8/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/8/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/8/hops/0/outcome"]
+  Measured "elapsed_ns": 43832015 [recording:"/samples/8/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/8/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/8/hops/0/protocol"]
+  Measured "remote_address": "104.20.23.154:443" [recording:"/samples/8/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/8/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/8/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/8/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/8/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.797153 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/8/hops/0/events/0"
+    Evidence "recording":"/samples/8/hops/0/events/1"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "tcp_connect": 10.894298 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/8/hops/0/events/2"
+    Evidence "recording":"/samples/8/hops/0/events/3"
+    Evidence "recording":"/samples/8/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "tls_handshake": 14.697757 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/8/hops/0/events/4"
+    Evidence "recording":"/samples/8/hops/0/events/5"
+    Evidence "recording":"/samples/8/hops/0/events/2"
+    Evidence "recording":"/samples/8/hops/0/events/3"
+    Evidence "recording":"/samples/8/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/8/hops/0/remote_address"
+    Evidence "recording":"/samples/8/hops/0/events/6"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "connection_setup": 26.618748 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/8/hops/0/events/2"
+    Evidence "recording":"/samples/8/hops/0/events/3"
+    Evidence "recording":"/samples/8/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/8/hops/0/events/6"
+    Evidence "recording":"/samples/8/hops/0/remote_address"
+    Evidence "recording":"/samples/8/hops/0/events/4"
+    Evidence "recording":"/samples/8/hops/0/events/5"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "first_byte_wait": 16.959643 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/8/hops/0/events/7"
+    Evidence "recording":"/samples/8/hops/0/events/8"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "response_read": 0.190756 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/8/hops/0/events/8"
+    Evidence "recording":"/samples/8/hops/0/events/9"
+    Evidence "recording":"/samples/8/hops/0/body_complete"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Calculated "observed_payload_rate": 3024806.559 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/8/hops/0/body_bytes"
+    Evidence "recording":"/samples/8/hops/0/body_complete"
+    Evidence "report":"/samples/8/hops/0/calculations/5"
+    Evidence "recording":"/samples/8/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/8/hops/0/calculations/3"
+    Evidence "report":"/samples/8/hops/0/calculations/4"
+    Evidence "report":"/samples/8/hops/0/calculations/5"
+Sample 9
+  Measured "outcome": "complete" [recording:"/samples/9/outcome"]
+  Measured "elapsed_ns": 37463539 [recording:"/samples/9/elapsed_ns"]
+ Hop 0
+  Measured "url": "https://example.com/" [recording:"/samples/9/hops/0/url"]
+  Measured "outcome": "complete" [recording:"/samples/9/hops/0/outcome"]
+  Measured "elapsed_ns": 37433231 [recording:"/samples/9/hops/0/elapsed_ns"]
+  Measured "status_code": 200 [recording:"/samples/9/hops/0/status_code"]
+  Measured "protocol": "HTTP/2.0" [recording:"/samples/9/hops/0/protocol"]
+  Measured "remote_address": "172.66.147.243:443" [recording:"/samples/9/hops/0/remote_address"]
+  Measured "connection_reused": false [recording:"/samples/9/hops/0/connection_reused"]
+  Measured "content_encoding": "identity" [recording:"/samples/9/hops/0/content_encoding"]
+  Measured "body_bytes": 577 [recording:"/samples/9/hops/0/body_bytes"]
+  Measured "body_complete": true [recording:"/samples/9/hops/0/body_complete"]
+  Calculated "dns_resolution": 0.812208 ms ["dns_resolution_v1"]
+    Limit: "Resolver timing does not establish whether a network DNS lookup occurred."
+    Evidence "recording":"/samples/9/hops/0/events/0"
+    Evidence "recording":"/samples/9/hops/0/events/1"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "tcp_connect": 8.635684 ms ["tcp_connect_v1"]
+    Evidence "recording":"/samples/9/hops/0/events/2"
+    Evidence "recording":"/samples/9/hops/0/events/3"
+    Evidence "recording":"/samples/9/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "tls_handshake": 12.944247 ms ["tls_handshake_v1"]
+    Evidence "recording":"/samples/9/hops/0/events/4"
+    Evidence "recording":"/samples/9/hops/0/events/5"
+    Evidence "recording":"/samples/9/hops/0/events/2"
+    Evidence "recording":"/samples/9/hops/0/events/3"
+    Evidence "recording":"/samples/9/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/9/hops/0/remote_address"
+    Evidence "recording":"/samples/9/hops/0/events/6"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "connection_setup": 22.627259 ms ["connection_setup_v1"]
+    Limit: "Elapsed time from hop start to connection acquisition includes resolver, dial, TLS and scheduling effects where present; these intervals are not additive."
+    Evidence "recording":"/samples/9/hops/0/events/2"
+    Evidence "recording":"/samples/9/hops/0/events/3"
+    Evidence "recording":"/samples/9/hops/0/winning_connect_attempt"
+    Evidence "recording":"/samples/9/hops/0/events/6"
+    Evidence "recording":"/samples/9/hops/0/remote_address"
+    Evidence "recording":"/samples/9/hops/0/events/4"
+    Evidence "recording":"/samples/9/hops/0/events/5"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "first_byte_wait": 14.638811 ms ["first_byte_wait_v1"]
+    Limit: "Client first-byte waiting includes effects beyond origin processing and does not identify a server-side cause."
+    Evidence "recording":"/samples/9/hops/0/events/7"
+    Evidence "recording":"/samples/9/hops/0/events/8"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "response_read": 0.133218 ms ["response_read_v1"]
+    Limit: "Starts at the first response byte, so it includes response-header reading and client scheduling as well as body reading."
+    Evidence "recording":"/samples/9/hops/0/events/8"
+    Evidence "recording":"/samples/9/hops/0/events/9"
+    Evidence "recording":"/samples/9/hops/0/body_complete"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Calculated "observed_payload_rate": 4331246.528 "bytes/s" ["observed_payload_rate_v1"]
+    Limit: "Payload bytes divided by the observed response interval is not link capacity or a pure body-transfer rate."
+    Evidence "recording":"/samples/9/hops/0/body_bytes"
+    Evidence "recording":"/samples/9/hops/0/body_complete"
+    Evidence "report":"/samples/9/hops/0/calculations/5"
+    Evidence "recording":"/samples/9/hops/0/events"
+  Interpretation ["largest_interval_v1"]: "Connection setup was the largest of the compared intervals in this hop."
+    Limit: "These intervals do not cover every part of the hop and do not establish the cause of the delay."
+    Evidence "report":"/samples/9/hops/0/calculations/3"
+    Evidence "report":"/samples/9/hops/0/calculations/4"
+    Evidence "report":"/samples/9/hops/0/calculations/5"

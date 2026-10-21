@@ -1,0 +1,34 @@
+BitSpeed Inspect comparison
+Calculated baseline counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Calculated candidate counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Recorded source hashes: baseline="89838173b27662dd7d120fa432aeefe289e14b41e87917bc9f4901bc341efc9e" candidate="f174f0d531fa2ea8ee6576272b689fb2c1ae4e99e464a710a43c6d8122d57b1c"
+Recorded location labels: baseline="github-macos" candidate="github-macos"
+Check ["request_target_v1", "blocking", scope="all"]: "Recorded request targets differ."
+Check ["redirect_chain_v1", "blocking", scope="all"]: "Hop targets or redirect chains differ within or between recordings; hop indices do not establish equivalent requests."
+Hop 0
+Check ["hop_body_bytes_v1", "blocking", scope="response"]: "Hop metadata differs, varies or is unavailable: body_bytes."
+Check ["remote_address_v1", "information", scope="all"]: "Observed remote addresses differ, vary or are unavailable."
+ Calculated "dns_resolution": baseline median=1.402062 ms range=[1.017708 ms, 31.131833 ms] n=10 unavailable=0 excluded=0; candidate median=2.539916 ms range=[1.198042 ms, 24.256209 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 1.137854 ms; percent change: 81.156%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tcp_connect": baseline median=3.387145 ms range=[2.470708 ms, 6.966375 ms] n=10 unavailable=0 excluded=0; candidate median=3.019938 ms range=[2.529916 ms, 5.667208 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -0.367208 ms; percent change: -10.841%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tls_handshake": baseline median=8.631937 ms range=[7.278750 ms, 26.801167 ms] n=10 unavailable=0 excluded=0; candidate median=11.401333 ms range=[8.857834 ms, 18.174750 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 2.769396 ms; percent change: 32.083%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "connection_setup": baseline median=13.455167 ms range=[11.732959 ms, 64.354875 ms] n=10 unavailable=0 excluded=0; candidate median=18.110646 ms range=[13.539375 ms, 46.105292 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 4.655479 ms; percent change: 34.600%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "first_byte_wait": baseline median=8.000730 ms range=[6.979917 ms, 11.151917 ms] n=10 unavailable=0 excluded=0; candidate median=59.550708 ms range=[54.255792 ms, 271.618042 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 51.549979 ms; percent change: 644.316%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "response_read": baseline median=0.149875 ms range=[0.114917 ms, 0.718125 ms] n=10 unavailable=0 excluded=0; candidate median=0.249291 ms range=[0.140000 ms, 0.424792 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 0.099417 ms; percent change: 66.333%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "observed_payload_rate": baseline median=3849889.409 "bytes/s" range=[803481.288 "bytes/s", 5021015.167 "bytes/s"] n=10 unavailable=0 excluded=0; candidate median=55190675.255 "bytes/s" range=[32378199.213 "bytes/s", 98242857.143 "bytes/s"] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 51340785.846 "bytes/s"; percent change: 1333.565%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+Limit: "Medians and minimum-to-maximum ranges describe the recorded samples, not statistical confidence or a causal effect."
+Limit: "Available phase values are retained even when a comparison is blocked; no overall faster-transfer claim is made."
+Limit: "Matching metadata and payload size do not prove identical response contents or identical external conditions."

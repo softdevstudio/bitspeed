@@ -1,0 +1,821 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.1",
+  "started_at": "2026-10-21T11:12:47.674013732Z",
+  "request": {
+    "samples_requested": 10,
+    "max_redirects": 10,
+    "timeout_ns": 30000000000,
+    "connect_timeout_ns": 5000000000,
+    "header_timeout_ns": 10000000000,
+    "body_timeout_ns": 15000000000,
+    "interval_ns": 1000000000,
+    "method": "GET",
+    "url": "https://example.com/",
+    "connection_policy": "fresh",
+    "decompression": false,
+    "location_label": "github-ubuntu"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "outcome": "complete",
+      "elapsed_ns": 82406247,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 82390859,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 72916,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 22269277,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 22310214,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 38140798,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 38169642,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 65924047,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 65996193,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 66053309,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 82186541
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 82388544
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 82390859
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "outcome": "complete",
+      "elapsed_ns": 44893707,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 44856408,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 131085,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 969793,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1012983,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 12046586,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 12067074,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 27616446,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 27673874,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 27728927,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 44539846
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 44854404
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 44856408
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "outcome": "complete",
+      "elapsed_ns": 42395724,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 42365547,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 122629,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1045428,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1080334,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 10055870,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 10075577,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 25057144,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 25119400,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 25170686,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 42228200
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 42364034
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 42365547
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "outcome": "complete",
+      "elapsed_ns": 38884082,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 38850079,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 111499,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 864338,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 897650,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 10523932,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 10539982,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 23888351,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 23959213,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 24024025,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 38689210
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 38847463
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 38850079
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "outcome": "complete",
+      "elapsed_ns": 44693518,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 44665064,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 117589,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 856448,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 890461,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 12019162,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 12042786,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 28070652,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 28119994,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 28177412,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 44460564
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 44662529
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 44665064
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "outcome": "complete",
+      "elapsed_ns": 47602775,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 47557581,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.66.147.243:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 74018,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 916554,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 943484,
+              "attempt": "connect-2",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 13419019,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 13433526,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 29742183,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 29787197,
+              "outcome": "success",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 29843521,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 47302857
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 47555537
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 47557581
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "outcome": "complete",
+      "elapsed_ns": 44591301,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 44562037,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 155299,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1056655,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1084406,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 9902522,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 9928691,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 24150540,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 24213186,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 24262678,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 44079015
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 44558721
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 44562037
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "outcome": "complete",
+      "elapsed_ns": 51428883,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 51393727,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 81933,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 3328426,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3363250,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 14487819,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 14501805,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 30858707,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 30929138,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 30980825,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 51275554
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 51391543
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 51393727
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "outcome": "complete",
+      "elapsed_ns": 43869706,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 43832015,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.20.23.154:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 126146,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 923299,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 945171,
+              "attempt": "connect-2",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 11839469,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 11862031,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 26559788,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 26618748,
+              "outcome": "success",
+              "address": "104.20.23.154:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 26679672,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 43639315
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 43830071
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 43832015
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "outcome": "complete",
+      "elapsed_ns": 37463539,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://example.com/",
+          "outcome": "complete",
+          "elapsed_ns": 37433231,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.66.147.243:443",
+          "connection_reused": false,
+          "body_bytes": 577,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 105448,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 917656,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 951008,
+              "attempt": "connect-2",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 9586692,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 9613342,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 22557589,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 22627259,
+              "outcome": "success",
+              "address": "172.66.147.243:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 22659659,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 37298470
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 37431688
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 37433231
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

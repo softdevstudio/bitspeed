@@ -1,0 +1,30 @@
+BitSpeed Inspect comparison
+Calculated baseline counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Calculated candidate counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Recorded source hashes: baseline="f174f0d531fa2ea8ee6576272b689fb2c1ae4e99e464a710a43c6d8122d57b1c" candidate="991815bb6282ba61912463331275bb8a6c4a49f7c4fa563c8e1f0d21e81e0d9c"
+Recorded location labels: baseline="github-macos" candidate="github-macos"
+Hop 0
+ Calculated "dns_resolution": baseline median=2.539916 ms range=[1.198042 ms, 24.256209 ms] n=10 unavailable=0 excluded=0; candidate median=1.542958 ms range=[0.956000 ms, 2.932875 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -0.996958 ms; percent change: -39.252%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "tcp_connect": baseline median=3.019938 ms range=[2.529916 ms, 5.667208 ms] n=10 unavailable=0 excluded=0; candidate median=2.447166 ms range=[2.291834 ms, 2.649375 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -0.572771 ms; percent change: -18.966%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "tls_handshake": baseline median=11.401333 ms range=[8.857834 ms, 18.174750 ms] n=10 unavailable=0 excluded=0; candidate median=9.862270 ms range=[8.582167 ms, 13.927959 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -1.539063 ms; percent change: -13.499%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "connection_setup": baseline median=18.110646 ms range=[13.539375 ms, 46.105292 ms] n=10 unavailable=0 excluded=0; candidate median=14.458020 ms range=[12.064958 ms, 18.632834 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -3.652625 ms; percent change: -20.168%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "first_byte_wait": baseline median=59.550708 ms range=[54.255792 ms, 271.618042 ms] n=10 unavailable=0 excluded=0; candidate median=61.793750 ms range=[53.264375 ms, 82.961666 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 2.243041 ms; percent change: 3.767%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "response_read": baseline median=0.249291 ms range=[0.140000 ms, 0.424792 ms] n=10 unavailable=0 excluded=0; candidate median=0.160333 ms range=[0.118333 ms, 0.262834 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -0.088958 ms; percent change: -35.684%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+ Calculated "observed_payload_rate": baseline median=55190675.255 "bytes/s" range=[32378199.213 "bytes/s", 98242857.143 "bytes/s"] n=10 unavailable=0 excluded=0; candidate median=87043842.461 "bytes/s" range=[52329607.281 "bytes/s", 116231313.328 "bytes/s"] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 31853167.206 "bytes/s"; percent change: 57.715%
+ Interpretation ["inconclusive"]: "Observed minimum-to-maximum ranges overlap; the change is inconclusive beyond these samples."
+Limit: "Medians and minimum-to-maximum ranges describe the recorded samples, not statistical confidence or a causal effect."
+Limit: "Available phase values are retained even when a comparison is blocked; no overall faster-transfer claim is made."
+Limit: "Matching metadata and payload size do not prove identical response contents or identical external conditions."

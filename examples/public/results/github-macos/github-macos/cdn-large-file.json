@@ -1,0 +1,821 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.1",
+  "started_at": "2026-10-21T11:13:14.36813Z",
+  "request": {
+    "samples_requested": 10,
+    "max_redirects": 10,
+    "timeout_ns": 30000000000,
+    "connect_timeout_ns": 5000000000,
+    "header_timeout_ns": 10000000000,
+    "body_timeout_ns": 15000000000,
+    "interval_ns": 1000000000,
+    "method": "GET",
+    "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+    "connection_policy": "fresh",
+    "decompression": false,
+    "location_label": "github-macos"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "outcome": "complete",
+      "elapsed_ns": 56449500,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 56435291,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 78291,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 20691125,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 20755916,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 23079375,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 23109833,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 29964958,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 30031458,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 30119791,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 48568416
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 56432416
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 56435291
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "outcome": "complete",
+      "elapsed_ns": 31576667,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 31513500,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 76625,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2022250,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2054833,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4353000,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4377666,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 9940791,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 9984875,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 10015750,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 24935000
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 31510208
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 31513500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "outcome": "complete",
+      "elapsed_ns": 38549166,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 38466208,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 108958,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1314666,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1349666,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4151666,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4200083,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 11068041,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 11138625,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 11174583,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 30088541
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 38425375
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 38466208
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "outcome": "complete",
+      "elapsed_ns": 48632792,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 48554667,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 249667,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 3355875,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3437459,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 6620875,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 6674375,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 20664667,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 20911875,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 21034334,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 39227584
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 48550292
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 48554667
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "outcome": "complete",
+      "elapsed_ns": 60773375,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 60651833,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 251291,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 3855375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3940041,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 7258041,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 7295916,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 18302250,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18377583,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18426666,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 48646791
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 60645541
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 60651833
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "outcome": "complete",
+      "elapsed_ns": 44941166,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 44814042,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 191042,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2133125,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2168917,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4701542,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4766500,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 14695334,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 14776792,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 14808584,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 34397667
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 44810459
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 44814042
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "outcome": "complete",
+      "elapsed_ns": 40614292,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 40546708,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 80958,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1732791,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1814250,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4564666,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4626125,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 12691625,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 12797291,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 12907916,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 31776416
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 40543875
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 40546708
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "outcome": "complete",
+      "elapsed_ns": 56946375,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 56920583,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 375708,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1405583,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1431416,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 3928166,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 3957875,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 11355833,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 11468791,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 11538291,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 31965541
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 56916083
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 56920583
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "outcome": "complete",
+      "elapsed_ns": 37370166,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 37281625,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 445958,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1870375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1916625,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4490583,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4591958,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 10783000,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 10862542,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 10905875,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 30891417
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 37253667
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 37281625
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "outcome": "complete",
+      "elapsed_ns": 41202333,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js",
+          "outcome": "complete",
+          "elapsed_ns": 41178208,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "104.17.25.14:443",
+          "connection_reused": false,
+          "body_bytes": 603445,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 82167,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1585125,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1690750,
+              "attempt": "connect-2",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4705292,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4740500,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 11119667,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 11258792,
+              "outcome": "success",
+              "address": "104.17.25.14:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 11319833,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 32644000
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 41175708
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 41178208
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

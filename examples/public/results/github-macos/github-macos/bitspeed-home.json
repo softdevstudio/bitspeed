@@ -1,0 +1,821 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.1",
+  "started_at": "2026-10-21T11:12:43.529481Z",
+  "request": {
+    "samples_requested": 10,
+    "max_redirects": 10,
+    "timeout_ns": 30000000000,
+    "connect_timeout_ns": 5000000000,
+    "header_timeout_ns": 10000000000,
+    "body_timeout_ns": 15000000000,
+    "interval_ns": 1000000000,
+    "method": "GET",
+    "url": "https://bitspeed.org/",
+    "connection_policy": "fresh",
+    "decompression": false,
+    "location_label": "github-macos"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "outcome": "complete",
+      "elapsed_ns": 111564167,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 111534750,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 440875,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 24697084,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 24873709,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 27611250,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 27689750,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 45864500,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 46105292,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 46231209,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 111392959
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 111532959
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 111534750
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "outcome": "complete",
+      "elapsed_ns": 86452958,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 86400875,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 96667,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2767750,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2893709,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 5628084,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 5700500,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 15360750,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 15567542,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 15664917,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 86158084
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 86397917
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 86400875
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "outcome": "complete",
+      "elapsed_ns": 71334667,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 71305875,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 90875,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1962167,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2041500,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 5050125,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 5123500,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 14556125,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 14637084,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 14671917,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 71059250
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 71304000
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 71305875
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "outcome": "complete",
+      "elapsed_ns": 73717208,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 73669125,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 147667,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1499542,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1527875,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 4566708,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 4609083,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 13466917,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 13539375,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 13606500,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 73241375
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 73666167
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 73669125
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "outcome": "complete",
+      "elapsed_ns": 285647875,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 285566333,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 121333,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1319375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1366750,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 3896666,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 3955166,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 13625083,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 13735666,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 13781041,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 285399083
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 285564250
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 285566333
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "outcome": "complete",
+      "elapsed_ns": 73376042,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 73128000,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 539125,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 3584125,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3709750,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 6741000,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 6786083,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 18197166,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18417166,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18513916,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 72769708
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 73123916
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 73128000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "outcome": "complete",
+      "elapsed_ns": 107580417,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 107501833,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 302875,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 3294708,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3391750,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 6085583,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 6118750,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 17715250,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 17804125,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 17840708,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 107283208
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 107499916
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 107501833
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "outcome": "complete",
+      "elapsed_ns": 75404500,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 75234250,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 225083,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2014208,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2222000,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 6778208,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 6877416,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 18269000,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18604708,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18764583,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 74930791
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 75229375
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 75234250
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "outcome": "complete",
+      "elapsed_ns": 78120083,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 77934417,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 361958,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2770708,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 3029708,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 6178500,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 6361708,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 20870792,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 21053500,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 21807750,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 77610667
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 77931875
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 77934417
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "outcome": "complete",
+      "elapsed_ns": 86640667,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://bitspeed.org/",
+          "outcome": "complete",
+          "elapsed_ns": 85238709,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.67.169.114:443",
+          "connection_reused": false,
+          "body_bytes": 13754,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 827792,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 6629334,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 6764542,
+              "attempt": "connect-2",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 12431750,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 12751000,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 24498584,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 25446542,
+              "outcome": "success",
+              "address": "172.67.169.114:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 25516500,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 84983042
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 85236875
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 85238709
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

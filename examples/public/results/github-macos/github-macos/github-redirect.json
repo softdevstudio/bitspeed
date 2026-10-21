@@ -1,0 +1,1441 @@
+{
+  "schema_version": 1,
+  "tool_version": "0.1.1",
+  "started_at": "2026-10-21T11:13:02.98714Z",
+  "request": {
+    "samples_requested": 10,
+    "max_redirects": 10,
+    "timeout_ns": 30000000000,
+    "connect_timeout_ns": 5000000000,
+    "header_timeout_ns": 10000000000,
+    "body_timeout_ns": 15000000000,
+    "interval_ns": 1000000000,
+    "method": "GET",
+    "url": "http://github.com/",
+    "connection_policy": "fresh",
+    "decompression": false,
+    "location_label": "github-macos"
+  },
+  "samples": [
+    {
+      "index": 0,
+      "outcome": "complete",
+      "elapsed_ns": 233547166,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 55673917,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 100417,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 13113167,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 13193542,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 32228417,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 32259292,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 34277584,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 54214750
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 55657292
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 55673917
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 177836667,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572382,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 96792,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1147667,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1154958,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 22912875,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 23009042,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 67850833,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 67931250,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 67983833,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 89599333
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 177795542
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 177836667
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "outcome": "complete",
+      "elapsed_ns": 195678916,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 44867750,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 784291,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 8854750,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 8873291,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 26422833,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 26474958,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 27629333,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 44700708
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 44782750
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 44867750
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 150590125,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572387,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 657792,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1783584,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1791834,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 19744750,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 19765584,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 44618667,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 44698375,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 44760875,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 63844750
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 150586959
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 150590125
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "outcome": "complete",
+      "elapsed_ns": 195318000,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 47520167,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 229625,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2694167,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2728125,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 26677750,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 26717958,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 26809042,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 47278958
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 47503792
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 47520167
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 147544583,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572387,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 192833,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2263208,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2272333,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 20764250,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 22972792,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 46339375,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 46447083,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 46566375,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 65137542
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 147514917
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 147544583
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "outcome": "complete",
+      "elapsed_ns": 203842208,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 39369000,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 216458,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2212958,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2222041,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 20344250,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 20374708,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 20412750,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 39155250
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 39353166
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 39369000
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 164317666,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572382,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 127916,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2068958,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2112291,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 20623916,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 20643458,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 42084583,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 42232625,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 42274333,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 61891875
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 164307333
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 164317666
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "outcome": "complete",
+      "elapsed_ns": 177917666,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 40846625,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 144958,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 4744833,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 4752958,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 22496250,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 22549333,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 22715291,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 40670333
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 40835208
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 40846625
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 136943000,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572387,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 348500,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2114083,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2122875,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 19018250,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 19067791,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 41442333,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 41515333,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 41556041,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 59279833
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 136940500
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 136943000
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "outcome": "complete",
+      "elapsed_ns": 182766916,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 42375125,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 210083,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 4097166,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 4116750,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 24440833,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 24481250,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 24620000,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 42192041
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 42359791
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 42375125
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 140226750,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572387,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 140500,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1794333,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1805125,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 19094375,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 19118666,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 40317458,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 40406708,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 40470416,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 59399916
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 140222750
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 140226750
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "outcome": "complete",
+      "elapsed_ns": 171348042,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 38025750,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 111000,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1338375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1349542,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 19607042,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 19642875,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 19712667,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 37907167
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 38008834
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 38025750
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 133238750,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572382,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 79333,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1093792,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1099250,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 17349667,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 17407458,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 36788833,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 36868958,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 36906833,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 54120250
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 133235667
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 133238750
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "outcome": "complete",
+      "elapsed_ns": 180238250,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 35205625,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 102125,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1919375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1927667,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 18376584,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18412834,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18477584,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 34973792
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 35188417
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 35205625
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 144954084,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572387,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 81250,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 978709,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 984125,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 21456875,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 21477084,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 44243750,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 44313834,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 44356084,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 62650250
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 144951917
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 144954084
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "outcome": "complete",
+      "elapsed_ns": 177024000,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 34878334,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 185834,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2259375,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2299084,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 18657417,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18706167,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18786417,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 34682084
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 34865375
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 34878334
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 142085500,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572382,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 104000,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 1800625,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 1810208,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 21944791,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 21979583,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 43864750,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 43973625,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 44036166,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 61373333
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 142080875
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 142085500
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "outcome": "complete",
+      "elapsed_ns": 625255542,
+      "hops": [
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "http://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 36843417,
+          "status_code": 301,
+          "protocol": "HTTP/1.1",
+          "remote_address": "172.182.252.133:80",
+          "connection_reused": false,
+          "body_bytes": 0,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 192917,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2574208,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2629958,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 18873458,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 18919500,
+              "outcome": "success",
+              "address": "172.182.252.133:80"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 18977375,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 36633333
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 36818000
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 36843417
+            }
+          ]
+        },
+        {
+          "content_encoding": "identity",
+          "winning_connect_attempt": "connect-2",
+          "url": "https://github.com/",
+          "outcome": "complete",
+          "elapsed_ns": 588323500,
+          "status_code": 200,
+          "protocol": "HTTP/2.0",
+          "remote_address": "172.182.252.133:443",
+          "connection_reused": false,
+          "body_bytes": 572382,
+          "body_complete": true,
+          "events": [
+            {
+              "kind": "dns_start",
+              "offset_ns": 99083,
+              "attempt": "dns-1"
+            },
+            {
+              "kind": "dns_done",
+              "offset_ns": 2016208,
+              "attempt": "dns-1",
+              "outcome": "success"
+            },
+            {
+              "kind": "connect_start",
+              "offset_ns": 2026708,
+              "attempt": "connect-2",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "connect_done",
+              "offset_ns": 19252958,
+              "attempt": "connect-2",
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "tls_start",
+              "offset_ns": 19287375,
+              "attempt": "tls-3"
+            },
+            {
+              "kind": "tls_done",
+              "offset_ns": 48941666,
+              "attempt": "tls-3",
+              "outcome": "success"
+            },
+            {
+              "kind": "connection_acquired",
+              "offset_ns": 49105666,
+              "outcome": "success",
+              "address": "172.182.252.133:443"
+            },
+            {
+              "kind": "request_written",
+              "offset_ns": 49195000,
+              "outcome": "success"
+            },
+            {
+              "kind": "first_byte",
+              "offset_ns": 68487458
+            },
+            {
+              "kind": "body_done",
+              "offset_ns": 588318875
+            },
+            {
+              "kind": "hop_done",
+              "offset_ns": 588323500
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
