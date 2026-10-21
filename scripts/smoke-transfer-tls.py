@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory() as directory:
     process = subprocess.Popen([binary, 'serve', '--root=' + str(root / 'receiver'), '--token-file=' + str(token), '--listen=127.0.0.1:0', '--tls-cert=' + str(cert), '--tls-key=' + str(key)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
         lines = queue.Queue(); threading.Thread(target=lambda: lines.put(process.stdout.readline()), daemon=True).start()
-        url = lines.get(timeout=10).strip(); assert url.startswith('https://127.0.0.1:'), (url, process.poll(), process.stderr.read() if process.poll() is not None else 'still running')
+        url = lines.get(timeout=10).strip(); assert url.startswith('https://127.0.0.1:'), (url, process.wait(timeout=10), process.stderr.read())
         context = ssl.create_default_context(cafile=str(cert)); context.minimum_version = ssl.TLSVersion.TLSv1_2
         def request(method, path, data, kind):
             connection = http.client.HTTPSConnection(urlsplit(url).netloc, context=context, timeout=15)

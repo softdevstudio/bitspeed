@@ -42,7 +42,7 @@ with tempfile.TemporaryDirectory() as directory:
         lines = queue.Queue()
         threading.Thread(target=lambda: lines.put(receiver.stdout.readline()), daemon=True).start()
         base = lines.get(timeout=10).strip()
-        assert base.startswith('http://127.0.0.1:'), (base, receiver.poll(), receiver.stderr.read() if receiver.poll() is not None else 'still running')
+        assert base.startswith('http://127.0.0.1:'), (base, receiver.wait(timeout=10), receiver.stderr.read())
         uploaded = subprocess.run([binary, 'send', '--upload-only', '--spool=' + str(spool), '--reuse=' + identity, '--url=' + base, '--token-file=' + str(token_file)], capture_output=True, text=True, check=True, timeout=20)
         staged = json.loads(uploaded.stdout)
         assert 'receiver has 0 of 1 chunks verified; sending 1 (9 bytes)' in uploaded.stderr and 'sent 1 of 1 chunks, 9/9 bytes (100%)' in uploaded.stderr
