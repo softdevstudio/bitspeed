@@ -105,3 +105,43 @@ func TestSendProgressAfterPartialUploadAndCallbackStop(t *testing.T) {
 		t.Fatal("only missing chunks may be sent", sent)
 	}
 }
+
+func TestSendProgressStopAtFinalizeAndEmptyFile(t *testing.T) {
+	if !spoolSupported() {
+		t.Skip("sender unsupported on this platform")
+	}
+	data := bytes.Repeat([]byte("f"), int(MinChunkSize)+1)
+	_, url, spool, m := preparedOnly(t, data)
+	stop := errors.New("stop")
+	_, e := SendWithProgress(context.Background(), url, testToken, spool, m.TransferID, func(p SendProgress) error {
+		if p.Stage == "finalize" {
+			return stop
+		}
+		return nil
+	})
+	if !errors.Is(e, stop) {
+		t.Fatal(e)
+	}
+	s, e := QueryStatus(context.Background(), url, testToken, m.TransferID)
+	if e != nil || s.State != Uploading || s.Receipt != nil || len(s.MissingChunks) != 0 {
+		t.Fatal("a stop before finalize must not publish", s, e)
+	}
+	if _, e = os.Lstat(filepath.Join(spool, m.TransferID, "receipt.json")); !os.IsNotExist(e) {
+		t.Fatal("no receipt may be cached", e)
+	}
+	if s, e = Send(context.Background(), url, testToken, spool, m.TransferID); e != nil || s.State != Completed {
+		t.Fatal(s, e)
+	}
+
+	_, url, spool, m = preparedOnly(t, nil)
+	var events []SendProgress
+	if s, e = SendWithProgress(context.Background(), url, testToken, spool, m.TransferID, func(p SendProgress) error {
+		events = append(events, p)
+		return nil
+	}); e != nil || s.State != Completed {
+		t.Fatal(s, e)
+	}
+	if len(events) != 2 || events[0].Stage != "resume" || events[0].ToSend != 0 || events[1].Stage != "finalize" {
+		t.Fatal("empty file progress", events)
+	}
+}

@@ -49,7 +49,7 @@ func SendWithProgress(ctx context.Context, base, token, spool, id string, progre
 	}
 	if s.State != Completed {
 		if progress != nil {
-			if e = progress(SendProgress{Stage: "finalize", Chunks: len(m.ChunkSHA256), VerifiedChunks: len(m.ChunkSHA256)}); e != nil {
+			if e = progress(SendProgress{Stage: "finalize", Chunks: len(m.ChunkSHA256), VerifiedChunks: s.VerifiedChunks}); e != nil {
 				return StoredStatus{}, e
 			}
 		}

@@ -87,3 +87,25 @@ func TestProgressPrinterIsBounded(t *testing.T) {
 		t.Fatal("a broken stderr must be reported")
 	}
 }
+
+func TestProgressPrinterAtProtocolLimit(t *testing.T) {
+	var out bytes.Buffer
+	print := progressPrinter(&out)
+	chunks := int(transfer.MaxChunks)
+	total := int64(chunks)*transfer.MaxChunkSize - 7
+	var sent int64
+	for i := 1; i <= chunks; i++ {
+		size := transfer.MaxChunkSize
+		if i == chunks {
+			size -= 7
+		}
+		sent += size
+		if err := print(transfer.SendProgress{Stage: "chunk", ToSend: chunks, Sent: i, BytesSent: sent, BytesToSend: total}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	lines := strings.Split(strings.TrimSpace(out.String()), "\n")
+	if len(lines) > 102 || !strings.Contains(lines[len(lines)-1], "(100%)") {
+		t.Fatal(len(lines), lines[len(lines)-1])
+	}
+}
