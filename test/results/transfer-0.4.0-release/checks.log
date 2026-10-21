@@ -10,3 +10,4 @@ PASS downloaded binaries report bitspeed-transfer 0.4.0 and bitspeed-inspect 0.3
 PASS smoke-transfer.py, smoke-transfer-interruption.py and smoke-transfer-tls.py on the downloaded Linux amd64 binary
 PASS every releases/latest/download name used by bitspeed.org exists in the latest release
 Review: independent review found no blockers; should-fix items addressed before the version bump (see docs/transfer-releases.md)
+PASS published Windows archive on a fresh windows-latest runner (Transfer Windows demo run 39649126259): SHA256SUMS match, 64 MiB in 1 MiB chunks, sender and receiver killed after 16 of 64, restart status proved 16 and listed 48 missing, resumed send transferred true with the original SHA-256, clean freed 67108864 bytes; outputs in examples/public/windows-demo/github-windows

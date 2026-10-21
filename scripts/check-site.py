@@ -3,7 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from subprocess import run
 
-paths = ['/', '/about/', '/contact/', '/download/', '/quick-start/', '/reference/', '/inspect/', '/transfer/', '/bitspeed-transfer-resumes-interrupted-file-transfers-from-verified-chunks/', '/images/inspect-evidence.svg', '/images/ukue-terminal.png']
+paths = ['/', '/about/', '/contact/', '/download/', '/quick-start/', '/reference/', '/inspect/', '/transfer/', '/which-tool-do-i-need/', '/bitspeed-transfer-resumes-interrupted-file-transfers-from-verified-chunks/', '/images/inspect-evidence.svg', '/images/ukue-terminal.png']
 
 def check(path):
     result = run(['curl', '--silent', '--show-error', '--max-time', '40', '--max-filesize', '2097152', '--write-out', '\\n%{http_code}', 'https://bitspeed.org' + path], capture_output=True, text=True, timeout=45)
@@ -20,6 +20,8 @@ def check(path):
     if path == '/download/':
         assert 'bitspeed-inspect-linux-amd64.tar.gz' in body and 'bitspeed-transfer-linux-amd64.tar.gz' in body and 'Cross-built only' in body
         assert 'bitspeed-transfer-windows-amd64.zip' in body and 'bitspeed-transfer-verification.json' in body and 'delivery unsupported' not in body
+    if path == '/which-tool-do-i-need/':
+        assert 'bitspeed-inspect record' in body and 'bitspeed-transfer serve' in body
     if path == '/transfer/':
         assert 'Transfer 0.4.0' in body and 'NTFS' in body and 'clean --root' in body
     if path == '/bitspeed-transfer-resumes-interrupted-file-transfers-from-verified-chunks/':
