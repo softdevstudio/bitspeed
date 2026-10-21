@@ -47,8 +47,6 @@ jobs:
           go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test.log || { status=1; python scripts/annotate-log.py error tests test.log 250; }
           go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee race.log || { status=1; python scripts/annotate-log.py error race race.log 120; }
           go build -o bitspeed-transfer.exe ./cmd/bitspeed-transfer
-          python -c "import tempfile, subprocess; d = tempfile.mkdtemp(); print(subprocess.run(['icacls', d], capture_output=True, text=True).stdout)" > acl.log 2>&1 || true
-          python scripts/annotate-log.py notice python-tempdir-acl acl.log 20
           for script in smoke-transfer smoke-transfer-interruption smoke-transfer-tls; do
             python scripts/$script.py "$PWD/bitspeed-transfer.exe" > $script.log 2>&1 || { status=1; python scripts/annotate-log.py error $script $script.log 80; }
             python scripts/annotate-log.py notice $script $script.log 10

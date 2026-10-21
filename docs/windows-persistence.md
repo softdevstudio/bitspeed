@@ -24,6 +24,8 @@ Scope: Windows 10 and Server 2019 or later, amd64, local NTFS volumes on fixed d
 
 A file or directory that is open cannot be renamed or deleted unless every handle allows it. Transfer closes each handle before renaming, linking or removing the file it refers to. The chunk upload path closes its temporary file before removing it on every error path.
 
+Antivirus software sometimes opens a new file for a moment. If that makes a rename, link or delete fail, the step reports storage_unavailable, nothing is acknowledged, and repeating the request or restarting the receiver resumes from the last durable step.
+
 Another program can hold a published destination open without sharing write access, for example a media player. While it does, status cannot flush the destination and reports storage_unavailable, which is retryable. Nothing is marked failed and no data changes. The same applies to a spool snapshot opened by another program during reuse.
 
 A receiver root or spool directory created by the user must already have a private DACL: only allow entries for the current user, SYSTEM and Administrators, inherited or explicit. A folder under the user's profile normally qualifies. A folder made directly under C:\ normally does not, because it inherits access for Authenticated Users. Let Transfer create the root, or tighten an existing one with `icacls DIR /inheritance:r /grant:r "%USERNAME%:(OI)(CI)F" SYSTEM:(OI)(CI)F Administrators:(OI)(CI)F`. The token file needs the same kind of DACL, which a file created in the profile normally has.
