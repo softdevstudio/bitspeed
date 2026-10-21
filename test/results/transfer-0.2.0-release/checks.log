@@ -1,0 +1,9 @@
+UTC: 2026-10-21T13:06:25Z
+Release: transfer/v0.2.0 "BitSpeed Transfer v0.2.0", published by Release Transfer after CI on 1f7b8f2d6185dd019aded31351d97f35a2d142ee
+Latest release: transfer/v0.2.0, 13 assets (both products' five archives, both verification JSON files, combined SHA256SUMS)
+PASS latest checksum: all 12 assets match SHA256SUMS
+PASS carried Inspect binary reports bitspeed-inspect 0.1.1
+PASS downloaded Linux amd64 binary reports bitspeed-transfer 0.2.0
+PASS scripts/smoke-transfer.py on the downloaded binary (delivery, receipt cache, offline clean, restart, repeat delivery, damaged-output rejection)
+PASS all 13 bitspeed.org download links resolve to latest assets
+PASS case-study root: dry run reported 256 chunks / 268435456 bytes; clean removed them; du 513 MB -> 257 MB; destination SHA-256 unchanged (651b3dcd...); restarted receiver and repeat send returned transferred true with the same receipt
