@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import tarfile
 import tempfile
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -269,6 +270,23 @@ def carry_other(output):
             shutil.copyfile(Path(temp) / name, output / name)
 
 
+def gates_succeeded(run, needed, attempts=20, delay=15):
+    # The jobs API can show a job that already finished as still in progress
+    # for a few minutes. Wait only while every required job is listed and the
+    # only gap is a missing conclusion; a missing job, failure, cancellation or
+    # skip ends the wait at once.
+    for attempt in range(attempts):
+        jobs = api('actions/runs/' + run + '/jobs?per_page=100')['jobs']
+        latest = {job['name']: job for job in jobs if job['name'] in needed}
+        if set(latest) != needed or any(job['conclusion'] not in (None, 'success') for job in latest.values()):
+            return False
+        if all(job['conclusion'] == 'success' for job in latest.values()):
+            return True
+        if attempt + 1 < attempts:
+            time.sleep(delay)
+    return False
+
+
 def publish(sha, output):
     valid_sha(sha)
     verify_ci(sha)
@@ -284,10 +302,8 @@ def publish(sha, output):
     run = os.environ['GITHUB_RUN_ID']
     if not run.isdecimal():
         raise ValueError('invalid release run id')
-    jobs = api('actions/runs/' + run + '/jobs?per_page=100')['jobs']
     needed = {'package-' + goos + '-' + arch for goos, arch in TARGETS} | {'native-' + goos + '-' + arch for goos, arch in NATIVE}
-    succeeded = {job['name'] for job in jobs if job['conclusion'] == 'success'}
-    if not needed.issubset(succeeded):
+    if not gates_succeeded(run, needed):
         raise ValueError('required package/native gates did not succeed')
     output = Path(output).resolve()
     for target in TARGETS:

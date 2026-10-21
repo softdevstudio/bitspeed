@@ -174,3 +174,27 @@ class TransferReleaseGuards(ReleaseGuards):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class GateWait(unittest.TestCase):
+    needed = {'package-linux-amd64', 'native-linux-amd64'}
+
+    def jobs(self, *conclusions):
+        return {'jobs': [{'name': n, 'conclusion': c} for n, c in zip(sorted(self.needed), conclusions)]}
+
+    def test_waits_for_lagging_status(self):
+        with patch.object(release, 'api', side_effect=[self.jobs(None, 'success'), self.jobs('success', 'success')]), patch.object(release.time, 'sleep') as sleep:
+            self.assertTrue(release.gates_succeeded('1', self.needed))
+            sleep.assert_called_once()
+
+    def test_failure_stops_at_once(self):
+        for bad in ('failure', 'cancelled', 'skipped'):
+            with patch.object(release, 'api', return_value=self.jobs(None, bad)), patch.object(release.time, 'sleep') as sleep:
+                self.assertFalse(release.gates_succeeded('1', self.needed))
+                sleep.assert_not_called()
+
+    def test_gives_up_and_requires_every_job(self):
+        with patch.object(release, 'api', return_value=self.jobs(None, 'success')), patch.object(release.time, 'sleep'):
+            self.assertFalse(release.gates_succeeded('1', self.needed, attempts=3))
+        with patch.object(release, 'api', return_value={'jobs': [{'name': 'native-linux-amd64', 'conclusion': 'success'}]}), patch.object(release.time, 'sleep'):
+            self.assertFalse(release.gates_succeeded('1', self.needed, attempts=2))
