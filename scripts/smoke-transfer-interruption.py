@@ -33,7 +33,7 @@ def receiver(root, token):
     threading.Thread(target=lambda: lines.put(process.stdout.readline()), daemon=True).start()
     try:
         url = lines.get(timeout=10).strip()
-        assert url.startswith('http://127.0.0.1:'), 'receiver did not start'
+        assert url.startswith('http://127.0.0.1:'), ('receiver did not start', process.poll(), process.stderr.read() if process.poll() is not None else 'still running')
         return process, url
     except BaseException:
         stop(process)
