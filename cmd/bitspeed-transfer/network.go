@@ -32,10 +32,37 @@ func options(args []string, allowed ...string) (map[string]string, error) {
 	}
 	return out, nil
 }
-func uploadOnly(ctx context.Context, args []string, stdout io.Writer) error {
-	return sendFile(ctx, args, stdout, true)
+func uploadOnly(ctx context.Context, args []string, stdout, stderr io.Writer) error {
+	return sendFile(ctx, args, stdout, stderr, true)
 }
-func sendFile(ctx context.Context, args []string, stdout io.Writer, upload bool) error {
+
+// progressPrinter writes short progress lines to stderr: one when the receiver
+// reports what it already has, then at most about a hundred chunk lines however
+// large the file, and one before finalizing. It never prints paths or tokens.
+func progressPrinter(stderr io.Writer) func(transfer.SendProgress) error {
+	lastPercent := -1
+	return func(p transfer.SendProgress) error {
+		var err error
+		switch p.Stage {
+		case "resume":
+			_, err = fmt.Fprintf(stderr, "receiver has %d of %d chunks verified; sending %d (%d bytes)\n", p.VerifiedChunks, p.Chunks, p.ToSend, p.BytesToSend)
+		case "chunk":
+			percent := 100
+			if p.BytesToSend > 0 {
+				percent = int(p.BytesSent * 100 / p.BytesToSend)
+			}
+			if p.Sent == 1 || p.Sent == p.ToSend || percent != lastPercent {
+				lastPercent = percent
+				_, err = fmt.Fprintf(stderr, "sent %d of %d chunks, %d/%d bytes (%d%%)\n", p.Sent, p.ToSend, p.BytesSent, p.BytesToSend, percent)
+			}
+		case "finalize":
+			_, err = fmt.Fprintf(stderr, "all %d chunks verified; receiver is checking and publishing the file\n", p.Chunks)
+		}
+		return err
+	}
+}
+
+func sendFile(ctx context.Context, args []string, stdout, stderr io.Writer, upload bool) error {
 	v, e := options(args, "url", "token-file", "spool", "reuse")
 	if e != nil || v["--url"] == "" || v["--token-file"] == "" || v["--spool"] == "" || v["--reuse"] == "" {
 		return transfer.ErrConfig
@@ -44,11 +71,11 @@ func sendFile(ctx context.Context, args []string, stdout io.Writer, upload bool)
 	if e != nil {
 		return e
 	}
-	send := transfer.Send
+	send := transfer.SendWithProgress
 	if upload {
-		send = transfer.UploadOnly
+		send = transfer.UploadOnlyWithProgress
 	}
-	s, e := send(ctx, v["--url"], token, v["--spool"], v["--reuse"])
+	s, e := send(ctx, v["--url"], token, v["--spool"], v["--reuse"], progressPrinter(stderr))
 	if e != nil {
 		return e
 	}

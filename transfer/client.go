@@ -216,9 +216,37 @@ func QueryStatus(ctx context.Context, base, token, id string) (StoredStatus, err
 	return decodeStatus(data, id)
 }
 
+// SendProgress describes sender progress. Stage is "resume" once the receiver
+// has reported which chunks it can prove, "chunk" after each chunk the receiver
+// acknowledges as stored, and "finalize" before asking it to publish the file.
+// Counts and byte totals come from the manifest and receiver acknowledgements;
+// they never include a chunk the receiver has not confirmed.
+type SendProgress struct {
+	Stage          string `json:"stage"`
+	Chunks         int    `json:"chunks"`
+	VerifiedChunks int    `json:"verified_chunks"`
+	ToSend         int    `json:"to_send"`
+	Sent           int    `json:"sent"`
+	ChunkIndex     int    `json:"chunk_index"`
+	BytesSent      int64  `json:"bytes_sent"`
+	BytesToSend    int64  `json:"bytes_to_send"`
+}
+
 // UploadOnly stages verified chunks. It never finalizes or claims delivery.
 func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatus, error) {
+	return UploadOnlyWithProgress(ctx, base, token, spool, id, nil)
+}
+
+// UploadOnlyWithProgress is UploadOnly with an optional progress callback.
+// A callback error stops the upload; already stored chunks stay verified.
+func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, progress func(SendProgress) error) (StoredStatus, error) {
 	var empty StoredStatus
+	report := func(p SendProgress) error {
+		if progress == nil {
+			return nil
+		}
+		return progress(p)
+	}
 	base, e := endpoint(base)
 	if e != nil || !hex256(token) || !hex256(id) {
 		return empty, ErrConfig
@@ -263,6 +291,13 @@ func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatu
 		}
 		return s, nil
 	}
+	p := SendProgress{Stage: "resume", Chunks: len(m.ChunkSHA256), VerifiedChunks: s.VerifiedChunks, ToSend: len(s.MissingChunks)}
+	for _, index := range s.MissingChunks {
+		p.BytesToSend += chunkSizeAt(m, index)
+	}
+	if e = report(p); e != nil {
+		return empty, e
+	}
 	for _, index := range s.MissingChunks {
 		length := chunkSizeAt(m, index)
 		body := io.NewSectionReader(f, int64(index)*m.ChunkSize, length)
@@ -285,6 +320,11 @@ func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatu
 		identity, _ := m.Identity()
 		if ve != nil || v != 1 || ie != nil || int64(index) != i || te != nil || tid != id || me != nil || mid != identity || de != nil || digest != m.ChunkSHA256[index] || string(fields["stored"]) != "true" {
 			return empty, ErrProtocol
+		}
+		p.Stage, p.Sent, p.ChunkIndex = "chunk", p.Sent+1, index
+		p.BytesSent += length
+		if e = report(p); e != nil {
+			return empty, e
 		}
 	}
 	data, code, e = request(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)

@@ -95,7 +95,9 @@ Preparation returns JSON with prepared true, transferred false and the manifest.
 
 For a loopback staging exercise, see [docs/receiver-staging.md](docs/receiver-staging.md). Use a private token file, start serve with a dedicated private root, prepare the sender snapshot, then invoke send --upload-only using that snapshot ID. Its JSON says uploaded true and transferred false. This is an explicit development stage, not completed file delivery.
 
-For development delivery after preparation, use `bitspeed-transfer send --spool=DIR --reuse=ID --url=URL --token-file=FILE`. It stages missing chunks, finalizes one fixed destination, verifies the completed receipt against the snapshot and saves receipt.json before returning transferred true. Repeat the same command after a lost response. Snapshots, chunks, corrupt evidence, witnesses and receipts are retained by default.
+For development delivery after preparation, use `bitspeed-transfer send --spool=DIR --reuse=ID --url=URL --token-file=FILE`. It stages missing chunks, finalizes one fixed destination, verifies the completed receipt against the snapshot and saves receipt.json before returning transferred true. Repeat the same command after a lost response.
+
+From Transfer 0.3.0, send and send --upload-only print progress to stderr while the JSON result still goes to stdout alone. The first line says how many chunks the receiver can already prove and how many will be sent, chunk lines follow at most once per percent of the bytes to send, and a last line appears before the receiver checks and publishes the file. A chunk counts only after the receiver acknowledges it as stored. Progress lines contain counts and byte totals only, never paths or tokens. Snapshots, chunks, corrupt evidence, witnesses and receipts are retained by default.
 
 From Transfer 0.2.0, to free the space held by chunks of finished transfers, stop the receiver and run:
 

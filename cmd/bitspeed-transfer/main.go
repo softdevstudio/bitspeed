@@ -57,7 +57,7 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) == 2 && args[1] == "--help" {
 			help := map[string]string{
 				"serve":  "serve --root=DIR --token-file=FILE [--listen=127.0.0.1:8080] [--tls-cert=FILE --tls-key=FILE]\nReceiver on supported Linux/macOS local filesystems.",
-				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE\nsend --spool=DIR --reuse=ID --url=URL --token-file=FILE\nPublishes a verified destination and retains a local receipt.",
+				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation/revalidation only on Linux/macOS. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE\nsend --spool=DIR --reuse=ID --url=URL --token-file=FILE\nPublishes a verified destination and retains a local receipt. Progress goes to stderr; the JSON result goes to stdout.",
 				"status": "status --url=URL --token-file=FILE --id=ID\nAuthenticated verified observations and completion receipt.",
 			}
 			text := help[args[0]]
@@ -76,9 +76,9 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 				return queryReceiver(ctx, args[1:], stdout)
 			case "send":
 				if args[1] == "--upload-only" {
-					return uploadOnly(ctx, args[2:], stdout)
+					return uploadOnly(ctx, args[2:], stdout, stderr)
 				}
-				return sendFile(ctx, args[1:], stdout, false)
+				return sendFile(ctx, args[1:], stdout, stderr, false)
 			}
 		}
 		return errSendOptions

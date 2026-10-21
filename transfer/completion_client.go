@@ -34,7 +34,12 @@ func decodeReceipt(data []byte) (Receipt, error) {
 // Send returns only after a verified completed receipt is durably cached locally.
 // It retains the snapshot and never automatically deletes receiver evidence.
 func Send(ctx context.Context, base, token, spool, id string) (StoredStatus, error) {
-	s, e := UploadOnly(ctx, base, token, spool, id)
+	return SendWithProgress(ctx, base, token, spool, id, nil)
+}
+
+// SendWithProgress is Send with an optional progress callback; see SendProgress.
+func SendWithProgress(ctx context.Context, base, token, spool, id string, progress func(SendProgress) error) (StoredStatus, error) {
+	s, e := UploadOnlyWithProgress(ctx, base, token, spool, id, progress)
 	if e != nil {
 		return s, e
 	}
@@ -43,6 +48,11 @@ func Send(ctx context.Context, base, token, spool, id string) (StoredStatus, err
 		return StoredStatus{}, e
 	}
 	if s.State != Completed {
+		if progress != nil {
+			if e = progress(SendProgress{Stage: "finalize", Chunks: len(m.ChunkSHA256), VerifiedChunks: len(m.ChunkSHA256)}); e != nil {
+				return StoredStatus{}, e
+			}
+		}
 		identity, _ := m.Identity()
 		body, _ := json.Marshal(struct {
 			Identity string `json:"manifest_sha256"`

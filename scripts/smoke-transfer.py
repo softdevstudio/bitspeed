@@ -58,6 +58,8 @@ with tempfile.TemporaryDirectory() as directory:
             assert base.startswith('http://127.0.0.1:'), base
             uploaded = subprocess.run([binary, 'send', '--upload-only', '--spool=' + str(spool), '--reuse=' + identity, '--url=' + base, '--token-file=' + str(token_file)], capture_output=True, text=True, check=True, timeout=20)
             staged = json.loads(uploaded.stdout)
+            assert 'receiver has 0 of 1 chunks verified; sending 1 (9 bytes)' in uploaded.stderr and 'sent 1 of 1 chunks, 9/9 bytes (100%)' in uploaded.stderr
+            assert '0123456789abcdef' not in uploaded.stderr and str(spool) not in uploaded.stderr
             assert staged['uploaded'] and not staged['transferred']
             assert staged['status']['state'] == 'uploading' and staged['status']['receipt'] is None
             assert staged['status']['verified_bytes'] == 9 and not staged['status']['missing_chunks']
@@ -68,6 +70,7 @@ with tempfile.TemporaryDirectory() as directory:
             send_args = [binary, 'send', '--spool=' + str(spool), '--reuse=' + identity, '--url=' + base, '--token-file=' + str(token_file)]
             completed = subprocess.run(send_args, capture_output=True, text=True, check=True, timeout=20)
             delivered = json.loads(completed.stdout)
+            assert 'receiver has 1 of 1 chunks verified; sending 0 (0 bytes)' in completed.stderr and 'all 1 chunks verified; receiver is checking and publishing the file' in completed.stderr
             assert delivered['transferred'] and delivered['status']['state'] == 'completed'
             receipt = delivered['status']['receipt']
             output = receiver_root / 'files' / receipt['output_name']
@@ -117,4 +120,4 @@ with tempfile.TemporaryDirectory() as directory:
 
 
 if os.name != 'nt':
-    print('PASS: Transfer preparation, staging, verified publication, receipt cache, offline clean, process restart, repeat delivery and damaged-output rejection')
+    print('PASS: Transfer preparation, staging, verified publication, receipt cache, offline clean, progress output, process restart, repeat delivery and damaged-output rejection')
