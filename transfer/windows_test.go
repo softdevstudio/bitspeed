@@ -7,6 +7,8 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
+	"syscall"
 	"testing"
 )
 
@@ -79,7 +81,10 @@ func TestWindowsFlushesReadHandlesAndDirectories(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	t.Logf("plain Sync on a read handle: %v", f.Sync())
+	// Plain Sync is refused, so success below proves the second-handle path ran.
+	if e = f.Sync(); !errors.Is(e, syscall.ERROR_ACCESS_DENIED) {
+		t.Fatal("expected a read handle to refuse a plain flush", e)
+	}
 	if e = syncHandle(f); e != nil {
 		t.Fatal("read handle flush", e)
 	}
@@ -88,13 +93,32 @@ func TestWindowsFlushesReadHandlesAndDirectories(t *testing.T) {
 	if e != nil {
 		t.Fatal(e)
 	}
-	t.Logf("plain Sync on a directory handle: %v", d.Sync())
+	if e = d.Sync(); !errors.Is(e, syscall.ERROR_ACCESS_DENIED) {
+		t.Fatal("expected a directory handle to refuse a plain flush", e)
+	}
 	if e = syncHandle(d); e != nil {
 		t.Fatal("directory flush", e)
 	}
 	d.Close()
 	if e = syncDir(dir, realSnapshotOps()); e != nil {
 		t.Fatal(e)
+	}
+	// When the path names a different file than the open handle, nothing is flushed.
+	p, _ := syscall.UTF16PtrFromString(file)
+	h, e := syscall.CreateFile(p, syscall.GENERIC_READ, shareAll, nil, syscall.OPEN_EXISTING, 0, 0)
+	if e != nil {
+		t.Fatal(e)
+	}
+	held := os.NewFile(uintptr(h), file)
+	defer held.Close()
+	if e = os.Rename(file, file+".old"); e != nil {
+		t.Fatal(e)
+	}
+	if e = os.WriteFile(file, []byte("replacement"), 0600); e != nil {
+		t.Fatal(e)
+	}
+	if e = syncHandle(held); e == nil || !strings.Contains(e.Error(), "no longer names") {
+		t.Fatal("flushed a different file", e)
 	}
 }
 
@@ -178,5 +202,31 @@ func TestWindowsLockAndFilesystem(t *testing.T) {
 	}
 	if free, e := freeSpace(spool); e != nil || free <= 0 {
 		t.Fatal("free space", free, e)
+	}
+}
+
+func TestWindowsRemoteRootsAreRefused(t *testing.T) {
+	dir := t.TempDir()
+	volume := filepath.VolumeName(dir)
+	if len(volume) != 2 || volume[1] != ':' {
+		t.Skip("temporary directory is not on a drive letter")
+	}
+	unc := `\\localhost\` + volume[:1] + `$` + dir[2:]
+	if _, e := os.Stat(unc); e != nil {
+		t.Skip("administrative share unavailable:", e)
+	}
+	if e := receiverFilesystem(unc); !errors.Is(e, ErrUnsupported) {
+		t.Fatal("network path accepted", e)
+	}
+	link := filepath.Join(dir, "link")
+	if e := os.Symlink(unc, link); e != nil {
+		t.Log("symbolic link to the share unavailable:", e)
+		return
+	}
+	if e := receiverFilesystem(link); !errors.Is(e, ErrUnsupported) {
+		t.Fatal("local link to a network path accepted", e)
+	}
+	if _, e := NewReceiver(ReceiverConfig{Root: filepath.Join(link, "root"), Token: testToken}); !errors.Is(e, ErrUnsupported) {
+		t.Fatal("receiver started behind a link to a share", e)
 	}
 }

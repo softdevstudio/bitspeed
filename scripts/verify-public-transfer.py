@@ -17,6 +17,10 @@ args = parser.parse_args()
 metadata = json.loads(Path(args.metadata).read_text())
 sha, version = release.valid_sha(metadata['source_sha']), metadata['version']
 assert metadata['tag_name'] == 'transfer/v' + version and not metadata['draft']
+# Windows delivery and its design document arrived in 0.4.0; earlier releases are verified as published.
+windows_delivery = tuple(int(part) for part in version.split('.')) >= (0, 4, 0)
+if not windows_delivery:
+    release.reference_docs = lambda: ('sender-spool.md', 'receiver-staging.md', 'transfer-v1.md', 'finalization.md', 'transfer-releases.md')
 assert metadata['tag_sha'] == sha
 output, downloads = Path(args.output), Path(args.downloads)
 output.mkdir(parents=True, exist_ok=True); downloads.mkdir(parents=True, exist_ok=True)
@@ -55,12 +59,15 @@ with ThreadPoolExecutor(max_workers=4) as pool:
 release.PRODUCT = 'transfer'
 for target in release.TARGETS:
     info = release.verify_archive(downloads / release.archive_name('transfer', *target), version, sha, require_clean=True)
-    assert info['operational_support'] == 'see included platform documentation'
+    if windows_delivery or target[0] != 'windows':
+        assert info['operational_support'] == 'see included platform documentation'
+    else:
+        assert info['operational_support'] == 'unsupported'
 verification = json.loads((downloads / 'bitspeed-transfer-verification.json').read_text())
 assert verification['source_sha'] == sha and verification['version'] == version
-assert verification['operational_native_targets'] == ['linux/amd64', 'darwin/arm64', 'windows/amd64']
+assert verification['operational_native_targets'] == (['linux/amd64', 'darwin/arm64', 'windows/amd64'] if windows_delivery else ['linux/amd64', 'darwin/arm64'])
 assert verification['cross_build_only_targets'] == ['linux/arm64', 'darwin/amd64']
-assert verification['limited_native_targets'] == {}
+assert (verification['limited_native_targets'] == {}) if windows_delivery else ('windows/amd64' in verification['limited_native_targets'])
 native = {('Linux', 'x86_64'): ('linux', 'amd64'), ('Darwin', 'arm64'): ('darwin', 'arm64')}.get((platform.system(), platform.machine()))
 if native:
     destination = downloads / 'native-transfer'

@@ -170,6 +170,16 @@ class TransferReleaseGuards(ReleaseGuards):
         product = patch.object(release, 'PRODUCT', 'transfer')
         product.start()
         self.addCleanup(product.stop)
+        gate = patch.object(release, 'windows_gate', return_value=True)
+        gate.start()
+        self.addCleanup(gate.stop)
+
+    def test_plan_requires_windows_checks(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'output'
+            with patch.dict('os.environ', {'GITHUB_OUTPUT': str(output)}), patch.object(release, 'command', return_value='a' * 40), patch.object(release, 'verify_ci'), patch.object(release, 'version', return_value='0.4.0'), patch.object(release, 'find_release', return_value=None), patch.object(release, 'windows_gate', return_value=False):
+                self.assertRaises(ValueError, release.plan, 'a' * 40)
+            self.assertFalse(output.exists())
 
 
 if __name__ == '__main__':
@@ -198,3 +208,26 @@ class GateWait(unittest.TestCase):
             self.assertFalse(release.gates_succeeded('1', self.needed, attempts=3))
         with patch.object(release, 'api', return_value={'jobs': [{'name': 'native-linux-amd64', 'conclusion': 'success'}]}), patch.object(release.time, 'sleep'):
             self.assertFalse(release.gates_succeeded('1', self.needed, attempts=2))
+
+
+class WindowsGate(unittest.TestCase):
+    sha = 'b' * 40
+
+    def runs(self, *states):
+        return {'workflow_runs': [{'head_sha': self.sha, 'head_branch': 'main', 'event': 'push', 'repository': {'full_name': release.REPO}, 'status': s, 'conclusion': c} for s, c in states]}
+
+    def test_waits_then_passes(self):
+        with patch.object(release, 'api', side_effect=[self.runs(), self.runs(('in_progress', None)), self.runs(('completed', 'success'))]), patch.object(release.time, 'sleep') as sleep:
+            self.assertTrue(release.windows_gate(self.sha))
+            self.assertEqual(sleep.call_count, 2)
+
+    def test_failure_and_foreign_runs(self):
+        with patch.object(release, 'api', return_value=self.runs(('completed', 'failure'))), patch.object(release.time, 'sleep') as sleep:
+            self.assertFalse(release.windows_gate(self.sha))
+            sleep.assert_not_called()
+        foreign = self.runs(('completed', 'success'))
+        foreign['workflow_runs'][0]['head_sha'] = 'c' * 40
+        with patch.object(release, 'api', return_value=foreign), patch.object(release.time, 'sleep'):
+            self.assertFalse(release.windows_gate(self.sha, attempts=3))
+        with patch.object(release, 'api', return_value=self.runs(('in_progress', None))), patch.object(release.time, 'sleep'):
+            self.assertFalse(release.windows_gate(self.sha, attempts=3))

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math"
 	"os"
+	"strings"
 	"sync"
 	"syscall"
 	"unsafe"
@@ -14,18 +15,19 @@ import (
 // See docs/windows-persistence.md for how each call maps to the Unix sequence.
 
 var (
-	kernel32                 = syscall.NewLazyDLL("kernel32.dll")
-	advapi32                 = syscall.NewLazyDLL("advapi32.dll")
-	procLockFileEx           = kernel32.NewProc("LockFileEx")
-	procGetDiskFreeSpaceExW  = kernel32.NewProc("GetDiskFreeSpaceExW")
-	procGetVolumePathNameW   = kernel32.NewProc("GetVolumePathNameW")
-	procGetVolumeInformation = kernel32.NewProc("GetVolumeInformationW")
-	procGetDriveTypeW        = kernel32.NewProc("GetDriveTypeW")
-	procMoveFileExW          = kernel32.NewProc("MoveFileExW")
-	procLocalFree            = kernel32.NewProc("LocalFree")
-	procGetSecurityInfo      = advapi32.NewProc("GetSecurityInfo")
-	procGetAce               = advapi32.NewProc("GetAce")
-	procStringToSD           = advapi32.NewProc("ConvertStringSecurityDescriptorToSecurityDescriptorW")
+	kernel32                          = syscall.NewLazyDLL("kernel32.dll")
+	advapi32                          = syscall.NewLazyDLL("advapi32.dll")
+	procLockFileEx                    = kernel32.NewProc("LockFileEx")
+	procGetDiskFreeSpaceExW           = kernel32.NewProc("GetDiskFreeSpaceExW")
+	procGetVolumePathNameW            = kernel32.NewProc("GetVolumePathNameW")
+	procGetVolumeInformationByHandleW = kernel32.NewProc("GetVolumeInformationByHandleW")
+	procGetFinalPathNameByHandleW     = kernel32.NewProc("GetFinalPathNameByHandleW")
+	procGetDriveTypeW                 = kernel32.NewProc("GetDriveTypeW")
+	procMoveFileExW                   = kernel32.NewProc("MoveFileExW")
+	procLocalFree                     = kernel32.NewProc("LocalFree")
+	procGetSecurityInfo               = advapi32.NewProc("GetSecurityInfo")
+	procGetAce                        = advapi32.NewProc("GetAce")
+	procStringToSD                    = advapi32.NewProc("ConvertStringSecurityDescriptorToSecurityDescriptorW")
 )
 
 const (
@@ -36,6 +38,7 @@ const (
 	movefileReplaceExisting  = 0x1
 	movefileWriteThrough     = 0x8
 	readControl              = 0x00020000
+	fileReadAttributes       = 0x0080
 	fileWriteData            = 0x0002
 	fileAppendData           = 0x0004
 	fileFlagSequentialScan   = 0x08000000
@@ -76,14 +79,33 @@ func freeSpace(path string) (int64, error) {
 }
 
 // The receiver accepts local NTFS on fixed drives, where hard links, write-through
-// renames and directory flushes are available.
+// renames and directory flushes are available. The checks use an open handle, so
+// a symbolic link or junction on the way cannot make a network share look local.
 func receiverFilesystem(path string) error {
 	p, e := syscall.UTF16PtrFromString(path)
 	if e != nil {
 		return ErrStorage
 	}
-	volume := make([]uint16, syscall.MAX_PATH+1)
-	if r, _, _ := procGetVolumePathNameW.Call(uintptr(unsafe.Pointer(p)), uintptr(unsafe.Pointer(&volume[0])), uintptr(len(volume))); r == 0 {
+	h, e := syscall.CreateFile(p, fileReadAttributes, shareAll, nil, syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS, 0)
+	if e != nil {
+		return ErrStorage
+	}
+	defer syscall.CloseHandle(h)
+	buf := make([]uint16, 32768)
+	n, _, _ := procGetFinalPathNameByHandleW.Call(uintptr(h), uintptr(unsafe.Pointer(&buf[0])), uintptr(len(buf)), 0)
+	if n == 0 || n >= uintptr(len(buf)) {
+		return ErrStorage
+	}
+	final := syscall.UTF16ToString(buf[:n])
+	if !strings.HasPrefix(final, `\\?\`) || strings.HasPrefix(strings.ToUpper(final), `\\?\UNC\`) {
+		return ErrUnsupported
+	}
+	resolved, e := syscall.UTF16PtrFromString(final)
+	if e != nil {
+		return ErrStorage
+	}
+	volume := make([]uint16, len(buf))
+	if r, _, _ := procGetVolumePathNameW.Call(uintptr(unsafe.Pointer(resolved)), uintptr(unsafe.Pointer(&volume[0])), uintptr(len(volume))); r == 0 {
 		return ErrStorage
 	}
 	if r, _, _ := procGetDriveTypeW.Call(uintptr(unsafe.Pointer(&volume[0]))); r != driveFixed {
@@ -91,7 +113,7 @@ func receiverFilesystem(path string) error {
 	}
 	var flags uint32
 	name := make([]uint16, syscall.MAX_PATH+1)
-	if r, _, _ := procGetVolumeInformation.Call(uintptr(unsafe.Pointer(&volume[0])), 0, 0, 0, 0, uintptr(unsafe.Pointer(&flags)), uintptr(unsafe.Pointer(&name[0])), uintptr(len(name))); r == 0 {
+	if r, _, _ := procGetVolumeInformationByHandleW.Call(uintptr(h), 0, 0, 0, 0, uintptr(unsafe.Pointer(&flags)), uintptr(unsafe.Pointer(&name[0])), uintptr(len(name))); r == 0 {
 		return ErrStorage
 	}
 	if syscall.UTF16ToString(name) != "NTFS" || flags&fileSupportsHardLinks == 0 {
@@ -189,7 +211,7 @@ func privateObject(path string, wantDir bool) bool {
 	if e != nil {
 		return false
 	}
-	h, e := syscall.CreateFile(p, readControl, shareAll, nil, syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS|syscall.FILE_FLAG_OPEN_REPARSE_POINT, 0)
+	h, e := syscall.CreateFile(p, readControl|fileReadAttributes, shareAll, nil, syscall.OPEN_EXISTING, syscall.FILE_FLAG_BACKUP_SEMANTICS|syscall.FILE_FLAG_OPEN_REPARSE_POINT, 0)
 	if e != nil {
 		return false
 	}

@@ -177,6 +177,22 @@ def verify_ci(sha):
         raise ValueError('checked source is no longer main HEAD')
 
 
+def windows_gate(sha, attempts=60, delay=30):
+    # Transfer delivers on Windows from 0.4.0. Its Windows checks run in their own
+    # workflow so they cannot block Inspect; a Transfer release needs them to pass
+    # for this exact main commit. Wait while they are still running.
+    for attempt in range(attempts):
+        runs = api('actions/workflows/transfer-windows.yml/runs?branch=main&event=push&head_sha=' + sha + '&per_page=20')['workflow_runs']
+        runs = [r for r in runs if r['head_sha'] == sha and r['head_branch'] == 'main' and r['event'] == 'push' and r['repository']['full_name'] == REPO]
+        if any(r['status'] == 'completed' and r['conclusion'] == 'success' for r in runs):
+            return True
+        if runs and all(r['status'] == 'completed' for r in runs):
+            return False
+        if attempt + 1 < attempts:
+            time.sleep(delay)
+    return False
+
+
 def find_release(tag):
     # The tag endpoint omits drafts. List authenticated releases so retries
     # discover the draft created by this workflow before it is published.
@@ -218,6 +234,8 @@ def plan(sha):
     v = version()
     release = find_release(PRODUCT + '/v' + v)
     published = release is not None and not release['draft']
+    if PRODUCT == 'transfer' and not published and not windows_gate(sha):
+        raise ValueError('Transfer Windows checks did not pass for this commit')
     result = dict(sha=sha, version=v, build=str(not published).lower(), publish=str(not published and not v.endswith('-dev')).lower())
     with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
         for key, value in result.items():
@@ -305,6 +323,8 @@ def publish(sha, output):
     needed = {'package-' + goos + '-' + arch for goos, arch in TARGETS} | {'native-' + goos + '-' + arch for goos, arch in NATIVE}
     if not gates_succeeded(run, needed):
         raise ValueError('required package/native gates did not succeed')
+    if PRODUCT == 'transfer' and not windows_gate(sha):
+        raise ValueError('Transfer Windows checks did not pass for this commit')
     output = Path(output).resolve()
     for target in TARGETS:
         verify_archive(output / archive_name(PRODUCT, *target), v, sha, require_clean=True)

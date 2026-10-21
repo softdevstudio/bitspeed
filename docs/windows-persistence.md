@@ -2,7 +2,7 @@
 
 Transfer's protocol, storage layout and recovery rules are the same on every platform. What changes on Windows is how each step of the persistence sequence in transfer-v1.md and finalization.md is carried out. This document maps every Unix primitive Transfer relies on to its Windows counterpart, says what each one guarantees and lists the crash tests that back it.
 
-Scope: Windows 10 and Server 2019 or later, amd64, local NTFS volumes on fixed drives. ReFS (including Dev Drive), FAT and exFAT, removable drives, network shares and mapped drives are refused by the receiver. The sender spool is not checked for filesystem type, as on Unix, but it needs the same calls to succeed.
+Scope: Windows 10 version 1903 or later, Windows 11 and Windows Server 2022 or later, amd64, local NTFS volumes on fixed drives. Those versions delete files with POSIX semantics by default, so a name removed while another program still holds a handle disappears at once. Older versions can leave such a name pending deletion, which Transfer refuses safely but which is not tested. CI runs on GitHub's windows-latest image. ReFS (including Dev Drive), FAT and exFAT, removable drives, network shares and mapped drives are refused by the receiver. The sender spool is not checked for filesystem type, as on Unix, but it needs the same calls to succeed.
 
 ## Primitive mapping
 
@@ -12,12 +12,12 @@ Scope: Windows 10 and Server 2019 or later, amd64, local NTFS volumes on fixed d
 | Private file | created 0600 inside a private directory, checked for no group or other bits | created inside a private directory and inherits its DACL. Checked the same way as directories |
 | Sealed snapshot and manifest | `chmod 0400` and checked as exactly 0400 | no read-only attribute (it would block the flush described below). Privacy is checked as for any private file. Immutability rests on the SHA-256 revalidation every reuse already performs |
 | File sync | `fsync` on the open file, including read-only descriptors | `FlushFileBuffers`. A handle opened only for reading cannot be flushed on Windows, so Transfer opens a second handle with write access, no reparse following and full sharing, and flushes that. The flush covers the file's cached data whatever handle wrote it |
-| Directory sync | `fsync` on the directory | `FlushFileBuffers` on a directory handle opened with write access and backup semantics. NTFS accepts this and it flushes the directory's metadata. The call must succeed; there is no silent fallback |
-| Atomic rename | `rename` | `MoveFileExW` with `MOVEFILE_REPLACE_EXISTING` and `MOVEFILE_WRITE_THROUGH`, followed by the same directory sync as on Unix |
+| Directory sync | `fsync` on the directory | `FlushFileBuffers` on a directory handle opened with write access and backup semantics. NTFS accepts this on the tested runners. Microsoft documents FlushFileBuffers for files and volumes, not directories, so Transfer only relies on the call succeeding; there is no silent fallback |
+| Atomic rename | `rename` | `MoveFileExW` with `MOVEFILE_REPLACE_EXISTING` and `MOVEFILE_WRITE_THROUGH`, followed by the same directory sync as on Unix. Microsoft documents write-through for moves that copy between volumes; for a same-volume rename the directory sync is what Transfer relies on |
 | No-replace publication | `link` fails with EEXIST if the destination exists | `CreateHardLinkW` fails with `ERROR_ALREADY_EXISTS`. NTFS hard links give the same two-names-one-file witness, and `os.SameFile` compares volume serial and file index |
-| Exclusive lock | `flock(LOCK_EX|LOCK_NB)` on .lock | `LockFileEx` with `LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY` on the first byte of .lock. Released when the handle closes or the process dies |
+| Exclusive lock | `flock(LOCK_EX|LOCK_NB)` on .lock | `LockFileEx` with `LOCKFILE_EXCLUSIVE_LOCK|LOCKFILE_FAIL_IMMEDIATELY` on the first byte of .lock. Released when the handle closes or the process ends. Windows can take a moment to release it after a process is killed, so an immediate restart may briefly report the root as busy |
 | Free space | `statfs` | `GetDiskFreeSpaceExW`, bytes available to the caller |
-| Filesystem gate | `statfs` type or name | `GetVolumePathNameW`, then `GetDriveTypeW` must report a fixed drive and `GetVolumeInformationW` must report NTFS with hard link support |
+| Filesystem gate | `statfs` type or name | opens the root (or its parent before the root exists) and works from that handle, so links and junctions are followed to the real location. `GetFinalPathNameByHandleW` must give a local drive path, not a network one, `GetDriveTypeW` on its volume must report a fixed drive and `GetVolumeInformationByHandleW` must report NTFS with hard link support |
 | Stable source | open with `O_NOFOLLOW|O_NONBLOCK`, compare identity, size and modification time before and after | open with `FILE_FLAG_OPEN_REPARSE_POINT` and share mode read only, which refuses the open while another process holds write access and blocks writers, renames and deletes for the whole copy. The same identity, size and time comparison follows |
 
 ## Rules that only matter on Windows
@@ -29,6 +29,8 @@ Antivirus software sometimes opens a new file for a moment. If that makes a rena
 Another program can hold a published destination open without sharing write access, for example a media player. While it does, status cannot flush the destination and reports storage_unavailable, which is retryable. Nothing is marked failed and no data changes. The same applies to a spool snapshot opened by another program during reuse.
 
 A receiver root or spool directory created by the user must already have a private DACL: only allow entries for the current user, SYSTEM and Administrators, inherited or explicit. A folder under the user's profile normally qualifies. A folder made directly under C:\ normally does not, because it inherits access for Authenticated Users. Let Transfer create the root, or tighten an existing one with `icacls DIR /inheritance:r /grant:r "%USERNAME%:(OI)(CI)F" SYSTEM:(OI)(CI)F Administrators:(OI)(CI)F`. The token file needs the same kind of DACL, which a file created in the profile normally has.
+
+A list inherited from a parent folder passes the check, but it can change later if someone changes the parent and lets the change spread. Mode bits on Unix do not change that way. Transfer rechecks privacy every time it opens a root, spool or token, so a widened list is refused at the next start; a root Transfer created itself has a protected list and does not inherit changes.
 
 The owner must be one of those three accounts too, because an owner can change the list at any time. Allow entries for OWNER RIGHTS are accepted, since they grant access only to that checked owner; Python's private temporary folders use them. Allow entries for any other account, a missing list, and object or callback entries all make the check fail. Deny entries for any account are accepted because they only remove access.
 
@@ -44,10 +46,15 @@ The existing process tests run unchanged on the Windows CI runner: a child proce
 
 Windows-specific tests cover:
 
-- the directory DACL check accepting Transfer's own directories and rejecting a directory that also grants access to Everyone or Authenticated Users;
+- the directory DACL check accepting Transfer's own directories, inherited lists and OWNER RIGHTS entries, and rejecting a directory that also grants access to Everyone, Authenticated Users or Users;
 - a token file readable by another account being refused;
-- the root lock refusing a second receiver or spool user, and being released when the holder is killed;
+- the root lock refusing a second receiver or spool user and being released on close. Release after a kill is covered by the process tests, which restart on the same spool and root;
 - a source file held open for writing by another handle being refused, and writes to it being blocked during preparation;
-- flushing a file and a directory through the real calls;
-- refusing a hard link over an existing destination;
-- an executable smoke test of serve, send, kill, restart, status and clean with the packaged Windows binary.
+- flushing a read-only file handle and a directory handle, after checking that a plain flush on them is refused, and refusing to flush when the path now names a different file;
+- refusing a hard link over an existing destination, and renames replacing a file and moving a directory;
+- refusing a network path, both directly and through a local symbolic link to an administrative share;
+- an executable smoke test of serve, send, kill, restart, status and clean, plus the executable interruption and TLS checks, with a binary built in CI and again with the packaged Windows archive before release.
+
+These run in the Transfer Windows workflow, separate from CI so that a Windows Transfer failure cannot hold up an Inspect release. Release Transfer requires that workflow to pass for the exact commit. Its logs are kept as the results-windows-transfer artifact, and the release evidence folder records the run.
+
+Not tested directly: owners outside the allowed accounts, a missing access list, and FAT, exFAT, ReFS or removable volumes. The code refuses all of them; the runner has no such volume to try.

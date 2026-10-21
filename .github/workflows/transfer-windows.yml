@@ -1,0 +1,45 @@
+name: Transfer Windows
+# Separate from CI so a Windows Transfer failure can never block an Inspect release.
+# Release Transfer requires this workflow to pass for the exact commit.
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  transfer-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: vet and tests
+        shell: bash
+        run: |
+          set -o pipefail
+          status=0
+          mkdir -p test/results/windows
+          { git rev-parse HEAD; go version; python -c "import platform; print(platform.platform())"; } > test/results/windows/environment.txt
+          python scripts/annotate-log.py notice environment test/results/windows/environment.txt 5
+          go vet ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test/results/windows/vet.log || status=1
+          go test -count=1 -v -run Windows ./transfer 2>&1 | tee test/results/windows/windows.log || status=1
+          python scripts/annotate-log.py notice windows-tests test/results/windows/windows.log 120
+          go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test/results/windows/test.log || { status=1; python scripts/annotate-log.py error tests test/results/windows/test.log 250; }
+          go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test/results/windows/race.log || { status=1; python scripts/annotate-log.py error race test/results/windows/race.log 120; }
+          go build -o bitspeed-transfer.exe ./cmd/bitspeed-transfer
+          for script in smoke-transfer smoke-transfer-interruption smoke-transfer-tls; do
+            python scripts/$script.py "$PWD/bitspeed-transfer.exe" > test/results/windows/$script.log 2>&1 || { status=1; python scripts/annotate-log.py error $script test/results/windows/$script.log 80; }
+            python scripts/annotate-log.py notice $script test/results/windows/$script.log 10
+          done
+          [ -s test/results/windows/vet.log ] && python scripts/annotate-log.py warning vet test/results/windows/vet.log 60
+          exit $status
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: results-windows-transfer
+          path: test/results/windows/
