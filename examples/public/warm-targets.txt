@@ -1,0 +1,3 @@
+# name url, recorded fresh then warm, 10 samples each, one second apart
+bitspeed-home https://bitspeed.org/
+example-com https://example.com/

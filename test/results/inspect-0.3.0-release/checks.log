@@ -1,0 +1,8 @@
+UTC: 2026-10-21T16:26:44Z
+Release: inspect/v0.3.0 "BitSpeed Inspect v0.3.0" from 07900545bcd33fab734e0e96ade469bedd0630ce (BUILD_INFO source_sha), published on the first attempt after the publisher's job-status wait fix
+Latest release: inspect/v0.3.0, 13 assets
+PASS latest checksum: all 12 assets match SHA256SUMS
+PASS downloaded binaries report bitspeed-inspect 0.3.0 and bitspeed-transfer 0.3.0 (carried)
+PASS scripts/smoke-inspect.py on the downloaded Linux amd64 binary, including POST bodies, warm connections and gate exit codes
+PASS all 13 bitspeed.org download links resolve to latest assets
+Compatibility: explain (text, JSON) on 12 saved schema 1 recordings and compare on 144 pairs are byte-identical to Inspect 0.2.0

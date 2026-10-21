@@ -1,0 +1,70 @@
+name: Public case study warm
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['examples/public/warm-targets.txt']
+permissions:
+  contents: read
+jobs:
+  record:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-latest, archive: bitspeed-inspect-linux-amd64.tar.gz, label: github-ubuntu}
+          - {runner: macos-latest, archive: bitspeed-inspect-darwin-arm64.tar.gz, label: github-macos}
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download released Inspect and verify checksum
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir dl && cd dl
+          gh release download inspect/v0.3.0 --repo "$GITHUB_REPOSITORY" -p "${{ matrix.archive }}" -p SHA256SUMS
+          grep " ${{ matrix.archive }}$" SHA256SUMS > want
+          if command -v sha256sum >/dev/null; then sha256sum -c want; else shasum -a 256 -c want; fi
+          tar xzf "${{ matrix.archive }}" bitspeed-inspect
+          ./bitspeed-inspect --version
+      - name: Record public targets
+        run: |
+          out="out/${{ matrix.label }}"; mkdir -p "$out"
+          uname -a > "$out/environment.txt"; date -u +%FT%TZ >> "$out/environment.txt"
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            case "$name" in \#*) continue;; esac
+            for mode in fresh warm; do
+              ./dl/bitspeed-inspect record --samples=10 --interval=1s --connection=$mode --location="${{ matrix.label }}" "$url" > "$out/$name-$mode.json" 2> "$out/$name-$mode.stderr" || echo "record $name $mode exited $?" >> "$out/status.txt"
+              ./dl/bitspeed-inspect explain "$out/$name-$mode.json" > "$out/$name-$mode.explain.txt" 2>&1 || true
+            done
+            ./dl/bitspeed-inspect compare "$out/$name-fresh.json" "$out/$name-warm.json" > "$out/compare-$name-fresh-vs-warm.txt" 2>&1 || true
+          done < examples/public/warm-targets.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: warm-study-${{ matrix.label }}
+          path: out/
+  commit:
+    needs: record
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: warm-study-*
+          path: dl
+      - name: Commit recordings to examples/public/results
+        run: |
+          rm -rf examples/public/warm
+          mkdir -p examples/public/warm
+          cp -r dl/warm-study-*/* examples/public/warm/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/public/warm
+          git commit -m "examples: record fresh and warm public-endpoint runs with Inspect 0.3.0" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
