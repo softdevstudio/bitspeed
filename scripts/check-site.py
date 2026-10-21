@@ -21,7 +21,7 @@ def check(path):
         assert 'bitspeed-inspect-linux-amd64.tar.gz' in body and 'bitspeed-transfer-linux-amd64.tar.gz' in body and 'Cross-built only' in body
         assert 'delivery unsupported' in body and 'bitspeed-transfer-verification.json' in body
     if path == '/transfer/':
-        assert 'Transfer 0.2.0' in body and 'Windows' in body and 'clean --root' in body
+        assert 'Transfer 0.3.0' in body and 'Windows' in body and 'clean --root' in body
     if path == '/bitspeed-transfer-resumes-interrupted-file-transfers-from-verified-chunks/':
         assert 'Transfer 0.1.0' in body and 'Windows' in body
     return f'PASS live {status} https://bitspeed.org{path}'

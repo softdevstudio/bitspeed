@@ -1,0 +1,9 @@
+UTC: 2026-10-21T13:42:18Z
+Release: transfer/v0.3.0 "BitSpeed Transfer v0.3.0" from 637b252 (CI and Release Transfer on the exact commit)
+First Release Transfer attempt: publish started while GitHub still showed native-darwin-arm64 in progress; the publisher's job-conclusion gate refused (no tag, no draft). Rerun attempt 2 passed every package, native and publish job.
+Latest release: transfer/v0.3.0, 13 assets
+PASS latest checksum: all 12 assets match SHA256SUMS
+PASS downloaded binaries report bitspeed-transfer 0.3.0 and bitspeed-inspect 0.1.1 (carried)
+PASS scripts/smoke-transfer.py (incl. progress output and clean) and smoke-transfer-interruption.py on the downloaded Linux amd64 binary
+PASS all 13 bitspeed.org download links resolve to latest assets
+Demo: 64 MiB file, 1 MiB chunks, sender killed after "sent 16 of 64"; rerun printed "receiver has 16 of 64 chunks verified; sending 48", then 48/48 and finalize; transferred true
