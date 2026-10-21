@@ -167,3 +167,86 @@ func TestCleanReceiverRejectsBadRoots(t *testing.T) {
 		t.Fatal("clean removed chunks from a root that failed recovery")
 	}
 }
+
+func completedRoot(t *testing.T, size int) (string, Manifest) {
+	t.Helper()
+	data := bytes.Repeat([]byte{5}, size)
+	r, server, spool, m := stagedFile(t, data)
+	if s, e := Send(context.Background(), server.URL, testToken, spool, m.TransferID); e != nil || s.State != Completed {
+		t.Fatal(s, e)
+	}
+	server.Close()
+	r.Close()
+	return r.root, m
+}
+
+func TestCleanReceiverKeepsChunksOfDamagedDestination(t *testing.T) {
+	if !spoolSupported() {
+		t.Skip("receiver unsupported on this platform")
+	}
+	root, m := completedRoot(t, 2*int(MinChunkSize)+3)
+	output := filepath.Join(root, "files", m.TransferID+".data")
+	f, e := os.OpenFile(output, os.O_WRONLY, 0)
+	if e != nil {
+		t.Fatal(e)
+	}
+	if _, e = f.WriteAt([]byte{9}, 0); e != nil {
+		t.Fatal(e)
+	}
+	f.Close()
+	chunks := filepath.Join(root, "sessions", m.TransferID, "chunks")
+	before := len(chunkFiles(t, chunks))
+	results, e := CleanReceiver(context.Background(), root, false)
+	if e != nil || len(results) != 1 || results[0].State != Failed || results[0].Cleaned || results[0].ChunksRemoved != 0 {
+		t.Fatal("damaged destination must be marked failed and keep its chunks", results, e)
+	}
+	if len(chunkFiles(t, chunks)) != before {
+		t.Fatal("chunks removed from a failed session")
+	}
+}
+
+func TestCleanReceiverWorksWithoutWriteSpace(t *testing.T) {
+	if !spoolSupported() {
+		t.Skip("receiver unsupported on this platform")
+	}
+	root, m := completedRoot(t, int(MinChunkSize)+1)
+	ops := realReceiverOps()
+	ops.write = func(*os.File, []byte) (int, error) { return 0, errors.New("no space") }
+	if _, e := newReceiver(ReceiverConfig{Root: root, Token: testToken}, ops); e == nil {
+		t.Fatal("serve startup should need its write probe")
+	}
+	results, e := cleanReceiver(context.Background(), root, false, ops)
+	if e != nil || len(results) != 1 || results[0].ChunksRemoved != len(m.ChunkSHA256) {
+		t.Fatal("clean must not need to write on a completed root", results, e)
+	}
+}
+
+func TestCleanReceiverStorageAndCancellation(t *testing.T) {
+	if !spoolSupported() {
+		t.Skip("receiver unsupported on this platform")
+	}
+	root, m := completedRoot(t, 2*int(MinChunkSize))
+	chunks := filepath.Join(root, "sessions", m.TransferID, "chunks")
+	ops := realReceiverOps()
+	ops.sync = func(f *os.File) error {
+		if filepath.Clean(f.Name()) == chunks {
+			return errors.New("sync")
+		}
+		return f.Sync()
+	}
+	if _, e := cleanReceiver(context.Background(), root, false, ops); !errors.Is(e, ErrStorage) {
+		t.Fatal("a failed directory sync must be reported", e)
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	if _, e := CleanReceiver(ctx, root, false); e == nil {
+		t.Fatal("cancelled clean must fail")
+	}
+	results, e := CleanReceiver(context.Background(), root, false)
+	if e != nil || len(results) != 1 || !results[0].Cleaned {
+		t.Fatal("clean must finish after earlier failures", results, e)
+	}
+	if names := chunkFiles(t, chunks); len(names) != 0 {
+		t.Fatal(names)
+	}
+}

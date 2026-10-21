@@ -31,6 +31,11 @@ with tempfile.TemporaryDirectory() as directory:
         unsupported = subprocess.run([binary, 'serve', '--root=' + str(Path(directory) / 'receiver'), '--token-file=' + str(token)], capture_output=True, text=True, timeout=10)
         assert unsupported.returncode == 1 and not unsupported.stdout and 'unsupported' in unsupported.stderr.lower()
         assert not (Path(directory) / 'receiver').exists()
+        existing = Path(directory) / 'existing-root'
+        existing.mkdir()
+        refused = subprocess.run([binary, 'clean', '--root=' + str(existing)], capture_output=True, text=True, timeout=10)
+        assert refused.returncode == 1 and not refused.stdout and 'unsupported' in refused.stderr.lower()
+        assert not list(existing.iterdir())
         print('PASS: Windows version/help and unsupported-operation checks; delivery is not supported')
     if os.name != 'nt':
         spool = Path(directory) / 'spool'

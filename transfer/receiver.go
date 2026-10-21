@@ -59,12 +59,13 @@ func newReceiverContext(ctx context.Context, c ReceiverConfig, ops receiverOps) 
 	if !hex256(c.Token) {
 		return nil, ErrConfig
 	}
-	return openReceiver(ctx, c, ops)
+	return openReceiver(ctx, c, ops, false)
 }
 
 // openReceiver takes the root lock and runs every startup recovery check.
-// Offline maintenance uses it without a token because it serves no requests.
-func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps) (*Receiver, error) {
+// Offline maintenance uses it without a token because it serves no requests,
+// and skips the write probe that only serving needs, so it can run on a full disk.
+func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps, offline bool) (*Receiver, error) {
 	if !spoolSupported() {
 		return nil, ErrUnsupported
 	}
@@ -139,8 +140,10 @@ func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps) (*Rece
 	if e = syncDir(c.Root, ops.snapshotOps); e != nil {
 		return nil, e
 	}
-	if e = r.probe(); e != nil {
-		return nil, e
+	if !offline {
+		if e = r.probe(); e != nil {
+			return nil, e
+		}
 	}
 	if _, _, e = r.inventory(); e != nil {
 		return nil, e

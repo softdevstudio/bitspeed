@@ -13,7 +13,7 @@ type CleanResult struct {
 	State          State  `json:"state"`
 	Cleaned        bool   `json:"cleaned"`
 	ChunksRemoved  int    `json:"chunks_removed"`
-	BytesFreed     int64  `json:"bytes_freed"`
+	BytesFreed     int64  `json:"bytes_freed"` // sum of removed file sizes, an estimate of space returned
 	EvidenceKept   int    `json:"evidence_kept"`
 	SkippedBecause string `json:"skipped_because,omitempty"`
 }
@@ -31,13 +31,16 @@ func CleanReceiver(ctx context.Context, root string, dryRun bool) ([]CleanResult
 }
 
 func cleanReceiver(ctx context.Context, root string, dryRun bool, ops receiverOps) ([]CleanResult, error) {
+	if !spoolSupported() {
+		return nil, ErrUnsupported
+	}
 	if root == "" {
 		return nil, ErrConfig
 	}
 	if info, e := os.Lstat(root); e != nil || !info.IsDir() {
 		return nil, ErrConfig
 	}
-	r, e := openReceiver(ctx, ReceiverConfig{Root: root, MaxSessions: MaxReceiverSessions, MaxReservedBytes: MaxReservedBytes}, ops)
+	r, e := openReceiver(ctx, ReceiverConfig{Root: root, MaxSessions: MaxReceiverSessions, MaxReservedBytes: MaxReservedBytes}, ops, true)
 	if e != nil {
 		return nil, e
 	}
