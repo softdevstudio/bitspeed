@@ -1,0 +1,64 @@
+name: Transfer Windows demo
+# Records a real kill-and-resume delivery with the published Windows archive.
+# Artifact downloads are blocked from Claude sessions, so the results are committed.
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['examples/public/windows-demo-release.txt']
+permissions:
+  contents: read
+jobs:
+  record:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Download the published archive and verify its checksum
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=$(tr -d '[:space:]' < examples/public/windows-demo-release.txt)
+          mkdir dl && cd dl
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" -p bitspeed-transfer-windows-amd64.zip -p SHA256SUMS
+          grep ' bitspeed-transfer-windows-amd64.zip$' SHA256SUMS > want
+          sha256sum -c want
+          unzip -q bitspeed-transfer-windows-amd64.zip -d archive
+          ./archive/bitspeed-transfer.exe --version
+      - name: Kill and resume a delivery
+        shell: bash
+        run: |
+          python scripts/demo-transfer-resume.py "$PWD/dl/archive/bitspeed-transfer.exe" out/github-windows > demo.log 2>&1 || { python scripts/annotate-log.py error demo demo.log 60; exit 1; }
+          python scripts/annotate-log.py notice demo demo.log 20
+          sha256sum dl/bitspeed-transfer-windows-amd64.zip > out/github-windows/archive.sha256
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-demo
+          path: out/
+  commit:
+    needs: record
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows-demo
+          path: dl
+      - name: Commit the recording to examples/public/windows-demo
+        run: |
+          rm -rf examples/public/windows-demo
+          mkdir -p examples/public/windows-demo
+          cp -r dl/* examples/public/windows-demo/
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add examples/public/windows-demo
+          git commit -m "examples: record a Windows kill-and-resume delivery with the published Transfer archive" || exit 0
+          git pull --rebase origin main
+          git push origin HEAD:main
