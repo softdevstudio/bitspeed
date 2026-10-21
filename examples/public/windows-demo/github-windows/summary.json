@@ -1,0 +1,15 @@
+{
+  "version": "bitspeed-transfer 0.4.0",
+  "platform": "Windows-2025Server-10.0.26100-SP0",
+  "file_bytes": 67108864,
+  "chunks": 64,
+  "chunk_bytes": 1048576,
+  "killed_after": "sent 16 of 64 chunks, 16777216/67108864 bytes (25%)",
+  "verified_after_restart": 16,
+  "missing_after_restart": 48,
+  "resumed_first_line": "receiver has 16 of 64 chunks verified; sending 48 (50331648 bytes)",
+  "transferred": true,
+  "sha256": "8cd76ae82d3b08de5725fa16e69db374fbf985bfacf7b3dfa25e1f5735e200ca",
+  "clean_chunks_removed": 64,
+  "clean_bytes_freed": 67108864
+}

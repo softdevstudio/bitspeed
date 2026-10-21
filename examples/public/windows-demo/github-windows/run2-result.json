@@ -1,0 +1,21 @@
+{
+  "uploaded": true,
+  "transferred": true,
+  "status": {
+    "protocol_version": 1,
+    "transfer_id": "18d5bc53d1dd1bcfe986e327b95170ba1d36ad27e44cd3f315473ac8cd4b7285",
+    "manifest_sha256": "34c291cedc5275104e8292ab63b9f618eee5cef9974a73304b879319296f25d6",
+    "state": "completed",
+    "verified_chunks": 64,
+    "verified_bytes": 67108864,
+    "missing_chunks": [],
+    "receipt": {
+      "transfer_id": "18d5bc53d1dd1bcfe986e327b95170ba1d36ad27e44cd3f315473ac8cd4b7285",
+      "manifest_sha256": "34c291cedc5275104e8292ab63b9f618eee5cef9974a73304b879319296f25d6",
+      "file_size": 67108864,
+      "file_sha256": "8cd76ae82d3b08de5725fa16e69db374fbf985bfacf7b3dfa25e1f5735e200ca",
+      "output_name": "18d5bc53d1dd1bcfe986e327b95170ba1d36ad27e44cd3f315473ac8cd4b7285.data"
+    },
+    "error_code": null
+  }
+}

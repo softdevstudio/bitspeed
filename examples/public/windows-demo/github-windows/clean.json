@@ -1,0 +1,15 @@
+{
+  "dry_run": false,
+  "chunks_removed": 64,
+  "bytes_freed": 67108864,
+  "sessions": [
+    {
+      "transfer_id": "18d5bc53d1dd1bcfe986e327b95170ba1d36ad27e44cd3f315473ac8cd4b7285",
+      "state": "completed",
+      "cleaned": true,
+      "chunks_removed": 64,
+      "bytes_freed": 67108864,
+      "evidence_kept": 0
+    }
+  ]
+}

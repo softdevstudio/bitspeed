@@ -1,0 +1,7 @@
+bitspeed-transfer 0.4.0 on Windows-2025Server-10.0.26100-SP0
+prepared 64 MiB as 64 chunks; original deleted
+run 1 last line before the kill: sent 16 of 64 chunks, 16777216/67108864 bytes (25%)
+after restart the receiver proves 16 of 64 chunks; missing 48
+run 2 first line: receiver has 16 of 64 chunks verified; sending 48 (50331648 bytes)
+transferred true; delivered SHA-256 8cd76ae82d3b08de5725fa16e69db374fbf985bfacf7b3dfa25e1f5735e200ca matches the original
+clean removed 64 chunks, 67108864 bytes

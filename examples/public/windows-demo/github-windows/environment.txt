@@ -1,0 +1,4 @@
+bitspeed-transfer 0.4.0
+Windows-2025Server-10.0.26100-SP0
+AMD64
+UTC 2026-10-21T18:02:45Z
