@@ -48,6 +48,10 @@ func TestWindowsPrivateDirectoriesAndFiles(t *testing.T) {
 			t.Fatal("restored directory refused", e)
 		}
 	}
+	icacls(t, inner, "/grant", "*S-1-3-4:(OI)(CI)F")
+	if e := privateDir(inner); e != nil {
+		t.Fatal("OWNER RIGHTS with an allowed owner must stay private", e)
+	}
 	icacls(t, inner, "/deny", "*S-1-1-0:(W)")
 	if e := privateDir(inner); e != nil {
 		t.Fatal("deny entry must not break privacy", e)

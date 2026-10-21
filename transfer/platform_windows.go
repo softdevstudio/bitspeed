@@ -29,22 +29,23 @@ var (
 )
 
 const (
-	lockfileFailImmediately = 0x1
-	lockfileExclusiveLock   = 0x2
-	driveFixed              = 3
-	fileSupportsHardLinks   = 0x00400000
-	movefileReplaceExisting = 0x1
-	movefileWriteThrough    = 0x8
-	readControl             = 0x00020000
-	fileWriteData           = 0x0002
-	fileAppendData          = 0x0004
-	fileFlagSequentialScan  = 0x08000000
-	seFileObject            = 1
-	daclSecurityInformation = 0x4
-	accessAllowedACEType    = 0
-	accessDeniedACEType     = 1
-	errorInvalidFunction    = syscall.Errno(1)
-	shareAll                = syscall.FILE_SHARE_READ | syscall.FILE_SHARE_WRITE | syscall.FILE_SHARE_DELETE
+	lockfileFailImmediately  = 0x1
+	lockfileExclusiveLock    = 0x2
+	driveFixed               = 3
+	fileSupportsHardLinks    = 0x00400000
+	movefileReplaceExisting  = 0x1
+	movefileWriteThrough     = 0x8
+	readControl              = 0x00020000
+	fileWriteData            = 0x0002
+	fileAppendData           = 0x0004
+	fileFlagSequentialScan   = 0x08000000
+	seFileObject             = 1
+	ownerSecurityInformation = 0x1
+	daclSecurityInformation  = 0x4
+	accessAllowedACEType     = 0
+	accessDeniedACEType      = 1
+	errorInvalidFunction     = syscall.Errno(1)
+	shareAll                 = syscall.FILE_SHARE_READ | syscall.FILE_SHARE_WRITE | syscall.FILE_SHARE_DELETE
 )
 
 func spoolSupported() bool { return true }
@@ -181,7 +182,8 @@ type winACE struct {
 }
 
 // privateObject reads the DACL through a handle that does not follow reparse
-// points, and accepts only allow entries for allowedSID plus any deny entries.
+// points. The owner must be an allowed account, and the DACL may hold only allow
+// entries for allowed accounts or OWNER RIGHTS, plus any deny entries.
 func privateObject(path string, wantDir bool) bool {
 	p, e := syscall.UTF16PtrFromString(path)
 	if e != nil {
@@ -199,13 +201,18 @@ func privateObject(path string, wantDir bool) bool {
 	if info.FileAttributes&syscall.FILE_ATTRIBUTE_REPARSE_POINT != 0 || (info.FileAttributes&syscall.FILE_ATTRIBUTE_DIRECTORY != 0) != wantDir {
 		return false
 	}
+	var owner *syscall.SID
 	var dacl *winACL
 	var sd uintptr
-	if r, _, _ := procGetSecurityInfo.Call(uintptr(h), seFileObject, daclSecurityInformation, 0, 0, uintptr(unsafe.Pointer(&dacl)), 0, uintptr(unsafe.Pointer(&sd))); r != 0 {
+	if r, _, _ := procGetSecurityInfo.Call(uintptr(h), seFileObject, ownerSecurityInformation|daclSecurityInformation, uintptr(unsafe.Pointer(&owner)), 0, uintptr(unsafe.Pointer(&dacl)), 0, uintptr(unsafe.Pointer(&sd))); r != 0 {
 		return false
 	}
 	defer procLocalFree.Call(sd)
-	if dacl == nil {
+	// An owner outside the allowed set could open the object up at any time.
+	if owner == nil || dacl == nil {
+		return false
+	}
+	if sid, e := owner.String(); e != nil || !allowedSID(sid) {
 		return false
 	}
 	for i := uint16(0); i < dacl.count; i++ {
@@ -217,7 +224,8 @@ func privateObject(path string, wantDir bool) bool {
 		case accessDeniedACEType:
 		case accessAllowedACEType:
 			sid, e := (*syscall.SID)(unsafe.Add(unsafe.Pointer(ace), 8)).String()
-			if e != nil || !allowedSID(sid) {
+			// OWNER RIGHTS (Python's private directories use it) means the owner checked above.
+			if e != nil || !allowedSID(sid) && sid != "S-1-3-4" {
 				return false
 			}
 		default:
