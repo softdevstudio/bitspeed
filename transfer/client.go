@@ -23,7 +23,7 @@ func LoadToken(path string) (string, error) {
 		return "", ErrUnsupported
 	}
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > 65 {
+	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > 65 {
 		return "", ErrConfig
 	}
 	f, e := openSource(path)
@@ -263,7 +263,7 @@ func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, 
 	defer unlock()
 	path := filepath.Join(spool, id, "snapshot")
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm() != 0400 || info.Size() != m.FileSize {
+	if e != nil || !info.Mode().IsRegular() || !sealedOK(path, info) || info.Size() != m.FileSize {
 		return empty, ErrSnapshot
 	}
 	f, e := os.Open(path)

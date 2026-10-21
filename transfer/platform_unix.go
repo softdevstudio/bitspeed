@@ -34,3 +34,19 @@ func openSource(path string) (*os.File, error) {
 	}
 	return os.NewFile(uintptr(fd), path), nil
 }
+
+func makePrivateDir(path string) error { return os.Mkdir(path, 0700) }
+
+// Directories are private when only the owner has any permission bits.
+func privateDirOK(_ string, info os.FileInfo) bool { return info.Mode().Perm() == 0700 }
+
+// Files are private when no group or other bits are set.
+func privateFileOK(_ string, info os.FileInfo) bool { return info.Mode().Perm()&0077 == 0 }
+func lockFileOK(_ string, info os.FileInfo) bool    { return info.Mode().Perm() == 0600 }
+
+// A sealed snapshot or manifest is owner read-only.
+func sealFile(f *os.File) error                { return f.Chmod(0400) }
+func sealedOK(_ string, info os.FileInfo) bool { return info.Mode().Perm() == 0400 }
+
+func syncHandle(f *os.File) error  { return f.Sync() }
+func renamePath(a, b string) error { return os.Rename(a, b) }

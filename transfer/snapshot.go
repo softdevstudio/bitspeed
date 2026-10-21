@@ -45,7 +45,7 @@ type snapshotOps struct {
 }
 
 func realSnapshotOps() snapshotOps {
-	return snapshotOps{freeSpace, func(f *os.File, b []byte) (int, error) { return f.Write(b) }, (*os.File).Sync, (*os.File).Close, os.Rename}
+	return snapshotOps{freeSpace, func(f *os.File, b []byte) (int, error) { return f.Write(b) }, syncHandle, (*os.File).Close, renamePath}
 }
 
 // Prepare copies a quiescent source into a private, locked local spool. No network
@@ -121,7 +121,7 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if _, e = os.Lstat(final); !os.IsNotExist(e) {
 		return result, ErrInvalidSpool
 	}
-	if e = os.Mkdir(pending, 0700); e != nil {
+	if e = makePrivateDir(pending); e != nil {
 		return result, ErrStorage
 	}
 	if e = privateDir(pending); e != nil {
@@ -178,7 +178,7 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if e = ops.close(src); e != nil {
 		return result, ErrStorage
 	}
-	if e = dst.Chmod(0400); e != nil {
+	if e = sealFile(dst); e != nil {
 		return result, ErrStorage
 	}
 	if e = ops.sync(dst); e != nil {
@@ -207,7 +207,7 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if e != nil || n != len(data) {
 		return result, ErrStorage
 	}
-	if e = meta.Chmod(0400); e != nil {
+	if e = sealFile(meta); e != nil {
 		return result, ErrStorage
 	}
 	if e = ops.sync(meta); e != nil {
@@ -299,7 +299,7 @@ func reuse(ctx context.Context, spool, id string, ops snapshotOps) (Manifest, er
 	}
 	path := filepath.Join(dir, "manifest.json")
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm() != 0400 || info.Size() > MaxManifestBytes {
+	if e != nil || !info.Mode().IsRegular() || !sealedOK(path, info) || info.Size() > MaxManifestBytes {
 		return empty, ErrInvalidSpool
 	}
 	f, e := os.Open(path)
@@ -377,7 +377,7 @@ func reuse(ctx context.Context, spool, id string, ops snapshotOps) (Manifest, er
 func hashSnapshot(ctx context.Context, path, id string, size, chunkSize int64, progress func(Progress) error, ops snapshotOps) (Manifest, error) {
 	var empty Manifest
 	before, e := os.Lstat(path)
-	if e != nil || !before.Mode().IsRegular() || before.Mode().Perm() != 0400 || before.Size() != size {
+	if e != nil || !before.Mode().IsRegular() || !sealedOK(path, before) || before.Size() != size {
 		return empty, ErrSnapshot
 	}
 	f, e := os.Open(path)
@@ -441,13 +441,13 @@ func hashSnapshot(ctx context.Context, path, id string, size, chunkSize int64, p
 
 func privateDir(path string) error {
 	info, e := os.Lstat(path)
-	if e != nil || !info.IsDir() || info.Mode().Perm() != 0700 {
+	if e != nil || !info.IsDir() || !privateDirOK(path, info) {
 		return ErrInvalidSpool
 	}
 	return nil
 }
 func openSpool(path string, ops snapshotOps) (func(), error) {
-	if e := os.Mkdir(path, 0700); e != nil && !os.IsExist(e) {
+	if e := makePrivateDir(path); e != nil && !os.IsExist(e) {
 		return nil, ErrInvalidSpool
 	}
 	if e := privateDir(path); e != nil {
@@ -455,7 +455,7 @@ func openSpool(path string, ops snapshotOps) (func(), error) {
 	}
 	lockPath := filepath.Join(path, ".lock")
 	info, e := os.Lstat(lockPath)
-	if e == nil && (!info.Mode().IsRegular() || info.Mode().Perm() != 0600) {
+	if e == nil && (!info.Mode().IsRegular() || !lockFileOK(lockPath, info)) {
 		return nil, ErrInvalidSpool
 	}
 	if e != nil && !os.IsNotExist(e) {
@@ -466,7 +466,7 @@ func openSpool(path string, ops snapshotOps) (func(), error) {
 		return nil, ErrStorage
 	}
 	opened, e := f.Stat()
-	if e != nil || !opened.Mode().IsRegular() || opened.Mode().Perm() != 0600 {
+	if e != nil || !opened.Mode().IsRegular() || !lockFileOK(lockPath, opened) {
 		f.Close()
 		return nil, ErrInvalidSpool
 	}

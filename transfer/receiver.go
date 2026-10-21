@@ -111,7 +111,7 @@ func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps, offlin
 	}
 	for _, name := range []string{"sessions", "files"} {
 		path := filepath.Join(c.Root, name)
-		if e = os.Mkdir(path, 0700); e != nil && !os.IsExist(e) {
+		if e = makePrivateDir(path); e != nil && !os.IsExist(e) {
 			return nil, ErrStorage
 		}
 		if e = privateDir(path); e != nil {
@@ -248,7 +248,7 @@ func (r *Receiver) inventory() (int, int64, error) {
 }
 func readRegular(path string, limit int64) ([]byte, error) {
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > limit {
+	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > limit {
 		return nil, ErrRecovery
 	}
 	f, e := os.Open(path)
@@ -361,7 +361,7 @@ func (r *Receiver) admit(ctx context.Context, m Manifest) (StoredStatus, bool, e
 		return StoredStatus{}, false, failure(503, "capacity_exhausted", true)
 	}
 	pending := filepath.Join(r.root, "sessions", ".admitting-"+m.TransferID)
-	if e = os.Mkdir(pending, 0700); e != nil {
+	if e = makePrivateDir(pending); e != nil {
 		return StoredStatus{}, false, ErrRecovery
 	}
 	// Failed admission is retained as evidence and blocks further admission until
@@ -369,7 +369,7 @@ func (r *Receiver) admit(ctx context.Context, m Manifest) (StoredStatus, bool, e
 	if e = privateDir(pending); e != nil {
 		return StoredStatus{}, false, e
 	}
-	if e = os.Mkdir(filepath.Join(pending, "chunks"), 0700); e != nil {
+	if e = makePrivateDir(filepath.Join(pending, "chunks")); e != nil {
 		return StoredStatus{}, false, ErrStorage
 	}
 	data, _ := m.CanonicalJSON()
@@ -407,7 +407,7 @@ func chunkSizeAt(m Manifest, index int) int64 {
 }
 func (r *Receiver) verifyFile(ctx context.Context, path string, length int64, digest string) error {
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > length {
+	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > length {
 		return ErrRecovery
 	}
 	if info.Size() != length {
@@ -472,7 +472,7 @@ func (r *Receiver) uploadStatus(ctx context.Context, m Manifest) (StoredStatus, 
 	for _, entry := range entries {
 		if entry.Name() == "incoming.tmp" {
 			info, e := os.Lstat(filepath.Join(chunks, entry.Name()))
-			if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > MaxChunkSize {
+			if e != nil || !info.Mode().IsRegular() || !privateFileOK(filepath.Join(chunks, entry.Name()), info) || info.Size() > MaxChunkSize {
 				return s, ErrRecovery
 			}
 			if e = os.Remove(filepath.Join(chunks, entry.Name())); e != nil {
@@ -588,8 +588,8 @@ func (r *Receiver) store(ctx context.Context, m Manifest, index int, body io.Rea
 		if e != nil {
 			return ack, ErrStorage
 		}
-		defer f.Close()
-		defer os.Remove(temp)
+		// Windows cannot remove a file that is still open, so close first.
+		defer func() { _ = f.Close(); _ = os.Remove(temp) }()
 	}
 	hash := sha256.New()
 	buf := make([]byte, 32<<10)

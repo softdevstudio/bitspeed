@@ -1,5 +1,3 @@
-//go:build linux || darwin
-
 package transfer
 
 import (
@@ -90,11 +88,11 @@ func TestTokenFileRules(t *testing.T) {
 		}
 	}
 	os.WriteFile(file, []byte(testToken), 0600)
-	os.Chmod(file, 0644)
+	exposeFile(t, file)
 	if _, e := LoadToken(file); e == nil {
 		t.Fatal("public token accepted")
 	}
-	os.Chmod(file, 0600)
+	unexposeFile(t, file)
 	link := filepath.Join(dir, "link")
 	os.Symlink(file, link)
 	if _, e := LoadToken(link); e == nil {

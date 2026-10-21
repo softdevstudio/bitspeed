@@ -1,5 +1,3 @@
-//go:build linux || darwin
-
 package transfer
 
 import (
@@ -69,8 +67,9 @@ func TestPrepareAndReuse(t *testing.T) {
 			if a != b {
 				t.Fatal("identity changed")
 			}
-			info, e := os.Stat(filepath.Join(spool, m.TransferID, "snapshot"))
-			if e != nil || info.Mode().Perm() != 0400 {
+			sealed := filepath.Join(spool, m.TransferID, "snapshot")
+			info, e := os.Stat(sealed)
+			if e != nil || !sealedOK(sealed, info) {
 				t.Fatal("not read-only", e)
 			}
 		})
@@ -238,30 +237,30 @@ func TestReuseRejectsDamage(t *testing.T) {
 			meta := filepath.Join(dir, "manifest.json")
 			switch kind {
 			case "bytes":
-				os.Chmod(snap, 0600)
+				unseal(snap)
 				os.WriteFile(snap, []byte("modified"), 0400)
-				os.Chmod(snap, 0400)
+				reseal(snap)
 			case "length":
-				os.Chmod(snap, 0600)
+				unseal(snap)
 				os.WriteFile(snap, []byte("x"), 0400)
-				os.Chmod(snap, 0400)
+				reseal(snap)
 			case "manifest":
-				os.Chmod(meta, 0600)
+				unseal(meta)
 				os.WriteFile(meta, []byte("{}"), 0400)
-				os.Chmod(meta, 0400)
+				reseal(meta)
 			case "duplicate":
 				b, _ := os.ReadFile(meta)
 				b = bytes.Replace(b, []byte(`{"protocol_version":1,`), []byte(`{"protocol_version":1,"protocol_version":1,`), 1)
-				os.Chmod(meta, 0600)
+				unseal(meta)
 				os.WriteFile(meta, b, 0400)
-				os.Chmod(meta, 0400)
+				reseal(meta)
 			case "unknown":
 				os.WriteFile(filepath.Join(dir, "other"), nil, 0600)
 			case "symlink":
 				os.Remove(snap)
 				os.Symlink(src, snap)
 			case "mode":
-				os.Chmod(snap, 0600)
+				breakSeal(t, snap)
 			}
 			if _, e = Reuse(context.Background(), spool, m.TransferID); e == nil {
 				t.Fatal("accepted damaged spool")

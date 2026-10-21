@@ -12,7 +12,7 @@ var errChunkCorrupt = errors.New("stored chunk bytes do not match manifest")
 
 func privateChunk(path string, limit int64) error {
 	info, e := os.Lstat(path)
-	if e != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 != 0 || info.Size() > limit {
+	if e != nil || !info.Mode().IsRegular() || !privateFileOK(path, info) || info.Size() > limit {
 		return ErrRecovery
 	}
 	return nil

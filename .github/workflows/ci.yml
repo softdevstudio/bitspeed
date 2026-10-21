@@ -26,3 +26,14 @@ jobs:
         with:
           name: results-${{ matrix.os }}
           path: test/results/
+  transfer-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - run: go vet ./transfer/... ./cmd/bitspeed-transfer/...
+      - run: go test -count=1 -v -run Windows ./transfer
+      - run: go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/...
+      - run: go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/...
