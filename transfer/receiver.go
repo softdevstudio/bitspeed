@@ -56,10 +56,19 @@ func NewReceiverContext(ctx context.Context, c ReceiverConfig) (*Receiver, error
 	return newReceiverContext(ctx, c, realReceiverOps())
 }
 func newReceiverContext(ctx context.Context, c ReceiverConfig, ops receiverOps) (*Receiver, error) {
+	if !hex256(c.Token) {
+		return nil, ErrConfig
+	}
+	return openReceiver(ctx, c, ops)
+}
+
+// openReceiver takes the root lock and runs every startup recovery check.
+// Offline maintenance uses it without a token because it serves no requests.
+func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps) (*Receiver, error) {
 	if !spoolSupported() {
 		return nil, ErrUnsupported
 	}
-	if !hex256(c.Token) || c.Root == "" {
+	if c.Root == "" {
 		return nil, ErrConfig
 	}
 	if c.MaxSessions == 0 {

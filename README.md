@@ -95,4 +95,13 @@ Preparation returns JSON with prepared true, transferred false and the manifest.
 
 For a loopback staging exercise, see [docs/receiver-staging.md](docs/receiver-staging.md). Use a private token file, start serve with a dedicated private root, prepare the sender snapshot, then invoke send --upload-only using that snapshot ID. Its JSON says uploaded true and transferred false. This is an explicit development stage, not completed file delivery.
 
-For development delivery after preparation, use `bitspeed-transfer send --spool=DIR --reuse=ID --url=URL --token-file=FILE`. It stages missing chunks, finalizes one fixed destination, verifies the completed receipt against the snapshot and saves receipt.json before returning transferred true. Repeat the same command after a lost response. All snapshots, chunks, corrupt evidence, witnesses and receipts are retained; follow the offline procedure in docs/finalization.md before removing anything. The Windows archive supports version/help and explicit unsupported-operation checks only; Linux arm64/macOS amd64 are cross-built without native runtime coverage.
+For development delivery after preparation, use `bitspeed-transfer send --spool=DIR --reuse=ID --url=URL --token-file=FILE`. It stages missing chunks, finalizes one fixed destination, verifies the completed receipt against the snapshot and saves receipt.json before returning transferred true. Repeat the same command after a lost response. Snapshots, chunks, corrupt evidence, witnesses and receipts are retained by default.
+
+To free the space held by chunks of finished transfers, stop the receiver and run:
+
+```sh
+bitspeed-transfer clean --root=/private/parent/receiver-root --dry-run
+bitspeed-transfer clean --root=/private/parent/receiver-root
+```
+
+Clean takes the receiver's root lock, so it refuses to run while serve is using that root. It first runs the same recovery checks as starting the receiver, which re-verifies every completed destination against its manifest. Then it removes the stored chunk files of completed sessions only. Destinations, receipts, witnesses, journals, corrupt-chunk evidence and every unfinished session stay as they are. The JSON output lists each session with the chunks removed and bytes freed; --dry-run reports the same without removing anything. A completed transfer keeps working afterwards: status and a repeated send still return its receipt. Clean does not change the receiver's reservation limit, and removing whole sessions still follows the offline procedure in docs/finalization.md. The Windows archive supports version/help and explicit unsupported-operation checks only; Linux arm64/macOS amd64 are cross-built without native runtime coverage.

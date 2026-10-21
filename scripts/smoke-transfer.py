@@ -17,7 +17,7 @@ assert version.stdout == 'bitspeed-transfer ' + expected_version + '\n'
 with tempfile.TemporaryDirectory() as directory:
     canary = Path(directory) / 'source'
     canary.write_bytes(b'unchanged')
-    for command in ('serve', 'send', 'status'):
+    for command in ('serve', 'send', 'status', 'clean'):
         help_result = subprocess.run([binary, command, '--help'], capture_output=True, text=True, timeout=10)
         assert help_result.returncode == 0 and help_result.stdout
         result = subprocess.run([binary, command, str(canary), '--token=SECRET'], cwd=directory, capture_output=True, text=True, timeout=10)
@@ -78,6 +78,13 @@ with tempfile.TemporaryDirectory() as directory:
                 receiver.kill()
                 _, diagnostics = receiver.communicate()
             assert '0123456789abcdef' not in diagnostics
+        # With the receiver stopped, clean removes the completed session's chunks only.
+        chunk = receiver_root / 'sessions' / identity / 'chunks' / '0'
+        dry = json.loads(subprocess.run([binary, 'clean', '--root=' + str(receiver_root), '--dry-run'], capture_output=True, text=True, check=True, timeout=20).stdout)
+        assert dry['dry_run'] and dry['chunks_removed'] == 1 and dry['bytes_freed'] == 9 and chunk.exists()
+        cleaned = json.loads(subprocess.run([binary, 'clean', '--root=' + str(receiver_root)], capture_output=True, text=True, check=True, timeout=20).stdout)
+        assert not cleaned['dry_run'] and cleaned['chunks_removed'] == 1 and cleaned['sessions'][0]['cleaned'] and not chunk.exists()
+        assert output.read_bytes() == b'unchanged'
         # Start a new receiver and a new sender process with the saved identity.
         receiver = subprocess.Popen([binary, 'serve', '--listen=127.0.0.1:0', '--root=' + str(receiver_root), '--token-file=' + str(token_file)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
@@ -105,4 +112,4 @@ with tempfile.TemporaryDirectory() as directory:
 
 
 if os.name != 'nt':
-    print('PASS: Transfer preparation, staging, verified publication, receipt cache, process restart, repeat delivery and damaged-output rejection')
+    print('PASS: Transfer preparation, staging, verified publication, receipt cache, offline clean, process restart, repeat delivery and damaged-output rejection')

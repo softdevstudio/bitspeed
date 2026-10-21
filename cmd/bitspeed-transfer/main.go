@@ -32,7 +32,7 @@ func run(args []string, stdout io.Writer) error {
 
 func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return errors.New("usage: bitspeed-transfer --version | serve | send | status; use --help")
+		return errors.New("usage: bitspeed-transfer --version | serve | send | status | clean; use --help")
 	}
 	switch args[0] {
 	case "--version":
@@ -45,8 +45,14 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) != 1 {
 			return errors.New("help takes no arguments")
 		}
-		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer "+transfer.Version+"\nAvailable: serve, status, send, send --prepare-only, send --upload-only\nSend verifies and publishes one file; upload-only stages chunks. See docs/transfer-releases.md for platform limits.\nSee docs/transfer-v1.md for the protocol.")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer "+transfer.Version+"\nAvailable: serve, status, send, send --prepare-only, send --upload-only, clean\nSend verifies and publishes one file; upload-only stages chunks. See docs/transfer-releases.md for platform limits.\nSee docs/transfer-v1.md for the protocol.")
 		return err
+	case "clean":
+		if len(args) == 2 && args[1] == "--help" {
+			_, err := fmt.Fprintln(stdout, "clean --root=DIR [--dry-run]\nWith the receiver stopped, removes stored chunks from completed sessions after startup recovery verifies each destination. Keeps destinations, receipts, witnesses, corrupt-chunk evidence and unfinished sessions.")
+			return err
+		}
+		return cleanReceiver(ctx, args[1:], stdout)
 	case "serve", "send", "status":
 		if len(args) == 2 && args[1] == "--help" {
 			help := map[string]string{
@@ -138,4 +144,38 @@ func prepareOnly(ctx context.Context, args []string, stdout, stderr io.Writer) e
 		Transferred bool              `json:"transferred"`
 		Manifest    transfer.Manifest `json:"manifest"`
 	}{true, false, m})
+}
+
+func cleanReceiver(ctx context.Context, args []string, stdout io.Writer) error {
+	invalid := errors.New("invalid clean options; use clean --help")
+	root, dryRun := "", false
+	for _, arg := range args {
+		switch {
+		case arg == "--dry-run" && !dryRun:
+			dryRun = true
+		case strings.HasPrefix(arg, "--root=") && root == "" && len(arg) > len("--root="):
+			root = strings.TrimPrefix(arg, "--root=")
+		default:
+			return invalid
+		}
+	}
+	if root == "" {
+		return invalid
+	}
+	results, err := transfer.CleanReceiver(ctx, root, dryRun)
+	if err != nil {
+		return err
+	}
+	var removed int
+	var freed int64
+	for _, r := range results {
+		removed += r.ChunksRemoved
+		freed += r.BytesFreed
+	}
+	return json.NewEncoder(stdout).Encode(struct {
+		DryRun        bool                   `json:"dry_run"`
+		ChunksRemoved int                    `json:"chunks_removed"`
+		BytesFreed    int64                  `json:"bytes_freed"`
+		Sessions      []transfer.CleanResult `json:"sessions"`
+	}{dryRun, removed, freed, results})
 }
