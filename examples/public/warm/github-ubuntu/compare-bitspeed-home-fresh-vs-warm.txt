@@ -1,0 +1,33 @@
+BitSpeed Inspect comparison
+Calculated baseline counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Calculated candidate counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Recorded source hashes: baseline="f1945e353d9925aabe39f917aa3eeef9d4eaa5d8646fb06459eec61640943047" candidate="1ce7530eacca8db779ae95c63805a7263a0a20c5bd69eba4a1f1fe9ce7939329"
+Recorded location labels: baseline="github-ubuntu" candidate="github-ubuntu"
+Check ["request_setting_connection_policy_v1", "blocking", scope="all"]: "Request settings differ: connection_policy."
+Check ["connection_reuse_v1", "caution", scope="all"]: "Connection reuse differs between recordings; reused and new connections do different work."
+Hop 0
+Check ["remote_address_v1", "information", scope="all"]: "Observed remote addresses differ, vary or are unavailable."
+ Calculated "dns_resolution": baseline median=0.532385 ms range=[0.470695 ms, 49.065108 ms] n=10 unavailable=0 excluded=0; candidate median=0.536904 ms range=[0.536904 ms, 0.536904 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 0.004520 ms; percent change: 0.849%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tcp_connect": baseline median=37.227384 ms range=[32.772971 ms, 41.720440 ms] n=10 unavailable=0 excluded=0; candidate median=37.929405 ms range=[37.929405 ms, 37.929405 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 0.702021 ms; percent change: 1.886%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tls_handshake": baseline median=39.264902 ms range=[35.438385 ms, 44.396595 ms] n=10 unavailable=0 excluded=0; candidate median=44.767891 ms range=[44.767891 ms, 44.767891 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 5.502988 ms; percent change: 14.015%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "connection_setup": baseline median=77.061031 ms range=[68.952150 ms, 135.383985 ms] n=10 unavailable=0 excluded=0; candidate median=83.435542 ms range=[83.435542 ms, 83.435542 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 6.374511 ms; percent change: 8.272%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "first_byte_wait": baseline median=81.258718 ms range=[52.173897 ms, 213.547210 ms] n=10 unavailable=0 excluded=0; candidate median=68.642562 ms range=[54.324116 ms, 79.937390 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -12.616155 ms; percent change: -15.526%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "response_read": baseline median=1.569857 ms range=[1.041665 ms, 1.947430 ms] n=10 unavailable=0 excluded=0; candidate median=2.219772 ms range=[1.723459 ms, 2.304670 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 0.649915 ms; percent change: 41.400%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "observed_payload_rate": baseline median=8969677.505 "bytes/s" range=[7230555.142 "bytes/s", 13517781.628 "bytes/s"] n=10 unavailable=0 excluded=0; candidate median=6343446.268 "bytes/s" range=[6109768.427 "bytes/s", 8170197.260 "bytes/s"] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -2626231.238 "bytes/s"; percent change: -29.279%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+Limit: "Medians and minimum-to-maximum ranges describe the recorded samples, not statistical confidence or a causal effect."
+Limit: "Available phase values are retained even when a comparison is blocked; no overall faster-transfer claim is made."
+Limit: "Matching metadata and payload size do not prove identical response contents or identical external conditions."

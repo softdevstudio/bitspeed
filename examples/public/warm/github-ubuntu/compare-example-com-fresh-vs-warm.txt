@@ -1,0 +1,33 @@
+BitSpeed Inspect comparison
+Calculated baseline counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Calculated candidate counts: requested=10 recorded=10 complete=10 failed=0 cancelled=0 unattempted=0
+Recorded source hashes: baseline="761df54253fc5108f610f40f7d3f7d967ae1bcd58b682ef73fc1778ce956a9d0" candidate="8d5c2dc6a4f67eabe8b6c66be34975fa1ac35a8673c0a88e89e4966c668d75bb"
+Recorded location labels: baseline="github-ubuntu" candidate="github-ubuntu"
+Check ["request_setting_connection_policy_v1", "blocking", scope="all"]: "Request settings differ: connection_policy."
+Check ["connection_reuse_v1", "caution", scope="all"]: "Connection reuse differs between recordings; reused and new connections do different work."
+Hop 0
+Check ["remote_address_v1", "information", scope="all"]: "Observed remote addresses differ, vary or are unavailable."
+ Calculated "dns_resolution": baseline median=0.555699 ms range=[0.507665 ms, 11.690795 ms] n=10 unavailable=0 excluded=0; candidate median=0.500256 ms range=[0.500256 ms, 0.500256 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: -0.055443 ms; percent change: -9.977%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tcp_connect": baseline median=36.174385 ms range=[28.057844 ms, 41.188053 ms] n=10 unavailable=0 excluded=0; candidate median=36.857674 ms range=[36.857674 ms, 36.857674 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 0.683289 ms; percent change: 1.889%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "tls_handshake": baseline median=35.710139 ms range=[26.511898 ms, 45.143755 ms] n=10 unavailable=0 excluded=0; candidate median=45.287696 ms range=[45.287696 ms, 45.287696 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 9.577557 ms; percent change: 26.820%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "connection_setup": baseline median=75.918958 ms range=[56.436331 ms, 94.568162 ms] n=10 unavailable=0 excluded=0; candidate median=82.823972 ms range=[82.823972 ms, 82.823972 ms] n=1 unavailable=9 excluded=0
+ Calculated candidate minus baseline: 6.905015 ms; percent change: 9.095%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "first_byte_wait": baseline median=39.261420 ms range=[29.837434 ms, 52.185200 ms] n=10 unavailable=0 excluded=0; candidate median=42.625819 ms range=[41.345212 ms, 44.508679 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 3.364399 ms; percent change: 8.569%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "response_read": baseline median=0.108229 ms range=[0.083064 ms, 0.150761 ms] n=10 unavailable=0 excluded=0; candidate median=0.064907 ms range=[0.050695 ms, 0.097255 ms] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: -0.043322 ms; percent change: -40.029%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+ Calculated "observed_payload_rate": baseline median=5331408.068 "bytes/s" range=[3827249.753 "bytes/s", 6946450.929 "bytes/s"] n=10 unavailable=0 excluded=0; candidate median=8900061.426 "bytes/s" range=[5932856.923 "bytes/s", 11381793.076 "bytes/s"] n=10 unavailable=0 excluded=0
+ Calculated candidate minus baseline: 3568653.357 "bytes/s"; percent change: 66.936%
+ Interpretation ["not_comparable"]: "Comparability checks block a change verdict for this phase."
+Limit: "Medians and minimum-to-maximum ranges describe the recorded samples, not statistical confidence or a causal effect."
+Limit: "Available phase values are retained even when a comparison is blocked; no overall faster-transfer claim is made."
+Limit: "Matching metadata and payload size do not prove identical response contents or identical external conditions."
