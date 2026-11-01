@@ -32,7 +32,7 @@ func run(args []string, stdout io.Writer) error {
 
 func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) error {
 	if len(args) == 0 {
-		return errors.New("usage: bitspeed-transfer --version | serve | send | status | clean; use --help")
+		return errors.New("usage: bitspeed-transfer --version | serve | send | status | clean | unpack; use --help")
 	}
 	switch args[0] {
 	case "--version":
@@ -45,8 +45,14 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) != 1 {
 			return errors.New("help takes no arguments")
 		}
-		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer "+transfer.Version+"\nAvailable: serve, status, send, send --prepare-only, send --upload-only, clean\nSend verifies and publishes one file; upload-only stages chunks. See docs/transfer-releases.md for platform limits.\nSee docs/transfer-v1.md for the protocol.")
+		_, err := fmt.Fprintln(stdout, "BitSpeed Transfer "+transfer.Version+"\nAvailable: serve, status, send, send --prepare-only, send --upload-only, clean, unpack\nSend verifies and publishes one file or one folder; upload-only stages chunks; unpack writes a received folder out. See docs/transfer-releases.md for platform limits.\nSee docs/transfer-v1.md for the protocol.")
 		return err
+	case "unpack":
+		if len(args) == 2 && args[1] == "--help" {
+			_, err := fmt.Fprintln(stdout, "unpack --root=DIR --id=ID --out=DIR\nOn the receiver, writes a completed folder transfer into OUT, which must not exist and must be outside the root. Checks every file and the whole payload against the receipt first. Safe to run while serve is running.")
+			return err
+		}
+		return unpackTree(ctx, args[1:], stdout)
 	case "clean":
 		if len(args) == 2 && args[1] == "--help" {
 			_, err := fmt.Fprintln(stdout, "clean --root=DIR [--dry-run]\nWith the receiver stopped, removes stored chunks from completed sessions after startup recovery verifies each destination. Keeps destinations, receipts, witnesses, corrupt-chunk evidence and unfinished sessions.")
@@ -57,7 +63,7 @@ func runContext(ctx context.Context, args []string, stdout, stderr io.Writer) er
 		if len(args) == 2 && args[1] == "--help" {
 			help := map[string]string{
 				"serve":  "serve --root=DIR --token-file=FILE [--listen=127.0.0.1:8080] [--tls-cert=FILE --tls-key=FILE]\nReceiver on supported Linux and macOS local filesystems and on local NTFS on Windows.",
-				"send":   "send --prepare-only --source=FILE --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation or revalidation only. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE [--parallel=N]\nsend --spool=DIR --reuse=ID --url=URL --token-file=FILE [--parallel=N]\nPublishes a verified destination and retains a local receipt. --parallel keeps up to N chunk uploads in flight (1 to 8, default 4). Progress goes to stderr; the JSON result goes to stdout.",
+				"send":   "send --prepare-only --source=FILE|FOLDER --spool=DIR [--chunk-size=BYTES]\nsend --prepare-only --spool=DIR --reuse=ID\nLocal preparation or revalidation only. send --upload-only --spool=DIR --reuse=ID --url=URL --token-file=FILE [--parallel=N]\nsend --spool=DIR --reuse=ID --url=URL --token-file=FILE [--parallel=N]\nPublishes a verified destination and retains a local receipt. --parallel keeps up to N chunk uploads in flight (1 to 8, default 4). Progress goes to stderr; the JSON result goes to stdout.",
 				"status": "status --url=URL --token-file=FILE --id=ID\nAuthenticated verified observations and completion receipt.",
 			}
 			text := help[args[0]]
@@ -113,6 +119,7 @@ func prepareOnly(ctx context.Context, args []string, stdout, stderr io.Writer) e
 		return invalid
 	}
 	var m transfer.Manifest
+	var tree *transfer.TreeSummary
 	var err error
 	if reuse != "" {
 		m, err = transfer.Reuse(ctx, values["--spool"], reuse)
@@ -126,7 +133,7 @@ func prepareOnly(ctx context.Context, args []string, stdout, stderr io.Writer) e
 		}
 		var last int64
 		lastStage := ""
-		m, err = transfer.Prepare(ctx, source, values["--spool"], transfer.PrepareOptions{ChunkSize: chunk, Progress: func(p transfer.Progress) error {
+		o := transfer.PrepareOptions{ChunkSize: chunk, Progress: func(p transfer.Progress) error {
 			if p.Stage != lastStage || p.Bytes-last >= 1<<20 || p.Bytes == p.Total {
 				last = p.Bytes
 				lastStage = p.Stage
@@ -134,16 +141,47 @@ func prepareOnly(ctx context.Context, args []string, stdout, stderr io.Writer) e
 				return err
 			}
 			return nil
-		}})
+		}}
+		if info, e := os.Lstat(source); e == nil && info.IsDir() {
+			var summary transfer.TreeSummary
+			m, summary, err = transfer.PrepareTree(ctx, source, values["--spool"], o)
+			tree = &summary
+		} else {
+			m, err = transfer.Prepare(ctx, source, values["--spool"], o)
+		}
 	}
 	if err != nil {
 		return err
 	}
 	return json.NewEncoder(stdout).Encode(struct {
-		Prepared    bool              `json:"prepared"`
-		Transferred bool              `json:"transferred"`
-		Manifest    transfer.Manifest `json:"manifest"`
-	}{true, false, m})
+		Prepared    bool                  `json:"prepared"`
+		Transferred bool                  `json:"transferred"`
+		Manifest    transfer.Manifest     `json:"manifest"`
+		Tree        *transfer.TreeSummary `json:"tree,omitempty"`
+	}{true, false, m, tree})
+}
+
+func unpackTree(ctx context.Context, args []string, stdout io.Writer) error {
+	invalid := errors.New("invalid unpack options; use unpack --help")
+	values := map[string]string{}
+	for _, arg := range args {
+		key, value, ok := strings.Cut(arg, "=")
+		if !ok || value == "" || key != "--root" && key != "--id" && key != "--out" || values[key] != "" {
+			return invalid
+		}
+		values[key] = value
+	}
+	if len(values) != 3 {
+		return invalid
+	}
+	result, err := transfer.Unpack(ctx, values["--root"], values["--id"], values["--out"])
+	if err != nil {
+		return err
+	}
+	return json.NewEncoder(stdout).Encode(struct {
+		Unpacked bool `json:"unpacked"`
+		transfer.UnpackResult
+	}{true, result})
 }
 
 func cleanReceiver(ctx context.Context, args []string, stdout io.Writer) error {

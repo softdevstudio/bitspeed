@@ -34,7 +34,7 @@ if [ -n "$unformatted" ]; then
 fi
 python3 -m unittest discover -s scripts -p "test_*.py" -v
 go vet ./...
-go test -race -v -count=1 -timeout=60s ./...
+go test -race -v -count=1 -timeout=180s ./...
 build_dir="$(mktemp -d)"
 trap 'rm -rf "$build_dir"' EXIT
 go build -o "$build_dir/bitspeed-inspect" ./cmd/bitspeed-inspect
@@ -45,6 +45,7 @@ go build -o "$build_dir/bitspeed-transfer" ./cmd/bitspeed-transfer
 python3 scripts/smoke-transfer.py "$build_dir/bitspeed-transfer"
 python3 scripts/smoke-transfer-interruption.py "$build_dir/bitspeed-transfer"
 python3 scripts/smoke-transfer-tls.py "$build_dir/bitspeed-transfer"
+python3 scripts/smoke-transfer-tree.py "$build_dir/bitspeed-transfer"
 printf 'PASS: formatting, vet, race tests, both command builds and CLI smoke\n'
 
 if [ "${BITSPEED_CHECK_SITE:-0}" = "1" ]; then

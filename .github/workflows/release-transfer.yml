@@ -130,6 +130,11 @@ jobs:
           NATIVE_BINARY: ${{ matrix.binary }}
         shell: bash
         run: python scripts/smoke-transfer-tls.py "$PWD/native/$NATIVE_BINARY"
+      - name: Native executable folder send and unpack
+        env:
+          NATIVE_BINARY: ${{ matrix.binary }}
+        shell: bash
+        run: python scripts/smoke-transfer-tree.py "$PWD/native/$NATIVE_BINARY"
   publish:
     needs: [plan, package, native]
     if: needs.plan.outputs.publish == 'true'

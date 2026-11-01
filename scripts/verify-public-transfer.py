@@ -73,7 +73,7 @@ if native:
     destination = downloads / 'native-transfer'
     release.verify_archive(downloads / release.archive_name('transfer', *native), version, sha, destination, require_clean=True)
     binary = destination / 'bitspeed-transfer'
-    for script in ('smoke-transfer.py', 'smoke-transfer-interruption.py', 'smoke-transfer-tls.py'):
+    for script in ('smoke-transfer.py', 'smoke-transfer-interruption.py', 'smoke-transfer-tls.py', 'smoke-transfer-tree.py'):
         command = [sys.executable, str(release.ROOT / 'scripts' / script), str(binary)]
         if script == 'smoke-transfer.py':
             command.append(version)

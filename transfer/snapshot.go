@@ -82,11 +82,60 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if e != nil || !sameSource(before, opened) {
 		return result, ErrSource
 	}
-	count := before.Size() / o.ChunkSize
-	if before.Size()%o.ChunkSize != 0 {
+	return prepareInto(ctx, spool, o, ops, before.Size(), func(dst *os.File) (string, error) {
+		buf := make([]byte, 32<<10)
+		var copied int64
+		copiedHash := sha256.New()
+		for {
+			if e := ctx.Err(); e != nil {
+				return "", e
+			}
+			n, readErr := src.Read(buf)
+			if n > 0 {
+				if copied+int64(n) > before.Size() {
+					return "", ErrSource
+				}
+				written, we := ops.write(dst, buf[:n])
+				if we != nil || written != n {
+					return "", ErrStorage
+				}
+				copied += int64(n)
+				copiedHash.Write(buf[:n])
+				if e := notify(o.Progress, Progress{"copying", copied, before.Size()}); e != nil {
+					return "", e
+				}
+			}
+			if readErr == io.EOF {
+				break
+			}
+			if readErr != nil {
+				return "", ErrSource
+			}
+		}
+		after, e := src.Stat()
+		if e != nil || copied != before.Size() || !sameSource(before, after) {
+			return "", ErrSource
+		}
+		pathAfter, e := os.Lstat(source)
+		if e != nil || !sameSource(before, pathAfter) {
+			return "", ErrSource
+		}
+		if e = ops.close(src); e != nil {
+			return "", ErrStorage
+		}
+		return hex.EncodeToString(copiedHash.Sum(nil)), nil
+	})
+}
+
+// prepareInto creates a pending spool entry, lets fill write exactly size
+// bytes of snapshot and return their SHA-256, then seals, hashes, records the
+// manifest and publishes the entry. Nothing is reusable until publication.
+func prepareInto(ctx context.Context, spool string, o PrepareOptions, ops snapshotOps, size int64, fill func(*os.File) (string, error)) (result Manifest, err error) {
+	count := size / o.ChunkSize
+	if size%o.ChunkSize != 0 {
 		count++
 	}
-	if before.Size() < 0 || before.Size() > MaxFileSize || count > MaxChunks {
+	if size < 0 || size > MaxFileSize || count > MaxChunks {
 		return result, ErrSource
 	}
 	unlock, e := openSpool(spool, ops)
@@ -108,7 +157,7 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if e != nil {
 		return result, ErrStorage
 	}
-	if available < before.Size()+spoolHeadroom {
+	if available < size+spoolHeadroom {
 		return result, ErrCapacity
 	}
 	var random [32]byte
@@ -138,45 +187,9 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 		return result, ErrStorage
 	}
 	defer dst.Close()
-	buf := make([]byte, 32<<10)
-	var copied int64
-	copiedHash := sha256.New()
-	for {
-		if e = ctx.Err(); e != nil {
-			return result, e
-		}
-		n, readErr := src.Read(buf)
-		if n > 0 {
-			if copied+int64(n) > before.Size() {
-				return result, ErrSource
-			}
-			written, we := ops.write(dst, buf[:n])
-			if we != nil || written != n {
-				return result, ErrStorage
-			}
-			copied += int64(n)
-			copiedHash.Write(buf[:n])
-			if e = notify(o.Progress, Progress{"copying", copied, before.Size()}); e != nil {
-				return result, e
-			}
-		}
-		if readErr == io.EOF {
-			break
-		}
-		if readErr != nil {
-			return result, ErrSource
-		}
-	}
-	after, e := src.Stat()
-	if e != nil || copied != before.Size() || !sameSource(before, after) {
-		return result, ErrSource
-	}
-	pathAfter, e := os.Lstat(source)
-	if e != nil || !sameSource(before, pathAfter) {
-		return result, ErrSource
-	}
-	if e = ops.close(src); e != nil {
-		return result, ErrStorage
+	copiedSum, e := fill(dst)
+	if e != nil {
+		return result, e
 	}
 	if e = sealFile(dst); e != nil {
 		return result, ErrStorage
@@ -187,11 +200,11 @@ func prepare(ctx context.Context, source, spool string, o PrepareOptions, ops sn
 	if e = ops.close(dst); e != nil {
 		return result, ErrStorage
 	}
-	m, e := hashSnapshot(ctx, filepath.Join(pending, "snapshot"), id, before.Size(), o.ChunkSize, o.Progress, ops)
+	m, e := hashSnapshot(ctx, filepath.Join(pending, "snapshot"), id, size, o.ChunkSize, o.Progress, ops)
 	if e != nil {
 		return result, e
 	}
-	if m.FileSHA256 != hex.EncodeToString(copiedHash.Sum(nil)) {
+	if m.FileSHA256 != copiedSum {
 		return result, ErrSnapshot
 	}
 	data, e := m.CanonicalJSON()

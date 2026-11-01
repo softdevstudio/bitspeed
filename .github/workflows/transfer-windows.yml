@@ -32,7 +32,7 @@ jobs:
           go test -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test/results/windows/test.log || { status=1; python scripts/annotate-log.py error tests test/results/windows/test.log 250; }
           go test -race -count=1 ./transfer/... ./cmd/bitspeed-transfer/... 2>&1 | tee test/results/windows/race.log || { status=1; python scripts/annotate-log.py error race test/results/windows/race.log 120; }
           go build -o bitspeed-transfer.exe ./cmd/bitspeed-transfer
-          for script in smoke-transfer smoke-transfer-interruption smoke-transfer-tls; do
+          for script in smoke-transfer smoke-transfer-interruption smoke-transfer-tls smoke-transfer-tree; do
             python scripts/$script.py "$PWD/bitspeed-transfer.exe" > test/results/windows/$script.log 2>&1 || { status=1; python scripts/annotate-log.py error $script test/results/windows/$script.log 80; }
             python scripts/annotate-log.py notice $script test/results/windows/$script.log 10
           done

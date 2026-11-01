@@ -109,7 +109,8 @@ for point in ('partial chunk', 'chunk response', 'final response'):
 
         proxy = ThreadingHTTPServer(('127.0.0.1', 0), Proxy)
         threading.Thread(target=proxy.serve_forever, daemon=True).start()
-        sender = subprocess.Popen([binary, 'send', '--spool=' + str(spool), '--reuse=' + identity, '--url=http://127.0.0.1:' + str(proxy.server_port), '--token-file=' + str(token)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        # One chunk at a time, so the held request decides exactly what is stored.
+        sender = subprocess.Popen([binary, 'send', '--spool=' + str(spool), '--reuse=' + identity, '--url=http://127.0.0.1:' + str(proxy.server_port), '--token-file=' + str(token), '--parallel=1'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             assert reached.wait(20), 'sender did not reach interruption boundary'
             stop(sender); stop(server)

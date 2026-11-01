@@ -14,7 +14,7 @@ type brokenWriter struct{}
 func (brokenWriter) Write([]byte) (int, error) { return 0, io.ErrClosedPipe }
 
 func TestVersionAndHelp(t *testing.T) {
-	for _, args := range [][]string{{"--version"}, {"--help"}, {"help"}, {"serve", "--help"}, {"send", "--help"}, {"status", "--help"}, {"clean", "--help"}} {
+	for _, args := range [][]string{{"--version"}, {"--help"}, {"help"}, {"serve", "--help"}, {"send", "--help"}, {"status", "--help"}, {"clean", "--help"}, {"unpack", "--help"}} {
 		var out bytes.Buffer
 		if err := run(args, &out); err != nil || out.Len() == 0 {
 			t.Fatal(args, err)
@@ -30,7 +30,7 @@ func TestVersionAndHelp(t *testing.T) {
 }
 
 func TestOperationalCommandsFailClosed(t *testing.T) {
-	for _, command := range []string{"serve", "send", "status", "clean"} {
+	for _, command := range []string{"serve", "send", "status", "clean", "unpack"} {
 		for _, tail := range [][]string{nil, {"--root=/private/canary", "--token=SECRET"}, {"https://private.invalid/SECRET"}, {"--help", "SECRET"}} {
 			args := append([]string{command}, tail...)
 			var out bytes.Buffer
@@ -57,6 +57,25 @@ func TestPreparationOptionsRejectBeforeIO(t *testing.T) {
 		err := run(append([]string{"send", "--prepare-only"}, tail...), &out)
 		if err == nil || out.Len() != 0 || strings.Contains(err.Error(), "SECRET") {
 			t.Fatal("invalid flags leaked or succeeded", err)
+		}
+	}
+}
+
+func TestUnpackAndParallelOptionsRejectBeforeIO(t *testing.T) {
+	for _, args := range [][]string{
+		{"unpack", "--root=SECRET", "--id=SECRET"},
+		{"unpack", "--root=SECRET", "--id=SECRET", "--out=SECRET", "--extra=SECRET"},
+		{"unpack", "--root=SECRET", "--root=SECRET", "--id=SECRET", "--out=SECRET"},
+		{"unpack", "--root", "--id=SECRET", "--out=SECRET"},
+		{"send", "--spool=SECRET", "--reuse=SECRET", "--url=http://127.0.0.1:1", "--token-file=SECRET", "--parallel=0"},
+		{"send", "--spool=SECRET", "--reuse=SECRET", "--url=http://127.0.0.1:1", "--token-file=SECRET", "--parallel=9"},
+		{"send", "--spool=SECRET", "--reuse=SECRET", "--url=http://127.0.0.1:1", "--token-file=SECRET", "--parallel=04"},
+		{"send", "--upload-only", "--spool=SECRET", "--reuse=SECRET", "--url=http://127.0.0.1:1", "--token-file=SECRET", "--parallel=x"},
+	} {
+		var out bytes.Buffer
+		err := run(args, &out)
+		if err == nil || out.Len() != 0 || strings.Contains(err.Error(), "SECRET") {
+			t.Fatal("invalid options accepted or exposed", args, err)
 		}
 	}
 }
