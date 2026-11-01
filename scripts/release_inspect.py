@@ -47,7 +47,7 @@ def archive_name(product, goos, arch):
 
 
 def reference_docs():
-    return ('recording-v1.md', 'explanations.md', 'comparisons.md', 'releases.md') if PRODUCT == 'inspect' else ('sender-spool.md', 'receiver-staging.md', 'transfer-v1.md', 'finalization.md', 'transfer-releases.md', 'windows-persistence.md')
+    return ('recording-v1.md', 'explanations.md', 'comparisons.md', 'releases.md') if PRODUCT == 'inspect' else ('sender-spool.md', 'receiver-staging.md', 'transfer-v1.md', 'finalization.md', 'transfer-releases.md', 'windows-persistence.md', 'transfer-tree.md')
 
 
 def package(goos, arch, output, allow_dirty=False):

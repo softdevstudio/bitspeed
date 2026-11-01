@@ -16,10 +16,10 @@ Design decisions:
 - Version Transfer 0.5.0; protocol version stays 1 (the wire format is unchanged, only concurrency is new).
 
 Steps (done / remaining):
-1. [ ] README rewrite and this file restructured.
+1. [x] README rewrite and this file restructured.
 2. [x] Parallel chunks (receiver concurrency, sender window), with tests: concurrent distinct chunks, same index twice, in-flight cap, finalize while in flight, status during an upload, kill during parallel upload then resume, old-receiver fallback via session_busy retries, progress counts.
 3. [x] Directory mode (tree snapshot, unpack), with tests: nested and empty folders, empty files, refused symlinks and special files, source changed during copy, bad paths, damaged index or footer, digest mismatch, existing OUT, OUT inside root, case clash, kill-and-resume of a tree send.
-4. [ ] Docs: docs/transfer-v1.md concurrency notes, docs/transfer-tree.md, docs/transfer-releases.md, smoke scripts and release checks for directory mode.
+4. [x] Docs: docs/transfer-v1.md concurrency notes, docs/transfer-tree.md, docs/transfer-releases.md, smoke scripts and release checks for directory mode.
 5. [ ] Independent review (at most two rounds), fixes, fresh test/results.
 6. [ ] Transfer 0.5.0 released by the workflow; downloads checked against SHA256SUMS at the tag and latest; a downloaded binary sends and unpacks a folder.
 7. [ ] bitspeed.org post with its image and page updates; softdevstudio.com note and listing; softdev-plan.md item 35 marked done.
