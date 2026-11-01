@@ -643,6 +643,7 @@ func unpack(ctx context.Context, root, id, out string, ops snapshotOps) (result 
 	if e := ctx.Err(); e != nil {
 		return result, e
 	}
+	var claimed os.FileInfo
 	if runtime.GOOS != "windows" {
 		// rename(2) silently replaces an empty folder. Claim OUT first with an
 		// exclusive mkdir, so a folder someone else made in the meantime is
@@ -650,11 +651,13 @@ func unpack(ctx context.Context, root, id, out string, ops snapshotOps) (result 
 		if e := os.Mkdir(out, 0700); e != nil {
 			return result, fmt.Errorf("%w: the output folder already exists", ErrUnpack)
 		}
+		claimed, _ = os.Lstat(out)
 	} else if _, e := os.Lstat(out); !os.IsNotExist(e) {
 		return result, fmt.Errorf("%w: the output folder already exists", ErrUnpack)
 	}
 	if e := renameOver(temp, out, ops); e != nil {
-		if runtime.GOOS != "windows" {
+		// Remove OUT only if it is still the empty folder claimed above.
+		if now, e := os.Lstat(out); claimed != nil && e == nil && os.SameFile(now, claimed) {
 			_ = os.Remove(out)
 		}
 		return result, fmt.Errorf("%w: cannot rename the unpacked folder into place", ErrUnpack)

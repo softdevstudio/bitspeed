@@ -1,10 +1,10 @@
-UTC: 2026-11-01T08:58:20Z
+UTC: 2026-11-01T09:05:32Z
 go version go1.24.7 linux/amd64
 linux
 amd64
 1
-Parent commit: 6e094785cf4b37e39bc5baf285a0c5eb353d889e
-Source tree SHA256: a7a5ea362c83ebc0626aae5423f76150d7607c74698c5e2dd57b6d7ee65dbc78
+Parent commit: 845ec9e314063ae49658fd612d4907a6a0f008d0
+Source tree SHA256: e3c3dbbb504bc9b8442da5c3b3021f03a9a81cbdb0c68aa2d9d2e0f7eb2f0bee
 test_failure_stops_at_once (test_release_inspect.GateWait.test_failure_stops_at_once) ... ok
 test_gives_up_and_requires_every_job (test_release_inspect.GateWait.test_gives_up_and_requires_every_job) ... ok
 test_waits_for_lagging_status (test_release_inspect.GateWait.test_waits_for_lagging_status) ... ok
@@ -53,7 +53,7 @@ test_failure_and_foreign_runs (test_release_inspect.WindowsGate.test_failure_and
 test_waits_then_passes (test_release_inspect.WindowsGate.test_waits_then_passes) ... ok
 
 ----------------------------------------------------------------------
-Ran 30 tests in 0.108s
+Ran 30 tests in 0.156s
 
 OK
 === RUN   TestCommands
@@ -85,15 +85,15 @@ OK
 === RUN   TestRecordCommand
 --- PASS: TestRecordCommand (0.01s)
 === RUN   TestExplainCommand
---- PASS: TestExplainCommand (0.01s)
+--- PASS: TestExplainCommand (0.02s)
 === RUN   TestCompareCommand
---- PASS: TestCompareCommand (0.02s)
+--- PASS: TestCompareCommand (0.03s)
 === RUN   TestCompareGateExitCodes
---- PASS: TestCompareGateExitCodes (0.29s)
+--- PASS: TestCompareGateExitCodes (0.34s)
 === RUN   TestRecordPostAndWarmFlags
 --- PASS: TestRecordPostAndWarmFlags (0.03s)
 PASS
-ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-inspect	1.381s
+ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-inspect	1.454s
 === RUN   TestVersionAndHelp
 --- PASS: TestVersionAndHelp (0.00s)
 === RUN   TestOperationalCommandsFailClosed
@@ -115,7 +115,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-inspect	1.381s
 PASS
 ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestCompareExactStatistics
---- PASS: TestCompareExactStatistics (0.03s)
+--- PASS: TestCompareExactStatistics (0.04s)
 === RUN   TestCompareScopesAndBlocking
 === RUN   TestCompareScopesAndBlocking/payload
 === RUN   TestCompareScopesAndBlocking/encoding
@@ -130,7 +130,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestCompareScopesAndBlocking/tool
 === RUN   TestCompareScopesAndBlocking/location
 === RUN   TestCompareScopesAndBlocking/mixed_payload
---- PASS: TestCompareScopesAndBlocking (0.13s)
+--- PASS: TestCompareScopesAndBlocking (0.14s)
     --- PASS: TestCompareScopesAndBlocking/payload (0.01s)
     --- PASS: TestCompareScopesAndBlocking/encoding (0.01s)
     --- PASS: TestCompareScopesAndBlocking/unknown_encoding (0.01s)
@@ -152,12 +152,12 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestCompareFailuresCoverageZeroAndOverlap/zero
 === RUN   TestCompareFailuresCoverageZeroAndOverlap/overlap
 === RUN   TestCompareFailuresCoverageZeroAndOverlap/higher
---- PASS: TestCompareFailuresCoverageZeroAndOverlap (0.07s)
+--- PASS: TestCompareFailuresCoverageZeroAndOverlap (0.08s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/failure (0.01s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/unattempted (0.01s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/missing_phase (0.01s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/small (0.01s)
-    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/zero (0.01s)
+    --- PASS: TestCompareFailuresCoverageZeroAndOverlap/zero (0.02s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/overlap (0.01s)
     --- PASS: TestCompareFailuresCoverageZeroAndOverlap/higher (0.01s)
 === RUN   TestComparisonOutputAndInvalidInput
@@ -169,7 +169,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestScopedIPv6ZoneCasePreserved
 --- PASS: TestScopedIPv6ZoneCasePreserved (0.00s)
 === RUN   TestComparisonMultipleHops
---- PASS: TestComparisonMultipleHops (0.06s)
+--- PASS: TestComparisonMultipleHops (0.04s)
 === RUN   TestExplainExactIntervalsAndEvidence
 --- PASS: TestExplainExactIntervalsAndEvidence (0.00s)
 === RUN   TestExplainMissingAndAmbiguousEvidence
@@ -182,7 +182,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestExplainMissingAndAmbiguousEvidence/zero_read
 === RUN   TestExplainMissingAndAmbiguousEvidence/partial
 === RUN   TestExplainMissingAndAmbiguousEvidence/tie
---- PASS: TestExplainMissingAndAmbiguousEvidence (0.02s)
+--- PASS: TestExplainMissingAndAmbiguousEvidence (0.01s)
     --- PASS: TestExplainMissingAndAmbiguousEvidence/missing_write (0.00s)
     --- PASS: TestExplainMissingAndAmbiguousEvidence/failed_write (0.00s)
     --- PASS: TestExplainMissingAndAmbiguousEvidence/reversed_write (0.00s)
@@ -195,13 +195,13 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestExplainSuccessfulAndFailedOperations
 --- PASS: TestExplainSuccessfulAndFailedOperations (0.00s)
 === RUN   TestExplainControlledDelays
-    explain_test.go:189: fixture=/headers first_byte_wait_ns=80773039 response_read_ns=321004
-    explain_test.go:189: fixture=/body first_byte_wait_ns=196893 response_read_ns=122172593
+    explain_test.go:189: fixture=/headers first_byte_wait_ns=80902578 response_read_ns=179226
+    explain_test.go:189: fixture=/body first_byte_wait_ns=153377 response_read_ns=122636432
 --- PASS: TestExplainControlledDelays (0.22s)
 === RUN   TestExplainFailuresRedactionAndIncompleteBatch
 --- PASS: TestExplainFailuresRedactionAndIncompleteBatch (0.00s)
 === RUN   TestExplainRejectsInvalidInputAndRendersSafely
---- PASS: TestExplainRejectsInvalidInputAndRendersSafely (0.02s)
+--- PASS: TestExplainRejectsInvalidInputAndRendersSafely (0.09s)
 === RUN   TestExplainUsesWinningDial
 --- PASS: TestExplainUsesWinningDial (0.00s)
 === RUN   TestTLSLifecycleEvidenceDependencies
@@ -219,7 +219,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestGateZeroBaselineNeverObservedAndBadThresholds
 --- PASS: TestGateZeroBaselineNeverObservedAndBadThresholds (0.00s)
 === RUN   TestGateRedirectHops
---- PASS: TestGateRedirectHops (0.09s)
+--- PASS: TestGateRedirectHops (0.10s)
 === RUN   TestRecordPostKeepsBodyOutOfRecording
 --- PASS: TestRecordPostKeepsBodyOutOfRecording (0.01s)
 === RUN   TestRecordPostRedirectMethods
@@ -231,7 +231,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestWarmRecordingSurvivesStaleConnections
 --- PASS: TestWarmRecordingSurvivesStaleConnections (0.01s)
 === RUN   TestReviewFixesForPostAndWarm
---- PASS: TestReviewFixesForPostAndWarm (0.01s)
+--- PASS: TestReviewFixesForPostAndWarm (0.02s)
 === RUN   TestRecorderFixtures
 === RUN   TestRecorderFixtures//headers
 === RUN   TestRecorderFixtures//body
@@ -240,7 +240,7 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestRecorderFixtures//disconnect
 === RUN   TestRecorderFixtures//missing
 --- PASS: TestRecorderFixtures (0.07s)
-    --- PASS: TestRecorderFixtures//headers (0.02s)
+    --- PASS: TestRecorderFixtures//headers (0.03s)
     --- PASS: TestRecorderFixtures//body (0.03s)
     --- PASS: TestRecorderFixtures//empty (0.00s)
     --- PASS: TestRecorderFixtures//redirect (0.01s)
@@ -253,20 +253,20 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestRecorderTimeoutsAndCancellation/cancel
 --- PASS: TestRecorderTimeoutsAndCancellation (0.09s)
     --- PASS: TestRecorderTimeoutsAndCancellation/headers (0.03s)
-    --- PASS: TestRecorderTimeoutsAndCancellation/body (0.04s)
+    --- PASS: TestRecorderTimeoutsAndCancellation/body (0.03s)
     --- PASS: TestRecorderTimeoutsAndCancellation/total (0.03s)
     --- PASS: TestRecorderTimeoutsAndCancellation/cancel (0.00s)
 === RUN   TestRedirectLimitsAndPrivacy
---- PASS: TestRedirectLimitsAndPrivacy (0.01s)
+--- PASS: TestRedirectLimitsAndPrivacy (0.02s)
 === RUN   TestTLSFailure
---- PASS: TestTLSFailure (0.11s)
+--- PASS: TestTLSFailure (0.10s)
 === RUN   TestConnectionRefused
 --- PASS: TestConnectionRefused (0.00s)
 === RUN   TestRepeatedSamplesUseFreshConnections
 --- PASS: TestRepeatedSamplesUseFreshConnections (0.01s)
 === RUN   TestStreamedLargeBody
-    recorder_test.go:219: streamed_bytes=33554432 total_allocated_bytes=238120
---- PASS: TestStreamedLargeBody (0.05s)
+    recorder_test.go:219: streamed_bytes=33554432 total_allocated_bytes=245176
+--- PASS: TestStreamedLargeBody (0.06s)
 === RUN   TestInvalidOptions
 --- PASS: TestInvalidOptions (0.00s)
 === RUN   TestTracePairingAndLateCallbacks
@@ -282,69 +282,69 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   TestRecordedEncodingClassification/br
 === RUN   TestRecordedEncodingClassification/gzip,_br
 === RUN   TestRecordedEncodingClassification/private-secret
---- PASS: TestRecordedEncodingClassification (0.02s)
+--- PASS: TestRecordedEncodingClassification (0.04s)
     --- PASS: TestRecordedEncodingClassification/#00 (0.00s)
-    --- PASS: TestRecordedEncodingClassification/gzip (0.00s)
-    --- PASS: TestRecordedEncodingClassification/GZip (0.00s)
-    --- PASS: TestRecordedEncodingClassification/br (0.00s)
-    --- PASS: TestRecordedEncodingClassification/gzip,_br (0.00s)
+    --- PASS: TestRecordedEncodingClassification/gzip (0.01s)
+    --- PASS: TestRecordedEncodingClassification/GZip (0.01s)
+    --- PASS: TestRecordedEncodingClassification/br (0.01s)
+    --- PASS: TestRecordedEncodingClassification/gzip,_br (0.01s)
     --- PASS: TestRecordedEncodingClassification/private-secret (0.00s)
 === RUN   TestRoundTripPreservesUnavailableAndZero
 --- PASS: TestRoundTripPreservesUnavailableAndZero (0.00s)
 === RUN   TestInvalidRecordings
+=== RUN   TestInvalidRecordings/policy
 === RUN   TestInvalidRecordings/sample_outcome
-=== RUN   TestInvalidRecordings/missing_hops
 === RUN   TestInvalidRecordings/negative_bytes
-=== RUN   TestInvalidRecordings/missing_status
-=== RUN   TestInvalidRecordings/plain_GET_as_schema_2
-=== RUN   TestInvalidRecordings/missing_timestamp
-=== RUN   TestInvalidRecordings/no_samples
-=== RUN   TestInvalidRecordings/negative_time
 === RUN   TestInvalidRecordings/incomplete_body
-=== RUN   TestInvalidRecordings/error_in_success
-=== RUN   TestInvalidRecordings/unordered
+=== RUN   TestInvalidRecordings/unknown_event
 === RUN   TestInvalidRecordings/unknown_content_encoding
-=== RUN   TestInvalidRecordings/future_schema
 === RUN   TestInvalidRecordings/method
+=== RUN   TestInvalidRecordings/hop_beyond_sample
+=== RUN   TestInvalidRecordings/plain_GET_as_schema_2
 === RUN   TestInvalidRecordings/raw_secret
 === RUN   TestInvalidRecordings/sample_index
-=== RUN   TestInvalidRecordings/hop_beyond_sample
-=== RUN   TestInvalidRecordings/unknown_event
+=== RUN   TestInvalidRecordings/error_in_success
 === RUN   TestInvalidRecordings/missing_tool_version
-=== RUN   TestInvalidRecordings/policy
+=== RUN   TestInvalidRecordings/no_samples
+=== RUN   TestInvalidRecordings/negative_time
+=== RUN   TestInvalidRecordings/missing_hops
+=== RUN   TestInvalidRecordings/missing_status
+=== RUN   TestInvalidRecordings/unordered
+=== RUN   TestInvalidRecordings/future_schema
+=== RUN   TestInvalidRecordings/missing_timestamp
 --- PASS: TestInvalidRecordings (0.00s)
+    --- PASS: TestInvalidRecordings/policy (0.00s)
     --- PASS: TestInvalidRecordings/sample_outcome (0.00s)
-    --- PASS: TestInvalidRecordings/missing_hops (0.00s)
     --- PASS: TestInvalidRecordings/negative_bytes (0.00s)
-    --- PASS: TestInvalidRecordings/missing_status (0.00s)
-    --- PASS: TestInvalidRecordings/plain_GET_as_schema_2 (0.00s)
-    --- PASS: TestInvalidRecordings/missing_timestamp (0.00s)
-    --- PASS: TestInvalidRecordings/no_samples (0.00s)
-    --- PASS: TestInvalidRecordings/negative_time (0.00s)
     --- PASS: TestInvalidRecordings/incomplete_body (0.00s)
-    --- PASS: TestInvalidRecordings/error_in_success (0.00s)
-    --- PASS: TestInvalidRecordings/unordered (0.00s)
+    --- PASS: TestInvalidRecordings/unknown_event (0.00s)
     --- PASS: TestInvalidRecordings/unknown_content_encoding (0.00s)
-    --- PASS: TestInvalidRecordings/future_schema (0.00s)
     --- PASS: TestInvalidRecordings/method (0.00s)
+    --- PASS: TestInvalidRecordings/hop_beyond_sample (0.00s)
+    --- PASS: TestInvalidRecordings/plain_GET_as_schema_2 (0.00s)
     --- PASS: TestInvalidRecordings/raw_secret (0.00s)
     --- PASS: TestInvalidRecordings/sample_index (0.00s)
-    --- PASS: TestInvalidRecordings/hop_beyond_sample (0.00s)
-    --- PASS: TestInvalidRecordings/unknown_event (0.00s)
+    --- PASS: TestInvalidRecordings/error_in_success (0.00s)
     --- PASS: TestInvalidRecordings/missing_tool_version (0.00s)
-    --- PASS: TestInvalidRecordings/policy (0.00s)
+    --- PASS: TestInvalidRecordings/no_samples (0.00s)
+    --- PASS: TestInvalidRecordings/negative_time (0.00s)
+    --- PASS: TestInvalidRecordings/missing_hops (0.00s)
+    --- PASS: TestInvalidRecordings/missing_status (0.00s)
+    --- PASS: TestInvalidRecordings/unordered (0.00s)
+    --- PASS: TestInvalidRecordings/future_schema (0.00s)
+    --- PASS: TestInvalidRecordings/missing_timestamp (0.00s)
 === RUN   TestFailedHopWithoutStatus
 --- PASS: TestFailedHopWithoutStatus (0.00s)
 === RUN   TestSafeURL
 --- PASS: TestSafeURL (0.00s)
 === RUN   TestDecodeBoundaries
---- PASS: TestDecodeBoundaries (0.36s)
+--- PASS: TestDecodeBoundaries (0.33s)
 === RUN   TestEncodeRejectsOversizedRecording
---- PASS: TestEncodeRejectsOversizedRecording (1.26s)
+--- PASS: TestEncodeRejectsOversizedRecording (1.77s)
 === RUN   TestErrorCodesCannotContainRawErrors
 --- PASS: TestErrorCodesCannotContainRawErrors (0.00s)
 === RUN   TestStrictJSONFields
---- PASS: TestStrictJSONFields (0.00s)
+--- PASS: TestStrictJSONFields (0.01s)
 === RUN   TestImportedConfigurationBounds
 --- PASS: TestImportedConfigurationBounds (0.00s)
 === RUN   FuzzRecordingReports
@@ -352,13 +352,13 @@ ok  	github.com/softdevstudio/bitspeed/cmd/bitspeed-transfer	1.018s
 === RUN   FuzzRecordingReports/seed#1
 === RUN   FuzzRecordingReports/seed#2
 === RUN   FuzzRecordingReports/seed#3
---- PASS: FuzzRecordingReports (0.01s)
+--- PASS: FuzzRecordingReports (0.02s)
     --- PASS: FuzzRecordingReports/seed#0 (0.01s)
     --- PASS: FuzzRecordingReports/seed#1 (0.00s)
     --- PASS: FuzzRecordingReports/seed#2 (0.00s)
     --- PASS: FuzzRecordingReports/seed#3 (0.00s)
 PASS
-ok  	github.com/softdevstudio/bitspeed/inspect	4.018s
+ok  	github.com/softdevstudio/bitspeed/inspect	4.617s
 === RUN   TestFixtureBehaviors
 === RUN   TestFixtureBehaviors//headers
 === RUN   TestFixtureBehaviors//body
@@ -380,19 +380,19 @@ ok  	github.com/softdevstudio/bitspeed/inspect	4.018s
 === RUN   TestTimeoutEndpoint
 --- PASS: TestTimeoutEndpoint (0.03s)
 PASS
-ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
+ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.088s
 === RUN   TestCleanReceiverRemovesOnlyCompletedChunks
---- PASS: TestCleanReceiverRemovesOnlyCompletedChunks (0.16s)
+--- PASS: TestCleanReceiverRemovesOnlyCompletedChunks (0.14s)
 === RUN   TestCleanReceiverPartialCleanupStillOpens
---- PASS: TestCleanReceiverPartialCleanupStillOpens (0.08s)
+--- PASS: TestCleanReceiverPartialCleanupStillOpens (0.09s)
 === RUN   TestCleanReceiverRejectsBadRoots
---- PASS: TestCleanReceiverRejectsBadRoots (0.05s)
+--- PASS: TestCleanReceiverRejectsBadRoots (0.06s)
 === RUN   TestCleanReceiverKeepsChunksOfDamagedDestination
---- PASS: TestCleanReceiverKeepsChunksOfDamagedDestination (0.06s)
+--- PASS: TestCleanReceiverKeepsChunksOfDamagedDestination (0.07s)
 === RUN   TestCleanReceiverWorksWithoutWriteSpace
---- PASS: TestCleanReceiverWorksWithoutWriteSpace (0.06s)
+--- PASS: TestCleanReceiverWorksWithoutWriteSpace (0.07s)
 === RUN   TestCleanReceiverStorageAndCancellation
---- PASS: TestCleanReceiverStorageAndCancellation (0.09s)
+--- PASS: TestCleanReceiverStorageAndCancellation (0.07s)
 === RUN   TestUploadAndAuthenticatedStatus
 === RUN   TestUploadAndAuthenticatedStatus/a
 === RUN   TestUploadAndAuthenticatedStatus/b
@@ -402,8 +402,8 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
     --- PASS: TestUploadAndAuthenticatedStatus/b (0.03s)
     --- PASS: TestUploadAndAuthenticatedStatus/d (0.04s)
 === RUN   TestClientRejectsRedirectAndUntrustedTLS
-2026/11/01 10:58:29 http: TLS handshake error from 127.0.0.1:33652: remote error: tls: bad certificate
---- PASS: TestClientRejectsRedirectAndUntrustedTLS (0.09s)
+2026/11/01 11:05:42 http: TLS handshake error from 127.0.0.1:50608: remote error: tls: bad certificate
+--- PASS: TestClientRejectsRedirectAndUntrustedTLS (0.10s)
 === RUN   TestTokenFileRules
 --- PASS: TestTokenFileRules (0.00s)
 === RUN   TestClientRejectsMalformedResponses
@@ -411,17 +411,17 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestClientRefusesInventedProgressAndAck
 === RUN   TestClientRefusesInventedProgressAndAck/progress
 === RUN   TestClientRefusesInventedProgressAndAck/ack
---- PASS: TestClientRefusesInventedProgressAndAck (0.01s)
+--- PASS: TestClientRefusesInventedProgressAndAck (0.02s)
     --- PASS: TestClientRefusesInventedProgressAndAck/progress (0.01s)
     --- PASS: TestClientRefusesInventedProgressAndAck/ack (0.01s)
 === RUN   TestCompletedFileAndReceipt
 === RUN   TestCompletedFileAndReceipt/0
 === RUN   TestCompletedFileAndReceipt/1
 === RUN   TestCompletedFileAndReceipt/65553
---- PASS: TestCompletedFileAndReceipt (0.18s)
-    --- PASS: TestCompletedFileAndReceipt/0 (0.06s)
+--- PASS: TestCompletedFileAndReceipt (0.20s)
+    --- PASS: TestCompletedFileAndReceipt/0 (0.05s)
     --- PASS: TestCompletedFileAndReceipt/1 (0.06s)
-    --- PASS: TestCompletedFileAndReceipt/65553 (0.07s)
+    --- PASS: TestCompletedFileAndReceipt/65553 (0.09s)
 === RUN   TestFinalizationFailuresAndConflicts
 === RUN   TestFinalizationFailuresAndConflicts/missing
 === RUN   TestFinalizationFailuresAndConflicts/damaged_chunk
@@ -432,18 +432,18 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestFinalizationFailuresAndConflicts/missing_receipt
 === RUN   TestFinalizationFailuresAndConflicts/corrupt_receipt
 === RUN   TestFinalizationFailuresAndConflicts/invalid_ready
---- PASS: TestFinalizationFailuresAndConflicts (0.29s)
-    --- PASS: TestFinalizationFailuresAndConflicts/missing (0.02s)
-    --- PASS: TestFinalizationFailuresAndConflicts/damaged_chunk (0.02s)
-    --- PASS: TestFinalizationFailuresAndConflicts/full_digest (0.03s)
-    --- PASS: TestFinalizationFailuresAndConflicts/foreign_destination (0.05s)
+--- PASS: TestFinalizationFailuresAndConflicts (0.34s)
+    --- PASS: TestFinalizationFailuresAndConflicts/missing (0.03s)
+    --- PASS: TestFinalizationFailuresAndConflicts/damaged_chunk (0.03s)
+    --- PASS: TestFinalizationFailuresAndConflicts/full_digest (0.04s)
+    --- PASS: TestFinalizationFailuresAndConflicts/foreign_destination (0.03s)
     --- PASS: TestFinalizationFailuresAndConflicts/equal_foreign_destination (0.03s)
-    --- PASS: TestFinalizationFailuresAndConflicts/damaged_output (0.04s)
-    --- PASS: TestFinalizationFailuresAndConflicts/missing_receipt (0.02s)
+    --- PASS: TestFinalizationFailuresAndConflicts/damaged_output (0.05s)
+    --- PASS: TestFinalizationFailuresAndConflicts/missing_receipt (0.04s)
     --- PASS: TestFinalizationFailuresAndConflicts/corrupt_receipt (0.04s)
-    --- PASS: TestFinalizationFailuresAndConflicts/invalid_ready (0.02s)
+    --- PASS: TestFinalizationFailuresAndConflicts/invalid_ready (0.03s)
 === RUN   TestFinalizeWireBounds
---- PASS: TestFinalizeWireBounds (0.02s)
+--- PASS: TestFinalizeWireBounds (0.03s)
 === RUN   TestFinalizeDiskFailureGates
 === RUN   TestFinalizeDiskFailureGates/intent_write
 === RUN   TestFinalizeDiskFailureGates/intent_close
@@ -464,26 +464,26 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestFinalizeDiskFailureGates/receipt_rename
 === RUN   TestFinalizeDiskFailureGates/completed_rename
 === RUN   TestFinalizeDiskFailureGates/completion_read_sync
---- PASS: TestFinalizeDiskFailureGates (0.65s)
-    --- PASS: TestFinalizeDiskFailureGates/intent_write (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/intent_close (0.03s)
+--- PASS: TestFinalizeDiskFailureGates (0.69s)
+    --- PASS: TestFinalizeDiskFailureGates/intent_write (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/intent_close (0.04s)
     --- PASS: TestFinalizeDiskFailureGates/intent_sync (0.04s)
     --- PASS: TestFinalizeDiskFailureGates/intent_rename (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/assembly_write (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/assembly_short (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/assembly_corrupt (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/assembly_close (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/assembly_sync (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/assembly_write (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/assembly_short (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/assembly_corrupt (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/assembly_close (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/assembly_sync (0.04s)
     --- PASS: TestFinalizeDiskFailureGates/ready_rename (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/ready_dir_sync (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/ready_dir_sync (0.03s)
     --- PASS: TestFinalizeDiskFailureGates/output_link (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/output_dir_sync (0.04s)
+    --- PASS: TestFinalizeDiskFailureGates/output_dir_sync (0.03s)
     --- PASS: TestFinalizeDiskFailureGates/receipt_write (0.03s)
-    --- PASS: TestFinalizeDiskFailureGates/receipt_close (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/receipt_sync (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/receipt_rename (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/completed_rename (0.04s)
-    --- PASS: TestFinalizeDiskFailureGates/completion_read_sync (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/receipt_close (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/receipt_sync (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/receipt_rename (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/completed_rename (0.03s)
+    --- PASS: TestFinalizeDiskFailureGates/completion_read_sync (0.04s)
 === RUN   TestLostFinalizeResponse
 --- PASS: TestLostFinalizeResponse (0.05s)
 === RUN   TestFinalizeProcessHelper
@@ -496,14 +496,14 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestKilledFinalizationRecovery/receipt_write
 === RUN   TestKilledFinalizationRecovery/receipt_rename
 === RUN   TestKilledFinalizationRecovery/completed_rename
---- PASS: TestKilledFinalizationRecovery (0.52s)
+--- PASS: TestKilledFinalizationRecovery (0.55s)
     --- PASS: TestKilledFinalizationRecovery/intent_rename (0.08s)
     --- PASS: TestKilledFinalizationRecovery/assembly_write (0.08s)
-    --- PASS: TestKilledFinalizationRecovery/ready_rename (0.07s)
-    --- PASS: TestKilledFinalizationRecovery/output_link (0.07s)
+    --- PASS: TestKilledFinalizationRecovery/ready_rename (0.08s)
+    --- PASS: TestKilledFinalizationRecovery/output_link (0.08s)
     --- PASS: TestKilledFinalizationRecovery/receipt_write (0.08s)
-    --- PASS: TestKilledFinalizationRecovery/receipt_rename (0.08s)
-    --- PASS: TestKilledFinalizationRecovery/completed_rename (0.07s)
+    --- PASS: TestKilledFinalizationRecovery/receipt_rename (0.07s)
+    --- PASS: TestKilledFinalizationRecovery/completed_rename (0.08s)
 === RUN   TestCompletedReceiptSurvivesMissingChunks
 --- PASS: TestCompletedReceiptSurvivesMissingChunks (0.05s)
 === RUN   TestFinalizingMissingChunkReturnsToUploading
@@ -514,126 +514,126 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestSenderReceiptFailureGates/sync
 === RUN   TestSenderReceiptFailureGates/rename
 === RUN   TestSenderReceiptFailureGates/directory
---- PASS: TestSenderReceiptFailureGates (0.11s)
-    --- PASS: TestSenderReceiptFailureGates/write (0.02s)
-    --- PASS: TestSenderReceiptFailureGates/close (0.02s)
-    --- PASS: TestSenderReceiptFailureGates/sync (0.02s)
-    --- PASS: TestSenderReceiptFailureGates/rename (0.02s)
-    --- PASS: TestSenderReceiptFailureGates/directory (0.02s)
+--- PASS: TestSenderReceiptFailureGates (0.16s)
+    --- PASS: TestSenderReceiptFailureGates/write (0.05s)
+    --- PASS: TestSenderReceiptFailureGates/close (0.03s)
+    --- PASS: TestSenderReceiptFailureGates/sync (0.03s)
+    --- PASS: TestSenderReceiptFailureGates/rename (0.03s)
+    --- PASS: TestSenderReceiptFailureGates/directory (0.03s)
 === RUN   TestReservationUpgradeFailsClosed
---- PASS: TestReservationUpgradeFailsClosed (0.02s)
+--- PASS: TestReservationUpgradeFailsClosed (0.03s)
 === RUN   TestFinalizingReceiptDamageBecomesFailed
 === RUN   TestFinalizingReceiptDamageBecomesFailed/missing_output
 === RUN   TestFinalizingReceiptDamageBecomesFailed/missing_witness
 === RUN   TestFinalizingReceiptDamageBecomesFailed/corrupt_data
 === RUN   TestFinalizingReceiptDamageBecomesFailed/foreign_output
---- PASS: TestFinalizingReceiptDamageBecomesFailed (0.14s)
+--- PASS: TestFinalizingReceiptDamageBecomesFailed (0.16s)
     --- PASS: TestFinalizingReceiptDamageBecomesFailed/missing_output (0.03s)
-    --- PASS: TestFinalizingReceiptDamageBecomesFailed/missing_witness (0.03s)
-    --- PASS: TestFinalizingReceiptDamageBecomesFailed/corrupt_data (0.03s)
+    --- PASS: TestFinalizingReceiptDamageBecomesFailed/missing_witness (0.04s)
+    --- PASS: TestFinalizingReceiptDamageBecomesFailed/corrupt_data (0.05s)
     --- PASS: TestFinalizingReceiptDamageBecomesFailed/foreign_output (0.04s)
 === RUN   TestMalformedReceiptBlocksFailedBinding
---- PASS: TestMalformedReceiptBlocksFailedBinding (0.02s)
+--- PASS: TestMalformedReceiptBlocksFailedBinding (0.03s)
 === RUN   TestFailedAdmissionRetryRejectsMutation
 --- PASS: TestFailedAdmissionRetryRejectsMutation (0.02s)
 === RUN   TestFinalizationCapacityAndCancellation
 === RUN   TestFinalizationCapacityAndCancellation/capacity
 === RUN   TestFinalizationCapacityAndCancellation/cancel_before
 === RUN   TestFinalizationCapacityAndCancellation/cancel_after_link
---- PASS: TestFinalizationCapacityAndCancellation (0.10s)
+--- PASS: TestFinalizationCapacityAndCancellation (0.12s)
     --- PASS: TestFinalizationCapacityAndCancellation/capacity (0.04s)
-    --- PASS: TestFinalizationCapacityAndCancellation/cancel_before (0.03s)
-    --- PASS: TestFinalizationCapacityAndCancellation/cancel_after_link (0.03s)
+    --- PASS: TestFinalizationCapacityAndCancellation/cancel_before (0.04s)
+    --- PASS: TestFinalizationCapacityAndCancellation/cancel_after_link (0.04s)
 === RUN   TestCompletedWireReceiptBinding
 --- PASS: TestCompletedWireReceiptBinding (0.00s)
 === RUN   TestLargeFileAssemblyAllocation
-    hardening_test.go:54: 64 MiB + 17 byte assembly, full verification and completion allocated 2601160 bytes
---- PASS: TestLargeFileAssemblyAllocation (2.18s)
+    hardening_test.go:54: 64 MiB + 17 byte assembly, full verification and completion allocated 2609144 bytes
+--- PASS: TestLargeFileAssemblyAllocation (2.30s)
 === RUN   TestVerifiedTLSDelivery
     hardening_test.go:67: === RUN   TestVerifiedTLSDelivery
-        2026/11/01 10:58:34 http: TLS handshake error from 127.0.0.1:47242: remote error: tls: bad certificate
-        2026/11/01 10:58:34 http: TLS handshake error from 127.0.0.1:42572: remote error: tls: bad certificate
-        --- PASS: TestVerifiedTLSDelivery (0.16s)
+        2026/11/01 11:05:47 http: TLS handshake error from 127.0.0.1:39648: remote error: tls: bad certificate
+        2026/11/01 11:05:47 http: TLS handshake error from 127.0.0.1:48364: read tcp 127.0.0.1:42595->127.0.0.1:48364: use of closed network connection
+        --- PASS: TestVerifiedTLSDelivery (0.15s)
         PASS
---- PASS: TestVerifiedTLSDelivery (1.18s)
+--- PASS: TestVerifiedTLSDelivery (1.16s)
 === RUN   TestManifestCanonicalEmpty
 --- PASS: TestManifestCanonicalEmpty (0.00s)
 === RUN   TestManifestShapeFailures
-=== RUN   TestManifestShapeFailures/small_chunk
-=== RUN   TestManifestShapeFailures/missing_hash
-=== RUN   TestManifestShapeFailures/extra_hash
-=== RUN   TestManifestShapeFailures/negative_size
-=== RUN   TestManifestShapeFailures/large_chunk
-=== RUN   TestManifestShapeFailures/null_hashes
-=== RUN   TestManifestShapeFailures/bad_chunk_hash
-=== RUN   TestManifestShapeFailures/bad_file_hash
 === RUN   TestManifestShapeFailures/too_many_chunks
 === RUN   TestManifestShapeFailures/version
-=== RUN   TestManifestShapeFailures/ID_path
-=== RUN   TestManifestShapeFailures/ID_uppercase
+=== RUN   TestManifestShapeFailures/negative_size
 === RUN   TestManifestShapeFailures/over_size
 === RUN   TestManifestShapeFailures/zero_chunk
+=== RUN   TestManifestShapeFailures/small_chunk
+=== RUN   TestManifestShapeFailures/large_chunk
+=== RUN   TestManifestShapeFailures/null_hashes
+=== RUN   TestManifestShapeFailures/missing_hash
+=== RUN   TestManifestShapeFailures/ID_path
+=== RUN   TestManifestShapeFailures/ID_uppercase
+=== RUN   TestManifestShapeFailures/extra_hash
+=== RUN   TestManifestShapeFailures/bad_chunk_hash
+=== RUN   TestManifestShapeFailures/bad_file_hash
 --- PASS: TestManifestShapeFailures (0.00s)
-    --- PASS: TestManifestShapeFailures/small_chunk (0.00s)
-    --- PASS: TestManifestShapeFailures/missing_hash (0.00s)
-    --- PASS: TestManifestShapeFailures/extra_hash (0.00s)
-    --- PASS: TestManifestShapeFailures/negative_size (0.00s)
-    --- PASS: TestManifestShapeFailures/large_chunk (0.00s)
-    --- PASS: TestManifestShapeFailures/null_hashes (0.00s)
-    --- PASS: TestManifestShapeFailures/bad_chunk_hash (0.00s)
-    --- PASS: TestManifestShapeFailures/bad_file_hash (0.00s)
     --- PASS: TestManifestShapeFailures/too_many_chunks (0.00s)
     --- PASS: TestManifestShapeFailures/version (0.00s)
-    --- PASS: TestManifestShapeFailures/ID_path (0.00s)
-    --- PASS: TestManifestShapeFailures/ID_uppercase (0.00s)
+    --- PASS: TestManifestShapeFailures/negative_size (0.00s)
     --- PASS: TestManifestShapeFailures/over_size (0.00s)
     --- PASS: TestManifestShapeFailures/zero_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/small_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/large_chunk (0.00s)
+    --- PASS: TestManifestShapeFailures/null_hashes (0.00s)
+    --- PASS: TestManifestShapeFailures/missing_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/ID_path (0.00s)
+    --- PASS: TestManifestShapeFailures/ID_uppercase (0.00s)
+    --- PASS: TestManifestShapeFailures/extra_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/bad_chunk_hash (0.00s)
+    --- PASS: TestManifestShapeFailures/bad_file_hash (0.00s)
 === RUN   TestChunkLengthsAndLimits
---- PASS: TestChunkLengthsAndLimits (0.11s)
+--- PASS: TestChunkLengthsAndLimits (0.12s)
 === RUN   TestManifestIdentityBindsFields
 --- PASS: TestManifestIdentityBindsFields (0.00s)
 === RUN   TestParallelChunksStreamWithoutTheLock
---- PASS: TestParallelChunksStreamWithoutTheLock (0.02s)
+--- PASS: TestParallelChunksStreamWithoutTheLock (0.03s)
 === RUN   TestSameChunkTwiceAndInflightCap
---- PASS: TestSameChunkTwiceAndInflightCap (0.05s)
+--- PASS: TestSameChunkTwiceAndInflightCap (0.06s)
 === RUN   TestFailedStreamReleasesItsIndex
 --- PASS: TestFailedStreamReleasesItsIndex (0.02s)
 === RUN   TestParallelSendDeliversAndCountsProgress
---- PASS: TestParallelSendDeliversAndCountsProgress (0.22s)
+--- PASS: TestParallelSendDeliversAndCountsProgress (0.20s)
 === RUN   TestParallelSendToSerialReceiver
---- PASS: TestParallelSendToSerialReceiver (3.95s)
+--- PASS: TestParallelSendToSerialReceiver (2.66s)
 === RUN   TestParallelSendStopsOnFirstError
---- PASS: TestParallelSendStopsOnFirstError (0.17s)
+--- PASS: TestParallelSendStopsOnFirstError (0.15s)
 === RUN   TestParallelOptionBounds
 --- PASS: TestParallelOptionBounds (0.00s)
 === RUN   TestKilledParallelUploadResume
 === RUN   TestKilledParallelUploadResume/chunk_write
 === RUN   TestKilledParallelUploadResume/chunk_link
 === RUN   TestKilledParallelUploadResume/before_acknowledgement
---- PASS: TestKilledParallelUploadResume (0.76s)
-    --- PASS: TestKilledParallelUploadResume/chunk_write (0.26s)
-    --- PASS: TestKilledParallelUploadResume/chunk_link (0.25s)
-    --- PASS: TestKilledParallelUploadResume/before_acknowledgement (0.25s)
+--- PASS: TestKilledParallelUploadResume (0.81s)
+    --- PASS: TestKilledParallelUploadResume/chunk_write (0.27s)
+    --- PASS: TestKilledParallelUploadResume/chunk_link (0.28s)
+    --- PASS: TestKilledParallelUploadResume/before_acknowledgement (0.26s)
 === RUN   TestDuplicateAfterQuarantinePublishesNewBytes
 --- PASS: TestDuplicateAfterQuarantinePublishesNewBytes (0.02s)
 === RUN   TestCloseWaitsForStreamingChunks
 --- PASS: TestCloseWaitsForStreamingChunks (0.07s)
 === RUN   TestPanicInStreamFreesIndex
---- PASS: TestPanicInStreamFreesIndex (0.02s)
+--- PASS: TestPanicInStreamFreesIndex (0.01s)
 === RUN   TestUnpackOutsideRootByIdentity
 --- PASS: TestUnpackOutsideRootByIdentity (0.00s)
 === RUN   TestSendProgressReportsOnlyAcknowledgedChunks
---- PASS: TestSendProgressReportsOnlyAcknowledgedChunks (0.08s)
+--- PASS: TestSendProgressReportsOnlyAcknowledgedChunks (0.07s)
 === RUN   TestSendProgressAfterPartialUploadAndCallbackStop
---- PASS: TestSendProgressAfterPartialUploadAndCallbackStop (0.09s)
+--- PASS: TestSendProgressAfterPartialUploadAndCallbackStop (0.08s)
 === RUN   TestSendProgressStopAtFinalizeAndEmptyFile
---- PASS: TestSendProgressStopAtFinalizeAndEmptyFile (0.10s)
+--- PASS: TestSendProgressStopAtFinalizeAndEmptyFile (0.09s)
 === RUN   TestWireManifestStrict
---- PASS: TestWireManifestStrict (0.35s)
+--- PASS: TestWireManifestStrict (0.33s)
 === RUN   TestAuthenticationBeforeBodiesAndPaths
 --- PASS: TestAuthenticationBeforeBodiesAndPaths (0.01s)
 === RUN   TestReceiverAdmissionChunkAndDuplicate
---- PASS: TestReceiverAdmissionChunkAndDuplicate (0.03s)
+--- PASS: TestReceiverAdmissionChunkAndDuplicate (0.04s)
 === RUN   TestRequestBoundsAndInvalidPaths
 --- PASS: TestRequestBoundsAndInvalidPaths (0.05s)
 === RUN   TestReceiverQuotaLockAndRecoveryGate
@@ -646,13 +646,13 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestReceiverStorageFailureGates/close
 === RUN   TestReceiverStorageFailureGates/link
 === RUN   TestReceiverStorageFailureGates/recovery_sync
---- PASS: TestReceiverStorageFailureGates (0.06s)
+--- PASS: TestReceiverStorageFailureGates (0.09s)
     --- PASS: TestReceiverStorageFailureGates/write (0.01s)
     --- PASS: TestReceiverStorageFailureGates/short_write (0.01s)
     --- PASS: TestReceiverStorageFailureGates/corrupt_write (0.01s)
     --- PASS: TestReceiverStorageFailureGates/sync (0.01s)
     --- PASS: TestReceiverStorageFailureGates/close (0.01s)
-    --- PASS: TestReceiverStorageFailureGates/link (0.01s)
+    --- PASS: TestReceiverStorageFailureGates/link (0.02s)
     --- PASS: TestReceiverStorageFailureGates/recovery_sync (0.01s)
 === RUN   TestAdmissionFailuresAndRetry
 === RUN   TestAdmissionFailuresAndRetry/space
@@ -662,25 +662,25 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestAdmissionFailuresAndRetry/close
 === RUN   TestAdmissionFailuresAndRetry/sync
 === RUN   TestAdmissionFailuresAndRetry/rename
---- PASS: TestAdmissionFailuresAndRetry (0.03s)
-    --- PASS: TestAdmissionFailuresAndRetry/space (0.00s)
-    --- PASS: TestAdmissionFailuresAndRetry/write (0.00s)
-    --- PASS: TestAdmissionFailuresAndRetry/short (0.00s)
-    --- PASS: TestAdmissionFailuresAndRetry/corrupt (0.00s)
-    --- PASS: TestAdmissionFailuresAndRetry/close (0.00s)
-    --- PASS: TestAdmissionFailuresAndRetry/sync (0.00s)
+--- PASS: TestAdmissionFailuresAndRetry (0.06s)
+    --- PASS: TestAdmissionFailuresAndRetry/space (0.01s)
+    --- PASS: TestAdmissionFailuresAndRetry/write (0.01s)
+    --- PASS: TestAdmissionFailuresAndRetry/short (0.01s)
+    --- PASS: TestAdmissionFailuresAndRetry/corrupt (0.01s)
+    --- PASS: TestAdmissionFailuresAndRetry/close (0.01s)
+    --- PASS: TestAdmissionFailuresAndRetry/sync (0.01s)
     --- PASS: TestAdmissionFailuresAndRetry/rename (0.01s)
 === RUN   TestConcurrentAdmission
 --- PASS: TestConcurrentAdmission (0.14s)
 === RUN   TestPhysicalReservationsIncludeExistingAdmissions
 --- PASS: TestPhysicalReservationsIncludeExistingAdmissions (0.01s)
 === RUN   TestPublishedChunkRecoverySyncGate
---- PASS: TestPublishedChunkRecoverySyncGate (0.01s)
+--- PASS: TestPublishedChunkRecoverySyncGate (0.02s)
 === RUN   TestReceiverStreamingAllocation
-    receiver_test.go:392: streamed_chunk_bytes=16777216 total_allocated_bytes=106712
---- PASS: TestReceiverStreamingAllocation (0.10s)
+    receiver_test.go:392: streamed_chunk_bytes=16777216 total_allocated_bytes=104632
+--- PASS: TestReceiverStreamingAllocation (0.11s)
 === RUN   TestRecoveryRepairAndReservation
---- PASS: TestRecoveryRepairAndReservation (0.05s)
+--- PASS: TestRecoveryRepairAndReservation (0.06s)
 === RUN   TestRecoveryRejectsUnexpectedEvidence
 === RUN   TestRecoveryRejectsUnexpectedEvidence/pending_unknown
 === RUN   TestRecoveryRejectsUnexpectedEvidence/pending_symlink
@@ -691,14 +691,14 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestRecoveryRejectsUnexpectedEvidence/bad_quarantine
 === RUN   TestRecoveryRejectsUnexpectedEvidence/unknown_root
 === RUN   TestRecoveryRejectsUnexpectedEvidence/foreign_probe_link
---- PASS: TestRecoveryRejectsUnexpectedEvidence (0.10s)
+--- PASS: TestRecoveryRejectsUnexpectedEvidence (0.11s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/pending_unknown (0.01s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/pending_symlink (0.01s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/pending_data (0.01s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/bad_journal (0.01s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/oversize_chunk (0.01s)
-    --- PASS: TestRecoveryRejectsUnexpectedEvidence/chunk_symlink (0.01s)
-    --- PASS: TestRecoveryRejectsUnexpectedEvidence/bad_quarantine (0.01s)
+    --- PASS: TestRecoveryRejectsUnexpectedEvidence/chunk_symlink (0.02s)
+    --- PASS: TestRecoveryRejectsUnexpectedEvidence/bad_quarantine (0.02s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/unknown_root (0.01s)
     --- PASS: TestRecoveryRejectsUnexpectedEvidence/foreign_probe_link (0.01s)
 === RUN   TestRecoveryQuarantineFailureGates
@@ -708,7 +708,7 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestRecoveryQuarantineFailureGates/after_link
 === RUN   TestRecoveryQuarantineFailureGates/read_sync
 --- PASS: TestRecoveryQuarantineFailureGates (0.06s)
-    --- PASS: TestRecoveryQuarantineFailureGates/link (0.02s)
+    --- PASS: TestRecoveryQuarantineFailureGates/link (0.01s)
     --- PASS: TestRecoveryQuarantineFailureGates/sync (0.01s)
     --- PASS: TestRecoveryQuarantineFailureGates/close (0.01s)
     --- PASS: TestRecoveryQuarantineFailureGates/after_link (0.01s)
@@ -721,14 +721,14 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestKilledUploadResume/chunk_write
 === RUN   TestKilledUploadResume/chunk_link
 === RUN   TestKilledUploadResume/before_acknowledgement
---- PASS: TestKilledUploadResume (5.59s)
-    --- PASS: TestKilledUploadResume/admission_write (1.13s)
-    --- PASS: TestKilledUploadResume/admission_rename (1.11s)
-    --- PASS: TestKilledUploadResume/chunk_write (1.13s)
-    --- PASS: TestKilledUploadResume/chunk_link (1.11s)
-    --- PASS: TestKilledUploadResume/before_acknowledgement (1.10s)
+--- PASS: TestKilledUploadResume (5.60s)
+    --- PASS: TestKilledUploadResume/admission_write (1.11s)
+    --- PASS: TestKilledUploadResume/admission_rename (1.12s)
+    --- PASS: TestKilledUploadResume/chunk_write (1.12s)
+    --- PASS: TestKilledUploadResume/chunk_link (1.12s)
+    --- PASS: TestKilledUploadResume/before_acknowledgement (1.11s)
 === RUN   TestLostChunkResponseResume
---- PASS: TestLostChunkResponseResume (0.04s)
+--- PASS: TestLostChunkResponseResume (0.03s)
 === RUN   TestInterruptedProbeRecovery
 === RUN   TestInterruptedProbeRecovery/empty
 === RUN   TestInterruptedProbeRecovery/partial
@@ -741,9 +741,9 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestRecoveryStartupPersistenceAndCancellation/sync
 === RUN   TestRecoveryStartupPersistenceAndCancellation/close
 === RUN   TestRecoveryStartupPersistenceAndCancellation/cancel
---- PASS: TestRecoveryStartupPersistenceAndCancellation (0.06s)
-    --- PASS: TestRecoveryStartupPersistenceAndCancellation/sync (0.02s)
-    --- PASS: TestRecoveryStartupPersistenceAndCancellation/close (0.02s)
+--- PASS: TestRecoveryStartupPersistenceAndCancellation (0.04s)
+    --- PASS: TestRecoveryStartupPersistenceAndCancellation/sync (0.01s)
+    --- PASS: TestRecoveryStartupPersistenceAndCancellation/close (0.01s)
     --- PASS: TestRecoveryStartupPersistenceAndCancellation/cancel (0.01s)
 === RUN   TestCorruptChunkCloseFailurePreservesEvidence
 --- PASS: TestCorruptChunkCloseFailurePreservesEvidence (0.01s)
@@ -754,10 +754,10 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestPrepareAndReuse/1
 === RUN   TestPrepareAndReuse/65536
 === RUN   TestPrepareAndReuse/65553
---- PASS: TestPrepareAndReuse (0.03s)
-    --- PASS: TestPrepareAndReuse/0 (0.01s)
-    --- PASS: TestPrepareAndReuse/1 (0.01s)
-    --- PASS: TestPrepareAndReuse/65536 (0.01s)
+--- PASS: TestPrepareAndReuse (0.02s)
+    --- PASS: TestPrepareAndReuse/0 (0.00s)
+    --- PASS: TestPrepareAndReuse/1 (0.00s)
+    --- PASS: TestPrepareAndReuse/65536 (0.00s)
     --- PASS: TestPrepareAndReuse/65553 (0.01s)
 === RUN   TestPreparationFailuresPublishNothing
 === RUN   TestPreparationFailuresPublishNothing/capacity
@@ -771,18 +771,18 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestPreparationFailuresPublishNothing/cancel
 === RUN   TestPreparationFailuresPublishNothing/source_change
 === RUN   TestPreparationFailuresPublishNothing/source_replace
---- PASS: TestPreparationFailuresPublishNothing (0.04s)
+--- PASS: TestPreparationFailuresPublishNothing (0.06s)
     --- PASS: TestPreparationFailuresPublishNothing/capacity (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/space_error (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/write (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/short_write (0.00s)
-    --- PASS: TestPreparationFailuresPublishNothing/corrupt_write (0.01s)
+    --- PASS: TestPreparationFailuresPublishNothing/corrupt_write (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/sync (0.00s)
-    --- PASS: TestPreparationFailuresPublishNothing/close (0.01s)
+    --- PASS: TestPreparationFailuresPublishNothing/close (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/rename (0.01s)
     --- PASS: TestPreparationFailuresPublishNothing/cancel (0.00s)
     --- PASS: TestPreparationFailuresPublishNothing/source_change (0.00s)
-    --- PASS: TestPreparationFailuresPublishNothing/source_replace (0.00s)
+    --- PASS: TestPreparationFailuresPublishNothing/source_replace (0.03s)
 === RUN   TestEverySynchronizationAndCloseBoundary
 === RUN   TestEverySynchronizationAndCloseBoundary/sync-1
 === RUN   TestEverySynchronizationAndCloseBoundary/sync-2
@@ -801,20 +801,20 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestEverySynchronizationAndCloseBoundary/close-8
 === RUN   TestEverySynchronizationAndCloseBoundary/write-1
 === RUN   TestEverySynchronizationAndCloseBoundary/write-2
---- PASS: TestEverySynchronizationAndCloseBoundary (0.07s)
+--- PASS: TestEverySynchronizationAndCloseBoundary (0.10s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/sync-1 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/sync-2 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/sync-3 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/sync-4 (0.00s)
-    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-5 (0.00s)
-    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-6 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-5 (0.01s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/sync-6 (0.01s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/sync-7 (0.01s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-1 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-2 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-3 (0.00s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-4 (0.00s)
-    --- PASS: TestEverySynchronizationAndCloseBoundary/close-5 (0.00s)
-    --- PASS: TestEverySynchronizationAndCloseBoundary/close-6 (0.00s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-5 (0.01s)
+    --- PASS: TestEverySynchronizationAndCloseBoundary/close-6 (0.01s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-7 (0.01s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/close-8 (0.01s)
     --- PASS: TestEverySynchronizationAndCloseBoundary/write-1 (0.00s)
@@ -829,19 +829,19 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestReuseRejectsDamage/mode
 --- PASS: TestReuseRejectsDamage (0.04s)
     --- PASS: TestReuseRejectsDamage/bytes (0.01s)
-    --- PASS: TestReuseRejectsDamage/length (0.01s)
-    --- PASS: TestReuseRejectsDamage/manifest (0.00s)
+    --- PASS: TestReuseRejectsDamage/length (0.00s)
+    --- PASS: TestReuseRejectsDamage/manifest (0.01s)
     --- PASS: TestReuseRejectsDamage/duplicate (0.01s)
     --- PASS: TestReuseRejectsDamage/unknown (0.00s)
-    --- PASS: TestReuseRejectsDamage/symlink (0.00s)
+    --- PASS: TestReuseRejectsDamage/symlink (0.01s)
     --- PASS: TestReuseRejectsDamage/mode (0.00s)
 === RUN   TestSpoolLockAndUnsafePaths
 --- PASS: TestSpoolLockAndUnsafePaths (0.00s)
 === RUN   TestSnapshotMemoryBound
-    snapshot_test.go:316: 32 MiB sparse source snapshot preparation allocated 86968 bytes
---- PASS: TestSnapshotMemoryBound (0.22s)
+    snapshot_test.go:316: 32 MiB sparse source snapshot preparation allocated 78624 bytes
+--- PASS: TestSnapshotMemoryBound (0.23s)
 === RUN   TestKilledPreparationRecovery
---- PASS: TestKilledPreparationRecovery (0.03s)
+--- PASS: TestKilledPreparationRecovery (0.04s)
 === RUN   TestParentSyncRetriedAndReuseCancellation
 --- PASS: TestParentSyncRetriedAndReuseCancellation (0.01s)
 === RUN   TestSpoolTrailingSymlinkRejected
@@ -849,25 +849,25 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestKilledPublicationRecovery
 === RUN   TestKilledPublicationRecovery/manifest
 === RUN   TestKilledPublicationRecovery/rename
---- PASS: TestKilledPublicationRecovery (0.05s)
-    --- PASS: TestKilledPublicationRecovery/manifest (0.02s)
+--- PASS: TestKilledPublicationRecovery (0.06s)
+    --- PASS: TestKilledPublicationRecovery/manifest (0.03s)
     --- PASS: TestKilledPublicationRecovery/rename (0.03s)
 === RUN   TestBoundedDirectoryScans
 --- PASS: TestBoundedDirectoryScans (0.01s)
 === RUN   TestTreeSendAndUnpack
---- PASS: TestTreeSendAndUnpack (0.10s)
+--- PASS: TestTreeSendAndUnpack (0.11s)
 === RUN   TestEmptyTree
---- PASS: TestEmptyTree (0.04s)
+--- PASS: TestEmptyTree (0.05s)
 === RUN   TestUnpackRefusesFilesAndUnfinishedTransfers
 --- PASS: TestUnpackRefusesFilesAndUnfinishedTransfers (0.08s)
 === RUN   TestUnpackDetectsDamagedPayload
+=== RUN   TestUnpackDetectsDamagedPayload/file_byte
 === RUN   TestUnpackDetectsDamagedPayload/index_byte
 === RUN   TestUnpackDetectsDamagedPayload/footer_magic
-=== RUN   TestUnpackDetectsDamagedPayload/file_byte
---- PASS: TestUnpackDetectsDamagedPayload (0.08s)
+--- PASS: TestUnpackDetectsDamagedPayload (0.09s)
+    --- PASS: TestUnpackDetectsDamagedPayload/file_byte (0.00s)
     --- PASS: TestUnpackDetectsDamagedPayload/index_byte (0.00s)
     --- PASS: TestUnpackDetectsDamagedPayload/footer_magic (0.00s)
-    --- PASS: TestUnpackDetectsDamagedPayload/file_byte (0.01s)
 === RUN   TestTreeIndexRules
 --- PASS: TestTreeIndexRules (0.00s)
 === RUN   TestReadTreeIndexBounds
@@ -889,17 +889,17 @@ ok  	github.com/softdevstudio/bitspeed/internal/fixture	1.093s
 === RUN   TestUnpackCaseClash
 --- PASS: TestUnpackCaseClash (0.03s)
 === RUN   TestUnpackRefusesWindowsNamesOnWindows
-    tree_test.go:481: Windows only
+    tree_test.go:484: Windows only
 --- SKIP: TestUnpackRefusesWindowsNamesOnWindows (0.00s)
 === RUN   TestTreeResumesAfterFailedUpload
 --- PASS: TestTreeResumesAfterFailedUpload (0.09s)
 === RUN   TestKilledTreeUploadResume
 --- PASS: TestKilledTreeUploadResume (0.14s)
 PASS
-ok  	github.com/softdevstudio/bitspeed/transfer	20.846s
+ok  	github.com/softdevstudio/bitspeed/transfer	20.079s
 bitspeed-inspect 0.3.0
 PASS: executable recording, explanations, comparison, compare gate exit codes, POST bodies, warm connections, redirects, truncated body, redaction, timeouts and native cancellation checks
-bitspeed-transfer 0.4.0
+bitspeed-transfer 0.5.0
 PASS: Transfer preparation, staging, verified publication, receipt cache, offline clean, progress output, process restart, repeat delivery and damaged-output rejection
 PASS: executable kill/restart/resume at partial chunk
 PASS: executable kill/restart/resume at chunk response
