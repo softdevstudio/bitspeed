@@ -373,6 +373,9 @@ func TestTreeDetectsChangesDuringCopy(t *testing.T) {
 		"file removed": func(src string) error { return os.Remove(filepath.Join(src, "spaces in name", "x y.txt")) },
 	} {
 		t.Run(name, func(t *testing.T) {
+			if name == "file grows" && runtime.GOOS == "windows" {
+				t.Skip("Windows holds the file being copied with read-only sharing, so no writer can open it; TestWindowsSourceWritersAreRefusedAndBlocked covers that")
+			}
 			src := sampleTree(t)
 			spool := filepath.Join(t.TempDir(), "spool")
 			changed := false
