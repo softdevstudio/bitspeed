@@ -15,6 +15,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 )
 
 const testToken = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
@@ -187,9 +188,12 @@ func TestRequestBoundsAndInvalidPaths(t *testing.T) {
 	if w.Code != 422 {
 		t.Fatal("excess bytes accepted")
 	}
+	saved := lockWait
+	lockWait = 20 * time.Millisecond
 	r.mu.Lock()
 	w = perform(r, "PUT", base+"/chunks/0", "application/octet-stream", strings.NewReader("data"), 4)
 	r.mu.Unlock()
+	lockWait = saved
 	if w.Code != 409 {
 		t.Fatal("concurrent mutation not rejected")
 	}
@@ -232,7 +236,7 @@ func TestReceiverStorageFailureGates(t *testing.T) {
 			case "sync":
 				real := r.ops.sync
 				r.ops.sync = func(f *os.File) error {
-					if filepath.Base(f.Name()) == "incoming.tmp" {
+					if strings.HasPrefix(filepath.Base(f.Name()), "incoming") {
 						return errors.New("sync")
 					}
 					return real(f)
@@ -241,7 +245,7 @@ func TestReceiverStorageFailureGates(t *testing.T) {
 				real := r.ops.close
 				r.ops.close = func(f *os.File) error {
 					e := real(f)
-					if filepath.Base(f.Name()) == "incoming.tmp" {
+					if strings.HasPrefix(filepath.Base(f.Name()), "incoming") {
 						return errors.New("close")
 					}
 					return e

@@ -17,7 +17,7 @@ Design decisions:
 
 Steps (done / remaining):
 1. [ ] README rewrite and this file restructured.
-2. [ ] Parallel chunks (receiver concurrency, sender window), with tests: concurrent distinct chunks, same index twice, in-flight cap, finalize while in flight, status during an upload, kill during parallel upload then resume, old-receiver fallback via session_busy retries, progress counts.
+2. [x] Parallel chunks (receiver concurrency, sender window), with tests: concurrent distinct chunks, same index twice, in-flight cap, finalize while in flight, status during an upload, kill during parallel upload then resume, old-receiver fallback via session_busy retries, progress counts.
 3. [ ] Directory mode (tree snapshot, unpack), with tests: nested and empty folders, empty files, refused symlinks and special files, source changed during copy, bad paths, damaged index or footer, digest mismatch, existing OUT, OUT inside root, case clash, kill-and-resume of a tree send.
 4. [ ] Docs: docs/transfer-v1.md concurrency notes, docs/transfer-tree.md, docs/transfer-releases.md, smoke scripts and release checks for directory mode.
 5. [ ] Independent review (at most two rounds), fixes, fresh test/results.

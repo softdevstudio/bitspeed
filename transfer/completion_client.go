@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"path/filepath"
 )
 
@@ -38,8 +39,15 @@ func Send(ctx context.Context, base, token, spool, id string) (StoredStatus, err
 }
 
 // SendWithProgress is Send with an optional progress callback; see SendProgress.
+// It sends one chunk at a time; SendWithOptions sends several.
 func SendWithProgress(ctx context.Context, base, token, spool, id string, progress func(SendProgress) error) (StoredStatus, error) {
-	s, e := UploadOnlyWithProgress(ctx, base, token, spool, id, progress)
+	return SendWithOptions(ctx, base, token, spool, id, SendOptions{Parallel: 1, Progress: progress})
+}
+
+// SendWithOptions is Send with a chunk window and an optional progress callback.
+func SendWithOptions(ctx context.Context, base, token, spool, id string, o SendOptions) (StoredStatus, error) {
+	progress := o.Progress
+	s, e := UploadOnlyWithOptions(ctx, base, token, spool, id, o)
 	if e != nil {
 		return s, e
 	}
@@ -63,7 +71,7 @@ func SendWithProgress(ctx context.Context, base, token, spool, id string, progre
 		}
 		client := transferHTTPClient()
 		defer client.CloseIdleConnections()
-		data, code, e := request(ctx, client, "POST", normalized+"/v1/transfers/"+id+"/finalize", token, "application/json", bytes.NewReader(body), int64(len(body)))
+		data, code, e := requestRetrying(ctx, client, "POST", normalized+"/v1/transfers/"+id+"/finalize", token, "application/json", func() io.Reader { return bytes.NewReader(body) }, int64(len(body)))
 		if e != nil {
 			return StoredStatus{}, e
 		}

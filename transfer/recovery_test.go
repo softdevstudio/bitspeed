@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -176,7 +177,8 @@ func TestRecoveryProcessHelper(t *testing.T) {
 		return
 	}
 	if mode == "sender" {
-		_, e := UploadOnly(context.Background(), os.Getenv("BITSPEED_RECOVERY_URL"), testToken, os.Getenv("BITSPEED_RECOVERY_SPOOL"), os.Getenv("BITSPEED_RECOVERY_ID"))
+		parallel, _ := strconv.Atoi(os.Getenv("BITSPEED_RECOVERY_PARALLEL"))
+		_, e := UploadOnlyWithOptions(context.Background(), os.Getenv("BITSPEED_RECOVERY_URL"), testToken, os.Getenv("BITSPEED_RECOVERY_SPOOL"), os.Getenv("BITSPEED_RECOVERY_ID"), SendOptions{Parallel: max(parallel, 1)})
 		if e != nil {
 			fmt.Fprintln(os.Stderr, e)
 			os.Exit(3)
@@ -193,7 +195,7 @@ func TestRecoveryProcessHelper(t *testing.T) {
 	ops := realReceiverOps()
 	ops.write = func(f *os.File, b []byte) (int, error) {
 		n, e := f.Write(b)
-		if (point == "chunk write" && filepath.Base(f.Name()) == "incoming.tmp") || (point == "admission write" && filepath.Base(f.Name()) == "manifest.json") {
+		if (point == "chunk write" && strings.HasPrefix(filepath.Base(f.Name()), "incoming")) || (point == "admission write" && filepath.Base(f.Name()) == "manifest.json") {
 			stop()
 		}
 		return n, e
@@ -207,7 +209,7 @@ func TestRecoveryProcessHelper(t *testing.T) {
 	}
 	ops.link = func(a, b string) error {
 		e := os.Link(a, b)
-		if e == nil && point == "chunk link" && filepath.Base(a) == "incoming.tmp" {
+		if e == nil && point == "chunk link" && strings.HasPrefix(filepath.Base(a), "incoming") {
 			stop()
 		}
 		return e

@@ -63,19 +63,26 @@ func progressPrinter(stderr io.Writer) func(transfer.SendProgress) error {
 }
 
 func sendFile(ctx context.Context, args []string, stdout, stderr io.Writer, upload bool) error {
-	v, e := options(args, "url", "token-file", "spool", "reuse")
+	v, e := options(args, "url", "token-file", "spool", "reuse", "parallel")
 	if e != nil || v["--url"] == "" || v["--token-file"] == "" || v["--spool"] == "" || v["--reuse"] == "" {
 		return transfer.ErrConfig
+	}
+	parallel := transfer.DefaultParallel
+	if value := v["--parallel"]; value != "" {
+		parallel, e = strconv.Atoi(value)
+		if e != nil || parallel < 1 || parallel > transfer.MaxParallel || strconv.Itoa(parallel) != value {
+			return errors.New("invalid --parallel; use a whole number from 1 to " + strconv.Itoa(transfer.MaxParallel))
+		}
 	}
 	token, e := transfer.LoadToken(v["--token-file"])
 	if e != nil {
 		return e
 	}
-	send := transfer.SendWithProgress
+	send := transfer.SendWithOptions
 	if upload {
-		send = transfer.UploadOnlyWithProgress
+		send = transfer.UploadOnlyWithOptions
 	}
-	s, e := send(ctx, v["--url"], token, v["--spool"], v["--reuse"], progressPrinter(stderr))
+	s, e := send(ctx, v["--url"], token, v["--spool"], v["--reuse"], transfer.SendOptions{Parallel: parallel, Progress: progressPrinter(stderr)})
 	if e != nil {
 		return e
 	}

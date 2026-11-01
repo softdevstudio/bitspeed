@@ -34,6 +34,13 @@ type receiverOps struct {
 
 func realReceiverOps() receiverOps { return receiverOps{realSnapshotOps(), os.Link} }
 
+// MaxInflightChunks bounds chunk uploads one session may have streaming at once.
+const MaxInflightChunks = 8
+
+// lockWait is how long a request waits for the receiver lock before it is
+// refused as session_busy.
+var lockWait = 30 * time.Second
+
 type Receiver struct {
 	mu          sync.Mutex
 	root, token string
@@ -42,7 +49,29 @@ type Receiver struct {
 	maxSessions int
 	maxReserved int64
 	ops         receiverOps
+	// inflight holds, per session, the chunk indexes whose bodies are being
+	// received without the lock. Guarded by mu.
+	inflight map[string]map[int]bool
 }
+
+// acquire waits for the receiver lock, at most lockWait and never past ctx.
+func (r *Receiver) acquire(ctx context.Context) bool {
+	deadline := time.Now().Add(lockWait)
+	pause := time.Millisecond
+	for {
+		if r.mu.TryLock() {
+			return true
+		}
+		if ctx.Err() != nil || time.Now().After(deadline) {
+			return false
+		}
+		time.Sleep(pause)
+		if pause < 20*time.Millisecond {
+			pause *= 2
+		}
+	}
+}
+func (r *Receiver) busy(id string) bool { return len(r.inflight[id]) != 0 }
 
 func NewReceiver(c ReceiverConfig) (*Receiver, error) { return newReceiver(c, realReceiverOps()) }
 func newReceiver(c ReceiverConfig, ops receiverOps) (*Receiver, error) {
@@ -465,12 +494,15 @@ func (r *Receiver) uploadStatus(ctx context.Context, m Manifest) (StoredStatus, 
 	s := StoredStatus{ProtocolVersion: 1, TransferID: m.TransferID, ManifestSHA256: identity, State: Uploading, MissingChunks: []int{}}
 	dir := filepath.Join(r.root, "sessions", m.TransferID)
 	chunks := filepath.Join(dir, "chunks")
-	entries, e := boundedEntries(chunks, 2*MaxChunks+1)
+	entries, e := boundedEntries(chunks, 2*MaxChunks+MaxInflightChunks+1)
 	if e != nil {
 		return s, ErrRecovery
 	}
 	for _, entry := range entries {
-		if entry.Name() == "incoming.tmp" {
+		if temp, index := incomingName(entry.Name(), len(m.ChunkSHA256)); temp {
+			if index >= 0 && r.inflight[m.TransferID][index] {
+				continue
+			}
 			info, e := os.Lstat(filepath.Join(chunks, entry.Name()))
 			if e != nil || !info.Mode().IsRegular() || !privateFileOK(filepath.Join(chunks, entry.Name()), info) || info.Size() > MaxChunkSize {
 				return s, ErrRecovery
@@ -547,106 +579,185 @@ func (r *Receiver) syncSession(ctx context.Context, m Manifest) error {
 	return ctx.Err()
 }
 
-func (r *Receiver) store(ctx context.Context, m Manifest, index int, body io.Reader, length int64) (chunkAck, error) {
-	identity, _ := m.Identity()
-	ack := chunkAck{1, m.TransferID, identity, index, m.ChunkSHA256[index], true}
+// incomingName reports whether name is a chunk temp file: the 0.4 name
+// incoming.tmp (index -1) or incoming-INDEX.tmp for an index in the manifest.
+func incomingName(name string, count int) (bool, int) {
+	if name == "incoming.tmp" {
+		return true, -1
+	}
+	middle, ok := strings.CutPrefix(name, "incoming-")
+	if !ok {
+		return false, 0
+	}
+	middle, ok = strings.CutSuffix(middle, ".tmp")
+	if !ok {
+		return false, 0
+	}
+	index, valid := validIndex(middle, count)
+	if !valid {
+		return false, 0
+	}
+	return true, index
+}
+
+// pendingChunk is one chunk upload between its two locked steps.
+type pendingChunk struct {
+	m         Manifest
+	index     int
+	want      int64
+	temp      string
+	target    string
+	duplicate bool
+	f         *os.File
+}
+
+// beginStore runs under the lock: it checks the target, discards a stale temp
+// file and opens a fresh one. The caller has reserved the index.
+func (r *Receiver) beginStore(ctx context.Context, m Manifest, index int, length int64) (*pendingChunk, error) {
 	want := chunkSizeAt(m, index)
 	if length != want {
-		return ack, failure(422, "chunk_length_mismatch", false)
+		return nil, failure(422, "chunk_length_mismatch", false)
 	}
 	chunks := filepath.Join(r.root, "sessions", m.TransferID, "chunks")
-	target := filepath.Join(chunks, strconv.Itoa(index))
-	duplicate := false
-	if _, e := os.Lstat(target); e == nil {
-		if e = r.verifyFile(ctx, target, want, m.ChunkSHA256[index]); errors.Is(e, errChunkCorrupt) {
-			if e = r.quarantine(target, want); e != nil {
-				return ack, e
+	p := &pendingChunk{m: m, index: index, want: want, target: filepath.Join(chunks, strconv.Itoa(index)), temp: filepath.Join(chunks, "incoming-"+strconv.Itoa(index)+".tmp")}
+	if _, e := os.Lstat(p.target); e == nil {
+		if e = r.verifyFile(ctx, p.target, want, m.ChunkSHA256[index]); errors.Is(e, errChunkCorrupt) {
+			if e = r.quarantine(p.target, want); e != nil {
+				return nil, e
 			}
 		} else if e != nil {
-			return ack, e
+			return nil, e
 		} else {
-			duplicate = true
+			p.duplicate = true
 		}
 	} else if !os.IsNotExist(e) {
-		return ack, ErrStorage
+		return nil, ErrStorage
 	}
-	temp := filepath.Join(chunks, "incoming.tmp")
-	if _, e := os.Lstat(temp); e == nil {
-		if e := privateChunk(temp, MaxChunkSize); e != nil {
-			return ack, e
+	if _, e := os.Lstat(p.temp); e == nil {
+		if e := privateChunk(p.temp, MaxChunkSize); e != nil {
+			return nil, e
 		}
-		if e = os.Remove(temp); e != nil {
-			return ack, ErrStorage
+		if e = os.Remove(p.temp); e != nil {
+			return nil, ErrStorage
 		}
 	} else if !os.IsNotExist(e) {
-		return ack, ErrStorage
+		return nil, ErrStorage
 	}
-	var f *os.File
-	var e error
-	if !duplicate {
-		f, e = os.OpenFile(temp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if !p.duplicate {
+		f, e := os.OpenFile(p.temp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
 		if e != nil {
-			return ack, ErrStorage
+			return nil, ErrStorage
 		}
-		// Windows cannot remove a file that is still open, so close first.
-		defer func() { _ = f.Close(); _ = os.Remove(temp) }()
+		p.f = f
 	}
+	return p, nil
+}
+
+// discard closes and removes the temp file. Windows cannot remove a file that
+// is still open, so close first. Safe to call more than once.
+func (p *pendingChunk) discard() {
+	if p.f != nil {
+		_ = p.f.Close()
+		p.f = nil
+	}
+	if !p.duplicate {
+		_ = os.Remove(p.temp)
+	}
+}
+
+// receive streams the body without the lock: the index is reserved, so no
+// other request touches this temp file or target.
+func (r *Receiver) receive(ctx context.Context, p *pendingChunk, body io.Reader) error {
 	hash := sha256.New()
 	buf := make([]byte, 32<<10)
 	var received int64
-	for received < want {
-		if e = ctx.Err(); e != nil {
-			return ack, e
+	for received < p.want {
+		if e := ctx.Err(); e != nil {
+			return e
 		}
-		n, re := body.Read(buf[:min(int64(len(buf)), want-received)])
+		n, re := body.Read(buf[:min(int64(len(buf)), p.want-received)])
 		if n > 0 {
 			hash.Write(buf[:n])
-			if f != nil {
-				written, we := r.ops.write(f, buf[:n])
+			if p.f != nil {
+				written, we := r.ops.write(p.f, buf[:n])
 				if we != nil || written != n {
-					return ack, ErrStorage
+					return ErrStorage
 				}
 			}
 			received += int64(n)
 		}
 		if re != nil && re != io.EOF {
-			return ack, failure(422, "chunk_length_mismatch", false)
+			return failure(422, "chunk_length_mismatch", false)
 		}
 		if n == 0 {
-			return ack, failure(422, "chunk_length_mismatch", false)
+			return failure(422, "chunk_length_mismatch", false)
 		}
 	}
 	var extra [1]byte
 	if n, re := body.Read(extra[:]); n != 0 || re != io.EOF {
-		return ack, failure(422, "chunk_length_mismatch", false)
+		return failure(422, "chunk_length_mismatch", false)
 	}
-	if hex.EncodeToString(hash.Sum(nil)) != m.ChunkSHA256[index] {
-		return ack, failure(422, "chunk_digest_mismatch", false)
+	if hex.EncodeToString(hash.Sum(nil)) != p.m.ChunkSHA256[p.index] {
+		return failure(422, "chunk_digest_mismatch", false)
 	}
-	if f != nil {
-		if e = r.ops.sync(f); e != nil {
-			return ack, ErrStorage
+	if p.f != nil {
+		f := p.f
+		if e := r.ops.sync(f); e != nil {
+			return ErrStorage
 		}
-		if e = r.ops.close(f); e != nil {
-			return ack, ErrStorage
+		p.f = nil
+		if e := r.ops.close(f); e != nil {
+			return ErrStorage
 		}
-		if e = r.verifyFile(ctx, temp, want, m.ChunkSHA256[index]); e != nil {
-			return ack, e
-		}
-		if e = r.ops.link(temp, target); e != nil {
-			return ack, ErrStorage
-		}
-		if e = os.Remove(temp); e != nil {
-			return ack, ErrStorage
+		if e := r.verifyFile(ctx, p.temp, p.want, p.m.ChunkSHA256[p.index]); e != nil {
+			return e
 		}
 	}
-	if e = syncDir(chunks, r.ops.snapshotOps); e != nil {
+	return nil
+}
+
+// commitStore runs under the lock: it publishes the verified temp file and
+// syncs the chunk folder before the chunk is acknowledged.
+func (r *Receiver) commitStore(ctx context.Context, p *pendingChunk) (chunkAck, error) {
+	identity, _ := p.m.Identity()
+	ack := chunkAck{1, p.m.TransferID, identity, p.index, p.m.ChunkSHA256[p.index], true}
+	j, e := r.readJournal(p.m)
+	if e != nil {
+		return ack, e
+	}
+	if j.State != Uploading {
+		return ack, failure(409, "invalid_state", false)
+	}
+	if !p.duplicate {
+		if e = r.ops.link(p.temp, p.target); e != nil {
+			return ack, ErrStorage
+		}
+		if e = os.Remove(p.temp); e != nil {
+			return ack, ErrStorage
+		}
+	}
+	if e = syncDir(filepath.Dir(p.target), r.ops.snapshotOps); e != nil {
 		return ack, e
 	}
 	if e = ctx.Err(); e != nil {
 		return ack, e
 	}
 	return ack, nil
+}
+
+// store runs all three steps while the caller already holds the lock. Tests
+// and single-request paths use it; ServeHTTP releases the lock while the body
+// streams.
+func (r *Receiver) store(ctx context.Context, m Manifest, index int, body io.Reader, length int64) (chunkAck, error) {
+	p, e := r.beginStore(ctx, m, index, length)
+	if e != nil {
+		return chunkAck{}, e
+	}
+	defer p.discard()
+	if e = r.receive(ctx, p, body); e != nil {
+		return chunkAck{}, e
+	}
+	return r.commitStore(ctx, p)
 }
 
 func receiverError(err error) *protocolError {

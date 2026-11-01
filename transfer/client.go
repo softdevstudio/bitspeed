@@ -13,10 +13,64 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
 var ErrRequest = errors.New("receiver request failed")
+
+// ReceiverError is a documented error reply from the receiver.
+type ReceiverError struct {
+	Code      string
+	Retryable bool
+}
+
+func (e *ReceiverError) Error() string { return "receiver: " + e.Code }
+
+func busyReply(e error) bool {
+	var r *ReceiverError
+	return errors.As(e, &r) && r.Code == "session_busy"
+}
+
+const (
+	DefaultParallel = 4
+	MaxParallel     = 8
+)
+
+// busyRetry is how long one request keeps retrying session_busy replies.
+var busyRetry = 2 * time.Minute
+
+// requestRetrying repeats a request while the receiver answers session_busy,
+// with a growing pause. body builds a fresh request body for every attempt.
+func requestRetrying(ctx context.Context, client *http.Client, method, target, token, kind string, body func() io.Reader, length int64) ([]byte, int, error) {
+	deadline := time.Now().Add(busyRetry)
+	pause := 20 * time.Millisecond
+	for {
+		var b io.Reader
+		if body != nil {
+			b = body()
+		}
+		data, code, e := request(ctx, client, method, target, token, kind, b, length)
+		if !busyReply(e) || time.Now().After(deadline) {
+			return data, code, e
+		}
+		select {
+		case <-ctx.Done():
+			return nil, 0, ctx.Err()
+		case <-time.After(pause):
+		}
+		if pause < time.Second {
+			pause *= 2
+		}
+	}
+}
+
+// SendOptions configures an upload. Parallel is the most chunk uploads kept
+// in flight at once (0 means DefaultParallel). Progress may be nil.
+type SendOptions struct {
+	Parallel int
+	Progress func(SendProgress) error
+}
 
 func LoadToken(path string) (string, error) {
 	if !spoolSupported() {
@@ -61,7 +115,7 @@ func endpoint(base string) (string, error) {
 	return strings.TrimSuffix(u.String(), "/"), nil
 }
 func transferHTTPClient() *http.Client {
-	return &http.Client{Timeout: 6 * time.Minute, CheckRedirect: func(*http.Request, []*http.Request) error { return ErrRequest }, Transport: &http.Transport{Proxy: nil, DisableCompression: true, ResponseHeaderTimeout: 10 * time.Second, MaxResponseHeaderBytes: 16 << 10}}
+	return &http.Client{Timeout: 6 * time.Minute, CheckRedirect: func(*http.Request, []*http.Request) error { return ErrRequest }, Transport: &http.Transport{Proxy: nil, DisableCompression: true, ResponseHeaderTimeout: 10 * time.Second, MaxResponseHeaderBytes: 16 << 10, MaxIdleConnsPerHost: MaxParallel}}
 }
 func request(ctx context.Context, client *http.Client, method, target, token, kind string, body io.Reader, length int64) ([]byte, int, error) {
 	req, e := http.NewRequestWithContext(ctx, method, target, body)
@@ -109,7 +163,7 @@ func request(ctx context.Context, client *http.Client, method, target, token, ki
 		if !known[code] {
 			return nil, resp.StatusCode, ErrProtocol
 		}
-		return nil, resp.StatusCode, errors.New("receiver: " + code)
+		return nil, resp.StatusCode, &ReceiverError{Code: code, Retryable: retry == "true"}
 	}
 	return data, resp.StatusCode, nil
 }
@@ -241,10 +295,25 @@ func UploadOnly(ctx context.Context, base, token, spool, id string) (StoredStatu
 	return UploadOnlyWithProgress(ctx, base, token, spool, id, nil)
 }
 
-// UploadOnlyWithProgress is UploadOnly with an optional progress callback.
+// UploadOnlyWithProgress is UploadOnly with an optional progress callback. It
+// sends one chunk at a time, as in 0.4; UploadOnlyWithOptions sends several.
 // A callback error stops the upload; already stored chunks stay verified.
 func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, progress func(SendProgress) error) (StoredStatus, error) {
+	return UploadOnlyWithOptions(ctx, base, token, spool, id, SendOptions{Parallel: 1, Progress: progress})
+}
+
+// UploadOnlyWithOptions stages verified chunks with up to o.Parallel uploads
+// in flight. Progress events are delivered one at a time and count only
+// chunks the receiver has acknowledged as stored.
+func UploadOnlyWithOptions(ctx context.Context, base, token, spool, id string, o SendOptions) (StoredStatus, error) {
 	var empty StoredStatus
+	if o.Parallel == 0 {
+		o.Parallel = DefaultParallel
+	}
+	if o.Parallel < 1 || o.Parallel > MaxParallel {
+		return empty, ErrConfig
+	}
+	progress := o.Progress
 	report := func(p SendProgress) error {
 		if progress == nil {
 			return nil
@@ -278,7 +347,7 @@ func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, 
 	client := transferHTTPClient()
 	defer client.CloseIdleConnections()
 	manifest, _ := m.CanonicalJSON()
-	data, code, e := request(ctx, client, "POST", base+"/v1/transfers", token, "application/json", bytes.NewReader(manifest), int64(len(manifest)))
+	data, code, e := requestRetrying(ctx, client, "POST", base+"/v1/transfers", token, "application/json", func() io.Reader { return bytes.NewReader(manifest) }, int64(len(manifest)))
 	if e != nil {
 		return empty, e
 	}
@@ -302,34 +371,38 @@ func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, 
 	if e = report(p); e != nil {
 		return empty, e
 	}
-	for _, index := range s.MissingChunks {
+	identity, _ := m.Identity()
+	upload := func(ctx context.Context, index int) error {
 		length := chunkSizeAt(m, index)
-		body := io.NewSectionReader(f, int64(index)*m.ChunkSize, length)
-		data, code, e = request(ctx, client, "PUT", base+"/v1/transfers/"+id+"/chunks/"+strconv.Itoa(index), token, "application/octet-stream", body, length)
+		data, code, e := requestRetrying(ctx, client, "PUT", base+"/v1/transfers/"+id+"/chunks/"+strconv.Itoa(index), token, "application/octet-stream", func() io.Reader {
+			return io.NewSectionReader(f, int64(index)*m.ChunkSize, length)
+		}, length)
 		if e != nil {
-			return empty, e
+			return e
 		}
 		if code != 200 {
-			return empty, ErrProtocol
+			return ErrProtocol
 		}
 		fields, e := exactObject(data, "protocol_version", "transfer_id", "manifest_sha256", "chunk_index", "chunk_sha256", "stored")
 		if e != nil {
-			return empty, e
+			return e
 		}
 		v, ve := wireInt(fields["protocol_version"])
 		i, ie := wireInt(fields["chunk_index"])
 		tid, te := wireString(fields["transfer_id"])
 		mid, me := wireString(fields["manifest_sha256"])
 		digest, de := wireString(fields["chunk_sha256"])
-		identity, _ := m.Identity()
 		if ve != nil || v != 1 || ie != nil || int64(index) != i || te != nil || tid != id || me != nil || mid != identity || de != nil || digest != m.ChunkSHA256[index] || string(fields["stored"]) != "true" {
-			return empty, ErrProtocol
+			return ErrProtocol
 		}
+		return nil
+	}
+	if e = uploadWindow(ctx, s.MissingChunks, o.Parallel, upload, func(index int) error {
 		p.Stage, p.Sent, p.ChunkIndex = "chunk", p.Sent+1, index
-		p.BytesSent += length
-		if e = report(p); e != nil {
-			return empty, e
-		}
+		p.BytesSent += chunkSizeAt(m, index)
+		return report(p)
+	}); e != nil {
+		return empty, e
 	}
 	data, code, e = request(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)
 	if e != nil {
@@ -346,4 +419,60 @@ func UploadOnlyWithProgress(ctx context.Context, base, token, spool, id string, 
 		return empty, ErrStorage
 	}
 	return s, nil
+}
+
+// uploadWindow runs upload for each index with at most parallel calls at once,
+// taking indexes in order. done is called one at a time after each success.
+// The first error, from an upload or from done, cancels the rest and is
+// returned; chunks already acknowledged stay stored on the receiver.
+func uploadWindow(ctx context.Context, indexes []int, parallel int, upload func(context.Context, int) error, done func(int) error) error {
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+	var mu sync.Mutex
+	var first error
+	fail := func(e error) {
+		mu.Lock()
+		if first == nil {
+			first = e
+		}
+		mu.Unlock()
+		cancel()
+	}
+	next := make(chan int)
+	var wg sync.WaitGroup
+	for w := 0; w < min(parallel, len(indexes)); w++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for index := range next {
+				if e := upload(ctx, index); e != nil {
+					fail(e)
+					continue
+				}
+				mu.Lock()
+				var e error
+				if first == nil {
+					e = done(index)
+				}
+				mu.Unlock()
+				if e != nil {
+					fail(e)
+				}
+			}
+		}()
+	}
+feed:
+	for _, index := range indexes {
+		select {
+		case next <- index:
+		case <-ctx.Done():
+			break feed
+		}
+	}
+	close(next)
+	wg.Wait()
+	if first != nil {
+		return first
+	}
+	return ctx.Err()
 }

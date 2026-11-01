@@ -34,17 +34,22 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		replyError(w, failure(400, "invalid_request", false))
 		return
 	}
-	if !r.mu.TryLock() {
+	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Minute)
+	defer cancel()
+	if !r.acquire(ctx) {
 		replyError(w, failure(409, "session_busy", true))
 		return
 	}
-	defer r.mu.Unlock()
+	locked := true
+	defer func() {
+		if locked {
+			r.mu.Unlock()
+		}
+	}()
 	if r.closed {
 		replyError(w, ErrStorage)
 		return
 	}
-	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Minute)
-	defer cancel()
 	if len(req.Header.Values("Content-Encoding")) != 0 {
 		replyError(w, failure(415, "unsupported_encoding", false))
 		return
@@ -157,6 +162,10 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 			replyError(w, failure(409, "manifest_conflict", false))
 			return
 		}
+		if r.busy(m.TransferID) {
+			replyError(w, failure(409, "session_busy", true))
+			return
+		}
 		s, e := r.finalize(ctx, m)
 		if e != nil {
 			replyError(w, e)
@@ -195,11 +204,62 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		replyError(w, failure(400, "invalid_index", false))
 		return
 	}
+	if r.inflight[id][index] || len(r.inflight[id]) >= MaxInflightChunks {
+		replyError(w, failure(409, "session_busy", true))
+		return
+	}
 	if e = r.syncSession(ctx, m); e != nil {
 		replyError(w, e)
 		return
 	}
-	ack, e := r.store(ctx, m, index, req.Body, req.ContentLength)
+	p, e := r.beginStore(ctx, m, index, req.ContentLength)
+	if e != nil {
+		replyError(w, e)
+		return
+	}
+	// Reserve the index, then stream the body without the lock so other
+	// chunks of this or another session can be received at the same time.
+	if r.inflight == nil {
+		r.inflight = map[string]map[int]bool{}
+	}
+	if r.inflight[id] == nil {
+		r.inflight[id] = map[int]bool{}
+	}
+	r.inflight[id][index] = true
+	r.mu.Unlock()
+	locked = false
+	release := func() {
+		delete(r.inflight[id], index)
+		if len(r.inflight[id]) == 0 {
+			delete(r.inflight, id)
+		}
+	}
+	e = r.receive(ctx, p, req.Body)
+	if e != nil {
+		p.discard()
+		// The reservation must be released even when the lock wait times out.
+		r.mu.Lock()
+		release()
+		r.mu.Unlock()
+		replyError(w, e)
+		return
+	}
+	if !r.acquire(ctx) {
+		p.discard()
+		r.mu.Lock()
+		release()
+		r.mu.Unlock()
+		replyError(w, failure(409, "session_busy", true))
+		return
+	}
+	locked = true
+	defer release()
+	defer p.discard()
+	if r.closed {
+		replyError(w, ErrStorage)
+		return
+	}
+	ack, e := r.commitStore(ctx, p)
 	if e != nil {
 		replyError(w, e)
 		return
