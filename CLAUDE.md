@@ -1,5 +1,33 @@
 # BitSpeed
 
+## Where the next session starts
+
+Transfer 0.5 (softdev-plan item 35 in photozeitgeist/jollyroger.biz, approved by YK 2026-11-01, Phases 0, A and B) is in progress; see the next section. Inspect is unchanged at 0.3.0.
+
+## In progress: Transfer 0.5
+
+What and why: the README still reads as the Inspect 0.1.1 page; Transfer moves only one file, the biggest reason to pick rsync or rclone instead; and it sends one chunk at a time, which wastes high-latency links, where resume matters most.
+
+Design decisions:
+- Phase 0: README rewritten around the current releases, one section per tool, current download links, no "will" or "development stage" wording. This file's finished "Next" list becomes a dated history.
+- Phase B, parallel chunks: `send --parallel=N` (1 to 8, default 4) keeps up to N chunk uploads in flight. The per-chunk persistence sequence is unchanged (temp file, length and digest check, sync, close, re-verify, link, sync folder, then acknowledge). The receiver no longer refuses a request the moment another holds its lock: it waits up to 30 seconds. A chunk PUT holds the lock only to check and reserve its index and later to link the verified temp file; the body streams into chunks/incoming-INDEX.tmp without the lock. At most 8 chunks per session are in flight; the same index twice, or a ninth, is `session_busy` (retryable). Finalize is `session_busy` while chunks of that session are in flight; status skips in-flight temp files; startup removes every leftover incoming temp file. The sender retries `session_busy` with backoff, so a 0.4 receiver still works, one chunk at a time. Progress events stay serialised and only count acknowledged chunks.
+- Phase A, directory mode: `send --prepare-only --source=DIR` snapshots a folder into one transfer payload, a "tree": the file contents in path order, then a canonical JSON index (format bitspeed-tree, version 1; each entry a dir or a file with path, size and SHA-256), then a 16-byte footer (index length, "BSTREE01"). The existing protocol, resume, parallel chunks and receipt apply unchanged, so the one completion receipt binds every file through the index. Chosen over one transfer per file because a receiver root holds at most 16 sessions and the receiver never takes sender-controlled names. Symlinks, devices and other special files are refused; permissions, owners and times are not kept. The folder is walked again after copying, and any change fails preparation. Paths: UTF-8, `/`-separated, no empty, `.` or `..` segments, no backslash, NUL or control characters, segment at most 255 bytes, path at most 4096 bytes; at most 100000 entries and a 16 MiB index.
+- `bitspeed-transfer unpack --root=DIR --id=ID --out=DIR` writes a completed tree out on the receiver. It needs no lock and can run beside serve: it reads the completed session's receipt and files/ID.data, checks the whole stream against the receipt digest and each file against its index digest, writes into a fresh hidden folder next to OUT, syncs it, then renames it to OUT, which must not exist and must be outside the root. Every file and folder is created exclusively, so case-insensitive name clashes fail instead of overwriting; on Windows, names Windows cannot hold are refused.
+- Version Transfer 0.5.0; protocol version stays 1 (the wire format is unchanged, only concurrency is new).
+
+Steps (done / remaining):
+1. [ ] README rewrite and this file restructured.
+2. [ ] Parallel chunks (receiver concurrency, sender window), with tests: concurrent distinct chunks, same index twice, in-flight cap, finalize while in flight, status during an upload, kill during parallel upload then resume, old-receiver fallback via session_busy retries, progress counts.
+3. [ ] Directory mode (tree snapshot, unpack), with tests: nested and empty folders, empty files, refused symlinks and special files, source changed during copy, bad paths, damaged index or footer, digest mismatch, existing OUT, OUT inside root, case clash, kill-and-resume of a tree send.
+4. [ ] Docs: docs/transfer-v1.md concurrency notes, docs/transfer-tree.md, docs/transfer-releases.md, smoke scripts and release checks for directory mode.
+5. [ ] Independent review (at most two rounds), fixes, fresh test/results.
+6. [ ] Transfer 0.5.0 released by the workflow; downloads checked against SHA256SUMS at the tag and latest; a downloaded binary sends and unpacks a folder.
+7. [ ] bitspeed.org post with its image and page updates; softdevstudio.com note and listing; softdev-plan.md item 35 marked done.
+
+Local note: this cloud session has Go 1.24 only (the Go download hosts are blocked), so local tests run with a scratch go.mod; CI on the go.mod version is the real check.
+
+## Project facts
+
 BitSpeed houses two independent tools: Inspect explains HTTP transfer timing and compares runs; Transfer moves a file in verified chunks and resumes after interruption.
 
 Domain: bitspeed.org
@@ -121,7 +149,7 @@ The inspect/v0.1.0 tag comes from the first publisher run, which stopped on a dr
 
 Standards cleanup the same day, in a Claude session: AGENTS.md became CLAUDE.md with a pointer AGENTS.md for Codex; eleven review-session files and the site-content review were removed from docs/ (git history keeps them); thirty-nine timestamped result folders, site-session-eight and session-five-fuzz were removed, the latest run kept as test/results/latest and the recorder changed to replace it; release evidence folders renamed by product and version; release titles changed to the vX.Y.Z form in scripts/release_inspect.py, and a title job in both release workflows renames an already published release when its title differs, because Claude sessions cannot edit releases. No version or tag changed. Site work in photozeitgeist/bitspeed.org: Transfer release post retitled, testing post covers both tools, two case-study posts added, one illustration per post. BitSpeed added to softdevstudio.com.
 
-## Next
+## Done: October 20 and 21 phases
 
 YK approved this plan on October 20, 2026, to be done in short phases with a pause and report after each, waiting for his go-ahead before the next:
 
