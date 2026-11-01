@@ -2,9 +2,9 @@
 
 ## Where the next session starts
 
-Transfer 0.5 (softdev-plan item 35 in photozeitgeist/jollyroger.biz, approved by YK 2026-11-01, Phases 0, A and B) is in progress; see the next section. Inspect is unchanged at 0.3.0.
+Transfer 0.5.0 is released and softdev-plan item 35 (photozeitgeist/jollyroger.biz) is done; nothing is in progress. Inspect is unchanged at 0.3.0. The plan's remaining candidate, an Inspect HTML report, is not approved; ask YK first. The live pages could not be opened from the release session (shell network blocked, page fetch unapproved); the Cloudflare Pages deploys succeeded.
 
-## In progress: Transfer 0.5
+## Done: Transfer 0.5 (softdev-plan item 35)
 
 What and why: the README still reads as the Inspect 0.1.1 page; Transfer moves only one file, the biggest reason to pick rsync or rclone instead; and it sends one chunk at a time, which wastes high-latency links, where resume matters most.
 
@@ -22,7 +22,7 @@ Steps (done / remaining):
 4. [x] Docs: docs/transfer-v1.md concurrency notes, docs/transfer-tree.md, docs/transfer-releases.md, smoke scripts and release checks for directory mode.
 5. [x] Independent review, two rounds; round 2 found nothing to fix, its three nits fixed (doc notes on a killed unpack and on closing the HTTP server before the receiver; unpack removes OUT on a failed rename only if it is still the folder it claimed). Fresh test/results recorded locally (Go 1.24, scratch go.mod).
 6. [x] Transfer 0.5.0 released by the workflow (commit 3876738, Release Transfer 41291796195 on the first attempt). All 13 assets identical at the tag and latest and matching SHA256SUMS; Inspect 0.3.0 carried unchanged. The downloaded Linux binary passed all four smoke scripts, folder send and unpack included. Parallel timing (32 MiB, 1 MiB chunks, 100 ms added per request on loopback): about 4.45 s at --parallel=1, 1.8 s at 4, 1.35 to 1.96 s at 8. Evidence in test/results/transfer-0.5.0-release.
-7. [ ] bitspeed.org post with its image and page updates; softdevstudio.com note and listing; softdev-plan.md item 35 marked done.
+7. [x] bitspeed.org post "BitSpeed Transfer 0.5 Sends Whole Folders and Several Chunks at Once" with transfer-folders-parallel.svg (rasterized and inspected), Transfer, Quick Start, Download, About, Which Tool and Reference pages, the rsync post's directory line (site commit 858d9eb, deploy succeeded); softdevstudio.com note and listing (ec44259, deploy succeeded); softdev-plan.md item 35 marked done. scripts/check-site.py now expects Transfer 0.5.0 and unpack on /transfer/.
 
 Review round 1 (2026-11-01, independent agent): blocker, a re-sent chunk verified at begin could be acknowledged after status quarantined its stored copy while the body streamed (the old one-lock design made that impossible). Fixed: every chunk body now goes to a temp file, and commit re-checks under the lock that the verified file is still the published chunk, else publishes the new bytes; regression test. Should-fix, all fixed with tests: Close released the root while bodies still streamed (now cancels and waits for them; the CLI closes the HTTP server first); the outside-the-root check compared names, so on macOS a different letter case or a bind mount got past it (now also compares folder identities up the tree, and the same for spool/source overlap); README called the change check stronger than it is; no process-kill test for a tree send (added). Nits fixed: index freed after a handler panic; unpack claims OUT with an exclusive mkdir and renames with rename(2), so a folder made meanwhile is never replaced; final status GETs retry session_busy; docs on downgrading a crashed 0.5 root, long status rehashes, Go's JSON escaping and U+FFFD in tree names, and what a killed unpack leaves. Left: the 0.4-receiver fallback test uses 64 KiB chunks (the reviewer checked 4 MiB chunks against the real 0.4.0 binary by hand, 4 of 4 runs completed). The README describes 0.5.0 a little before the release lands.
 
