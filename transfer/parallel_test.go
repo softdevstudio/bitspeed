@@ -369,3 +369,123 @@ func TestKilledParallelUploadResume(t *testing.T) {
 		})
 	}
 }
+
+// A re-sent chunk whose stored copy is quarantined while the re-send streams
+// must not be acknowledged unless its bytes end up published.
+func TestDuplicateAfterQuarantinePublishesNewBytes(t *testing.T) {
+	r, _ := testReceiver(t)
+	data := chunked(2)
+	m := dataManifest(data)
+	admitTest(t, r, m)
+	if w := perform(r, "PUT", "/v1/transfers/"+m.TransferID+"/chunks/0", "application/octet-stream", bytes.NewReader(data[:MinChunkSize]), MinChunkSize); w.Code != 200 {
+		t.Fatal(w.Code)
+	}
+	held := startHeldPut(t, r, m, data, 0)
+	waitInflight(t, r, m.TransferID, 1)
+	target := filepath.Join(r.root, "sessions", m.TransferID, "chunks", "0")
+	unseal(target)
+	os.Chmod(target, 0600)
+	f, e := os.OpenFile(target, os.O_WRONLY, 0)
+	if e != nil {
+		t.Fatal(e)
+	}
+	f.WriteAt([]byte{0xff, 0xfe}, 10)
+	f.Close()
+	// Status rehashes chunk 0 and quarantines it while the duplicate streams.
+	if w := perform(r, "GET", "/v1/transfers/"+m.TransferID, "", nil, 0); !strings.Contains(w.Body.String(), `"missing_chunks":[0,1,2]`) {
+		t.Fatal("rotted chunk not quarantined", w.Body.String())
+	}
+	if w := held.finish(t); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+	stored, e := os.ReadFile(target)
+	if e != nil || !bytes.Equal(stored, data[:MinChunkSize]) {
+		t.Fatal("acknowledged chunk is not the verified bytes on disk", e)
+	}
+	if _, e := os.Lstat(target + ".bad"); e != nil {
+		t.Fatal("corrupt evidence lost", e)
+	}
+	if w := perform(r, "GET", "/v1/transfers/"+m.TransferID, "", nil, 0); !strings.Contains(w.Body.String(), `"missing_chunks":[1,2]`) {
+		t.Fatal(w.Body.String())
+	}
+}
+
+// Close must not give up the root while a chunk body is still being written
+// into it: it cancels the stream and waits for the handler to clean up, so by
+// the time it returns the handler has finished, without an acknowledgement,
+// and its temp file is gone.
+func TestCloseWaitsForStreamingChunks(t *testing.T) {
+	root := filepath.Join(t.TempDir(), "receiver")
+	r, e := NewReceiver(ReceiverConfig{Root: root, Token: testToken})
+	if e != nil {
+		t.Fatal(e)
+	}
+	data := chunked(2)
+	m := dataManifest(data)
+	admitTest(t, r, m)
+	held := startHeldPut(t, r, m, data, 0)
+	waitInflight(t, r, m.TransferID, 1)
+	closed := make(chan struct{})
+	go func() { r.Close(); close(closed) }()
+	// A body blocked in a read keeps Close waiting until the connection or
+	// body ends (the HTTP server closes connections first); end it here.
+	time.Sleep(50 * time.Millisecond)
+	held.writer.CloseWithError(io.ErrUnexpectedEOF)
+	select {
+	case <-closed:
+	case <-time.After(10 * time.Second):
+		t.Fatal("Close did not return after the body ended")
+	}
+	select {
+	case w := <-held.done:
+		if w.Code == 200 {
+			t.Fatal("chunk acknowledged after Close", w.Body.String())
+		}
+	default:
+		t.Fatal("Close returned before the streaming handler finished")
+	}
+	if _, e := os.Lstat(filepath.Join(root, "sessions", m.TransferID, "chunks", "incoming-0.tmp")); !os.IsNotExist(e) {
+		t.Fatal("temp file left after Close", e)
+	}
+	again, e := NewReceiver(ReceiverConfig{Root: root, Token: testToken})
+	if e != nil {
+		t.Fatal(e)
+	}
+	defer again.Close()
+	if w := perform(again, "PUT", "/v1/transfers/"+m.TransferID+"/chunks/0", "application/octet-stream", bytes.NewReader(data[:MinChunkSize]), MinChunkSize); w.Code != 200 {
+		t.Fatal(w.Code, w.Body.String())
+	}
+}
+
+// A handler that panics mid-body must still free its index.
+func TestPanicInStreamFreesIndex(t *testing.T) {
+	r, _ := testReceiver(t)
+	data := chunked(1)
+	m := dataManifest(data)
+	admitTest(t, r, m)
+	func() {
+		defer func() { recover() }()
+		perform(r, "PUT", "/v1/transfers/"+m.TransferID+"/chunks/0", "application/octet-stream", panicBody{}, MinChunkSize)
+	}()
+	waitInflight(t, r, m.TransferID, 0)
+	if w := perform(r, "PUT", "/v1/transfers/"+m.TransferID+"/chunks/0", "application/octet-stream", bytes.NewReader(data[:MinChunkSize]), MinChunkSize); w.Code != 200 {
+		t.Fatal("index stayed reserved after a panic", w.Code, w.Body.String())
+	}
+}
+
+type panicBody struct{}
+
+func (panicBody) Read([]byte) (int, error) { panic("reader failed") }
+
+func TestUnpackOutsideRootByIdentity(t *testing.T) {
+	root := t.TempDir()
+	if !within(filepath.Join(root, "files", "x"), root) || !within(root, root) || within(t.TempDir(), root) {
+		t.Fatal("within by name")
+	}
+	// A second name for the root (a symlink here; a different case on macOS
+	// or a bind mount behaves the same) is still the root.
+	alias := filepath.Join(t.TempDir(), "alias")
+	if os.Symlink(root, alias) == nil && !within(filepath.Join(alias, "files", "x"), root) {
+		t.Fatal("alias of the root not detected")
+	}
+}

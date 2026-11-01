@@ -52,6 +52,11 @@ type Receiver struct {
 	// inflight holds, per session, the chunk indexes whose bodies are being
 	// received without the lock. Guarded by mu.
 	inflight map[string]map[int]bool
+	// streams counts chunk bodies being received without the lock; Close
+	// cancels them through stopped and waits before giving up the root.
+	streams sync.WaitGroup
+	stopped context.Context
+	stop    context.CancelFunc
 }
 
 // acquire waits for the receiver lock, at most lockWait and never past ctx.
@@ -123,6 +128,7 @@ func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps, offlin
 		return nil, e
 	}
 	r := &Receiver{root: c.Root, token: c.Token, unlock: unlock, maxSessions: c.MaxSessions, maxReserved: c.MaxReservedBytes, ops: ops}
+	r.stopped, r.stop = context.WithCancel(context.Background())
 	ok := false
 	defer func() {
 		if !ok {
@@ -199,13 +205,24 @@ func openReceiver(ctx context.Context, c ReceiverConfig, ops receiverOps, offlin
 	ok = true
 	return r, nil
 }
+
+// Close stops new work, cancels chunk bodies still streaming and waits for
+// them to clean up before releasing the root lock, so no other receiver can
+// open the root while this one still writes into it. A body blocked in a read
+// ends only when its connection does, so close the HTTP server first.
 func (r *Receiver) Close() error {
 	r.mu.Lock()
-	defer r.mu.Unlock()
-	if !r.closed {
-		r.closed = true
-		r.unlock()
+	if r.closed {
+		r.mu.Unlock()
+		return nil
 	}
+	r.closed = true
+	if r.stop != nil {
+		r.stop()
+	}
+	r.mu.Unlock()
+	r.streams.Wait()
+	r.unlock()
 	return nil
 }
 func (r *Receiver) probe() error {
@@ -602,13 +619,16 @@ func incomingName(name string, count int) (bool, int) {
 
 // pendingChunk is one chunk upload between its two locked steps.
 type pendingChunk struct {
-	m         Manifest
-	index     int
-	want      int64
-	temp      string
-	target    string
-	duplicate bool
-	f         *os.File
+	m      Manifest
+	index  int
+	want   int64
+	temp   string
+	target string
+	// existing is the verified chunk file found at begin, or nil. The body is
+	// still written to a temp file, so the chunk can be published at commit
+	// if that file was quarantined while the body streamed.
+	existing os.FileInfo
+	f        *os.File
 }
 
 // beginStore runs under the lock: it checks the target, discards a stale temp
@@ -627,8 +647,8 @@ func (r *Receiver) beginStore(ctx context.Context, m Manifest, index int, length
 			}
 		} else if e != nil {
 			return nil, e
-		} else {
-			p.duplicate = true
+		} else if p.existing, e = os.Lstat(p.target); e != nil {
+			return nil, ErrStorage
 		}
 	} else if !os.IsNotExist(e) {
 		return nil, ErrStorage
@@ -643,13 +663,11 @@ func (r *Receiver) beginStore(ctx context.Context, m Manifest, index int, length
 	} else if !os.IsNotExist(e) {
 		return nil, ErrStorage
 	}
-	if !p.duplicate {
-		f, e := os.OpenFile(p.temp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
-		if e != nil {
-			return nil, ErrStorage
-		}
-		p.f = f
+	f, e := os.OpenFile(p.temp, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
+	if e != nil {
+		return nil, ErrStorage
 	}
+	p.f = f
 	return p, nil
 }
 
@@ -660,9 +678,7 @@ func (p *pendingChunk) discard() {
 		_ = p.f.Close()
 		p.f = nil
 	}
-	if !p.duplicate {
-		_ = os.Remove(p.temp)
-	}
+	_ = os.Remove(p.temp)
 }
 
 // receive streams the body without the lock: the index is reserved, so no
@@ -700,20 +716,15 @@ func (r *Receiver) receive(ctx context.Context, p *pendingChunk, body io.Reader)
 	if hex.EncodeToString(hash.Sum(nil)) != p.m.ChunkSHA256[p.index] {
 		return failure(422, "chunk_digest_mismatch", false)
 	}
-	if p.f != nil {
-		f := p.f
-		if e := r.ops.sync(f); e != nil {
-			return ErrStorage
-		}
-		p.f = nil
-		if e := r.ops.close(f); e != nil {
-			return ErrStorage
-		}
-		if e := r.verifyFile(ctx, p.temp, p.want, p.m.ChunkSHA256[p.index]); e != nil {
-			return e
-		}
+	f := p.f
+	if e := r.ops.sync(f); e != nil {
+		return ErrStorage
 	}
-	return nil
+	p.f = nil
+	if e := r.ops.close(f); e != nil {
+		return ErrStorage
+	}
+	return r.verifyFile(ctx, p.temp, p.want, p.m.ChunkSHA256[p.index])
 }
 
 // commitStore runs under the lock: it publishes the verified temp file and
@@ -728,13 +739,24 @@ func (r *Receiver) commitStore(ctx context.Context, p *pendingChunk) (chunkAck, 
 	if j.State != Uploading {
 		return ack, failure(409, "invalid_state", false)
 	}
-	if !p.duplicate {
+	// Look again under the lock: status may have quarantined a duplicate's
+	// stored chunk while the body streamed. Acknowledge a duplicate only if
+	// the file verified at begin is still the published chunk; otherwise
+	// publish the newly verified bytes.
+	current, e := os.Lstat(p.target)
+	switch {
+	case e == nil && p.existing != nil && os.SameFile(current, p.existing):
+	case e == nil:
+		return ack, ErrRecovery
+	case os.IsNotExist(e):
 		if e = r.ops.link(p.temp, p.target); e != nil {
 			return ack, ErrStorage
 		}
-		if e = os.Remove(p.temp); e != nil {
-			return ack, ErrStorage
-		}
+	default:
+		return ack, ErrStorage
+	}
+	if e = os.Remove(p.temp); e != nil {
+		return ack, ErrStorage
 	}
 	if e = syncDir(filepath.Dir(p.target), r.ops.snapshotOps); e != nil {
 		return ack, e

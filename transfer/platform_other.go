@@ -17,3 +17,5 @@ func sealFile(*os.File) error                { return ErrUnsupported }
 func sealedOK(string, os.FileInfo) bool      { return false }
 func syncHandle(*os.File) error              { return ErrUnsupported }
 func renamePath(string, string) error        { return ErrUnsupported }
+
+func renameOver(string, string, snapshotOps) error { return ErrUnsupported }

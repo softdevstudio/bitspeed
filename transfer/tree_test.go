@@ -533,3 +533,41 @@ func TestTreeResumesAfterFailedUpload(t *testing.T) {
 	}
 	sameListing(t, treeListing(t, src), treeListing(t, out))
 }
+
+// A tree is an ordinary payload, but check it end to end anyway: kill both
+// processes part way through a parallel tree upload, restart, resume and
+// unpack.
+func TestKilledTreeUploadResume(t *testing.T) {
+	if !spoolSupported() {
+		t.Skip("unsupported platform")
+	}
+	src := sampleTree(t)
+	spool := filepath.Join(t.TempDir(), "spool")
+	m, _, e := PrepareTree(context.Background(), src, spool, PrepareOptions{ChunkSize: MinChunkSize})
+	if e != nil {
+		t.Fatal(e)
+	}
+	root := filepath.Join(t.TempDir(), "receiver")
+	receiver := startRecoveryChild(t, "BITSPEED_RECOVERY_HELPER=receiver", "BITSPEED_RECOVERY_ROOT="+root, "BITSPEED_RECOVERY_POINT=chunk write")
+	url := childLine(t, receiver, "url")
+	sender := startRecoveryChild(t, "BITSPEED_RECOVERY_HELPER=sender", "BITSPEED_RECOVERY_URL="+url, "BITSPEED_RECOVERY_SPOOL="+spool, "BITSPEED_RECOVERY_ID="+m.TransferID, "BITSPEED_RECOVERY_PARALLEL=4")
+	childLine(t, receiver, "ready")
+	sender.cmd.Process.Kill()
+	sender.cmd.Wait()
+	receiver.cmd.Process.Kill()
+	receiver.cmd.Wait()
+	restarted, e := NewReceiver(ReceiverConfig{Root: root, Token: testToken})
+	if e != nil {
+		t.Fatal(e)
+	}
+	server := httptest.NewServer(restarted)
+	defer func() { server.Close(); restarted.Close() }()
+	if s, e := SendWithOptions(context.Background(), server.URL, testToken, spool, m.TransferID, SendOptions{Parallel: 4}); e != nil || s.State != Completed {
+		t.Fatal(s, e)
+	}
+	out := filepath.Join(t.TempDir(), "out")
+	if _, e := Unpack(context.Background(), root, m.TransferID, out); e != nil {
+		t.Fatal(e)
+	}
+	sameListing(t, treeListing(t, src), treeListing(t, out))
+}

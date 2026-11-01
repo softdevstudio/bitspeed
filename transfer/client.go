@@ -264,7 +264,7 @@ func QueryStatus(ctx context.Context, base, token, id string) (StoredStatus, err
 	}
 	client := transferHTTPClient()
 	defer client.CloseIdleConnections()
-	data, code, e := request(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)
+	data, code, e := requestRetrying(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)
 	if e != nil {
 		return empty, e
 	}
@@ -404,7 +404,7 @@ func UploadOnlyWithOptions(ctx context.Context, base, token, spool, id string, o
 	}); e != nil {
 		return empty, e
 	}
-	data, code, e = request(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)
+	data, code, e = requestRetrying(ctx, client, "GET", base+"/v1/transfers/"+id, token, "", nil, 0)
 	if e != nil {
 		return empty, e
 	}

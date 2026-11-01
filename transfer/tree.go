@@ -280,6 +280,30 @@ func inside(child, parent string) bool {
 	return e == nil && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel)
 }
 
+// within reports whether target is root or lies below it, by comparing the
+// identity of every existing folder above target with root. Unlike comparing
+// names, this holds on case-insensitive filesystems and across bind mounts.
+func within(target, root string) bool {
+	rootInfo, e := os.Stat(root)
+	if e != nil {
+		return false
+	}
+	p, e := filepath.Abs(target)
+	if e != nil {
+		return false
+	}
+	for {
+		if info, e := os.Stat(p); e == nil && os.SameFile(info, rootInfo) {
+			return true
+		}
+		parent := filepath.Dir(p)
+		if parent == p {
+			return false
+		}
+		p = parent
+	}
+}
+
 // resolved returns an absolute path with symlinks in its existing part resolved.
 func resolved(p string) (string, error) {
 	p, e := filepath.Abs(p)
@@ -327,7 +351,7 @@ func prepareTree(ctx context.Context, source, spool string, o PrepareOptions, op
 	}
 	realSource, se := resolved(source)
 	realSpool, pe := resolved(spool)
-	if se != nil || pe != nil || inside(realSpool, realSource) || inside(realSource, realSpool) {
+	if se != nil || pe != nil || inside(realSpool, realSource) || inside(realSource, realSpool) || within(spool, source) || within(source, spool) {
 		return empty, TreeSummary{}, fmt.Errorf("%w: the spool and the source folder must not contain each other", ErrSource)
 	}
 	walked, e := walkTree(ctx, source)
@@ -563,7 +587,7 @@ func unpack(ctx context.Context, root, id, out string, ops snapshotOps) (result 
 	}
 	realRoot, re := resolved(root)
 	realOut, oe := resolved(out)
-	if re != nil || oe != nil || inside(realOut, realRoot) {
+	if re != nil || oe != nil || inside(realOut, realRoot) || within(out, root) {
 		return result, fmt.Errorf("%w: the output must be outside the receiver root", ErrUnpack)
 	}
 	temp, e := os.MkdirTemp(parent, ".bitspeed-unpack-")
@@ -619,10 +643,20 @@ func unpack(ctx context.Context, root, id, out string, ops snapshotOps) (result 
 	if e := ctx.Err(); e != nil {
 		return result, e
 	}
-	if _, e := os.Lstat(out); !os.IsNotExist(e) {
+	if runtime.GOOS != "windows" {
+		// rename(2) silently replaces an empty folder. Claim OUT first with an
+		// exclusive mkdir, so a folder someone else made in the meantime is
+		// refused rather than replaced; the rename then replaces only ours.
+		if e := os.Mkdir(out, 0700); e != nil {
+			return result, fmt.Errorf("%w: the output folder already exists", ErrUnpack)
+		}
+	} else if _, e := os.Lstat(out); !os.IsNotExist(e) {
 		return result, fmt.Errorf("%w: the output folder already exists", ErrUnpack)
 	}
-	if e := ops.rename(temp, out); e != nil {
+	if e := renameOver(temp, out, ops); e != nil {
+		if runtime.GOOS != "windows" {
+			_ = os.Remove(out)
+		}
 		return result, fmt.Errorf("%w: cannot rename the unpacked folder into place", ErrUnpack)
 	}
 	published = true

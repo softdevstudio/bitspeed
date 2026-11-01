@@ -36,6 +36,10 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	ctx, cancel := context.WithTimeout(req.Context(), 5*time.Minute)
 	defer cancel()
+	if r.stopped != nil {
+		stop := context.AfterFunc(r.stopped, cancel)
+		defer stop()
+	}
 	if !r.acquire(ctx) {
 		replyError(w, failure(409, "session_busy", true))
 		return
@@ -219,6 +223,9 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	// Reserve the index, then stream the body without the lock so other
 	// chunks of this or another session can be received at the same time.
+	// One deferred step undoes everything, whichever way this request ends,
+	// a panic included: it discards the temp file, frees the index and lets
+	// Close know this body is finished.
 	if r.inflight == nil {
 		r.inflight = map[string]map[int]bool{}
 	}
@@ -226,35 +233,30 @@ func (r *Receiver) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		r.inflight[id] = map[int]bool{}
 	}
 	r.inflight[id][index] = true
-	r.mu.Unlock()
-	locked = false
-	release := func() {
+	r.streams.Add(1)
+	defer func() {
+		p.discard()
+		if !locked {
+			r.mu.Lock()
+			locked = true
+		}
 		delete(r.inflight[id], index)
 		if len(r.inflight[id]) == 0 {
 			delete(r.inflight, id)
 		}
-	}
-	e = r.receive(ctx, p, req.Body)
-	if e != nil {
-		p.discard()
-		// The reservation must be released even when the lock wait times out.
-		r.mu.Lock()
-		release()
-		r.mu.Unlock()
+		r.streams.Done()
+	}()
+	r.mu.Unlock()
+	locked = false
+	if e = r.receive(ctx, p, req.Body); e != nil {
 		replyError(w, e)
 		return
 	}
 	if !r.acquire(ctx) {
-		p.discard()
-		r.mu.Lock()
-		release()
-		r.mu.Unlock()
 		replyError(w, failure(409, "session_busy", true))
 		return
 	}
 	locked = true
-	defer release()
-	defer p.discard()
 	if r.closed {
 		replyError(w, ErrStorage)
 		return

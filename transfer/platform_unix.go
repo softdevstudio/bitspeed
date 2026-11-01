@@ -50,3 +50,8 @@ func sealedOK(_ string, info os.FileInfo) bool { return info.Mode().Perm() == 04
 
 func syncHandle(f *os.File) error  { return f.Sync() }
 func renamePath(a, b string) error { return os.Rename(a, b) }
+
+// renameOver renames a folder onto the empty folder the caller just created
+// exclusively. Go's os.Rename refuses any existing folder as the target, so
+// this calls rename(2) directly, which replaces only an empty folder.
+func renameOver(from, to string, _ snapshotOps) error { return syscall.Rename(from, to) }

@@ -157,7 +157,7 @@ Prepare reports how many files and folders it packed. The tree sends, resumes an
 bitspeed-transfer unpack --root=$HOME/bitspeed-receiver --id=TRANSFER_ID --out=$HOME/photos-2026
 ```
 
-Unpack checks each file and the whole payload against the receipt before the output folder appears, refuses to write into an existing folder or inside the receiver root, and can run while serve is running. Trees carry folders (empty ones too) and regular files. Symbolic links, devices and other special files are refused at prepare time, and permissions, owners and timestamps are not kept. A file or folder that changes while it is being copied fails preparation instead of producing a mixed copy. docs/transfer-tree.md has the format and the limits: 100,000 entries, 4096-byte paths and 64 GiB per transfer.
+Unpack checks each file and the whole payload against the receipt before the output folder appears, refuses to write into an existing folder or inside the receiver root, and can run while serve is running. Trees carry folders (empty ones too) and regular files. Symbolic links, devices and other special files are refused at prepare time, and permissions, owners and timestamps are not kept. A change Transfer can see while it copies (a file's size, modification time or identity, or a file or folder added or removed) fails preparation. Like any copy tool, it cannot spot a program that rewrites a file in place and restores its modification time, so keep the folder quiet while preparing. docs/transfer-tree.md has the format and the limits: 100,000 entries, 4096-byte paths and 64 GiB per transfer.
 
 ### Free space after delivery
 

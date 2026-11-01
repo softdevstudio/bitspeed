@@ -327,3 +327,6 @@ func renamePath(a, b string) error {
 	}
 	return nil
 }
+
+// renameOver publishes a folder; MoveFileEx refuses an existing folder target.
+func renameOver(from, to string, ops snapshotOps) error { return ops.rename(from, to) }
