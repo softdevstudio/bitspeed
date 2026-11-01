@@ -23,7 +23,7 @@ def check(path):
     if path == '/which-tool-do-i-need/':
         assert 'bitspeed-inspect record' in body and 'bitspeed-transfer serve' in body
     if path == '/transfer/':
-        assert 'Transfer 0.4.0' in body and 'NTFS' in body and 'clean --root' in body
+        assert 'Transfer 0.5.0' in body and 'NTFS' in body and 'clean --root' in body and 'unpack' in body
     if path == '/bitspeed-transfer-resumes-interrupted-file-transfers-from-verified-chunks/':
         assert 'Transfer 0.1.0' in body and 'Windows' in body
     return f'PASS live {status} https://bitspeed.org{path}'

@@ -1,0 +1,18 @@
+UTC: 2026-11-01T09:13:42Z
+Release: transfer/v0.5.0 "BitSpeed Transfer v0.5.0" from 3876738 (source 38767380109f7ca16c2d3fb8f6576bf98a7ba486), published 2026-11-01T09:11:40Z, not a draft
+Gates on the exact commit: CI 41291648727 success; Transfer Windows 41291648711 success (full transfer tests, race tests, Windows tests and four executable smoke scripts including the folder send and unpack); Release Transfer 41291796195 success on the first attempt (plan with Windows gate, five package jobs, native linux-amd64, darwin-arm64 and windows-amd64 each running delivery, interruption, TLS and folder smoke, publish)
+Latest release: transfer/v0.5.0, 13 assets
+PASS every asset downloaded from the tag and from releases/latest/download is byte-identical, and all 12 non-manifest assets match SHA256SUMS
+PASS all ten Inspect archives and bitspeed-inspect-verification.json unchanged from the Transfer 0.4.0 latest release (Inspect 0.3.0 carried forward)
+PASS verification.json: version 0.5.0, source 3876738, native linux/amd64 darwin/arm64 windows/amd64, cross-built linux/arm64 darwin/amd64
+PASS downloaded Linux amd64 archive: BUILD_INFO version 0.5.0, source 3876738, clean, go1.27.3; --version prints bitspeed-transfer 0.5.0
+PASS downloaded binary: smoke-transfer.py (preparation, staging, verified publication, receipt cache, offline clean, progress, restart, repeat delivery, damaged-output rejection)
+PASS downloaded binary: smoke-transfer-interruption.py (kill/restart/resume at partial chunk, chunk response, final response)
+PASS downloaded binary: smoke-transfer-tls.py (HTTPS listener, certificate verification, authenticated upload and completion)
+PASS downloaded binary: smoke-transfer-tree.py (folder snapshot, parallel send, unpack beside a running receiver, refused re-unpack and output inside the root)
+Parallel timing, downloaded binary, scripts/demo-parallel-latency.py: 32 MiB in 1 MiB chunks over loopback through a local proxy adding 100 ms to every request, one machine (Linux x86_64 cloud container); delivered SHA-256 checked each time; three runs:
+  --parallel=1: 4.44 s, 4.45 s, 4.49 s
+  --parallel=4: 1.81 s, 1.82 s, 1.78 s
+  --parallel=8: 1.46 s, 1.96 s, 1.35 s
+  A simulated delay on one machine, not a WAN measurement; per-run JSON in parallel-latency/.
+Review: independent review in two rounds; round 1 one blocker (duplicate chunk acknowledged after quarantine) and five should-fix items, all fixed with tests; round 2 found nothing to fix, three nits fixed (see CLAUDE.md)
